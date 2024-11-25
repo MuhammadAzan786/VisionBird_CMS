@@ -1,0 +1,494 @@
+import { useEffect, useState } from "react";
+import {
+  TextField,
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+} from "@mui/material";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import bg from "/vbt-logo.png";
+import { Link } from "react-router-dom";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import dayjs from "dayjs";
+import axios from "../../utils/axiosInterceptor";
+import toast, { Toaster } from "react-hot-toast";
+import { useSelector } from "react-redux";
+import Select from "@mui/material/Select";
+import { palette } from "../../theme/colors";
+
+function LeaveForm() {
+  const [reason, setReason] = useState("");
+  const [leaveType, setLeaveType] = useState("");
+  const [leaveCategory, setLeaveCategory] = useState("");
+  const [leavesStart, setLeavesStart] = useState(null);
+  const [leavesEnd, setLeavesEnd] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [fromTime, setFromTime] = useState(null);
+  const [toTime, setToTime] = useState(null);
+  const [admin, setAdmin] = useState({});
+  const [managers, setManagers] = useState([]);
+  const [selectedManager, setSelectedManager] = useState("");
+  const { currentUser } = useSelector((state) => state.user);
+
+  let id = currentUser._id;
+  let role = currentUser.role;
+  let name = currentUser.employeeName;
+  let employeeID = currentUser.employeeID;
+  let employeeDesignation = currentUser.employeeDesignation;
+
+  const sendLeaveApplication = () => {
+    if (
+      !reason ||
+      !leaveType ||
+      !leaveCategory ||
+      (leaveType === "Half Leave" && (!fromTime || !toTime)) ||
+      (leaveType !== "Long Leaves" && !selectedDate) ||
+      (leaveType === "Long Leaves" && (!leavesStart || !leavesEnd))
+    ) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+    if (role === "employee" && !selectedManager) {
+      toast.error("Please select manager to request leave.");
+      return;
+    }
+    if (role === "manager" && Object.keys(admin).length === 0) {
+      toast.error("Please select admin to request leave.");
+      return;
+    }
+
+    // If all fields are filled, then submit the form.
+    let leave_information = {};
+
+    if (leaveType == "Half Leave") {
+      //Get From and To time
+      leave_information = {
+        from: id,
+        role,
+        name,
+        for: role == "manager" ? admin._id : selectedManager,
+        leaveType,
+        leaveCategory,
+        reason,
+        selectedDate,
+        fromTime,
+        toTime,
+      };
+    } else if (leaveType == "Full Leave") {
+      leave_information = {
+        from: id,
+        role,
+        name,
+        for: role == "manager" ? admin._id : selectedManager,
+        leaveType,
+        leaveCategory,
+        reason,
+        selectedDate,
+      };
+    } else {
+      //Long Leave
+      leave_information = {
+        from: id,
+        role,
+        name,
+        for: role == "manager" ? admin._id : selectedManager,
+        leaveType,
+        leaveCategory,
+        reason,
+        leavesStart,
+        leavesEnd,
+      };
+    }
+
+    axios
+      .post("/api/leave/create-leave", leave_information)
+      .then((res) => {
+        console.log(res);
+        toast.success("Leave Request Submitted Successfully");
+        setReason("");
+        setLeaveType("");
+        setLeaveCategory("");
+        setSelectedDate(null);
+        setLeavesStart(null);
+        setLeavesEnd(null);
+        setFromTime(null);
+        setToTime(null);
+        setSelectedManager("");
+      })
+      .catch((error) => {
+        toast.error("Error in Submitting Leave Request!!");
+        console.log(error);
+      });
+  };
+
+  const fetchManagers = async () => {
+    try {
+      const response = await axios.get("/api/employee/get-managers");
+      if (!response) {
+        throw new Error("Failed to fetch managers");
+      }
+      setManagers(response.data);
+    } catch (error) {
+      console.error("Error fetching managers:", error);
+    }
+  };
+
+  const fetchAdmin = async () => {
+    try {
+      const response = await axios.get("/api/employee/get-admin");
+      if (!response) {
+        throw new Error("Failed to fetch admin");
+      }
+      setAdmin(response.data);
+    } catch (error) {
+      console.error("Error fetching admin:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (role == "manager") {
+      fetchAdmin();
+    } else {
+      fetchManagers();
+    }
+  }, [role]);
+
+  return (
+    <>
+      <Box sx={{ width: "100%", padding: 3, paddingX: 6 }}>
+        <Box
+          display={"flex"}
+          justifyContent={"right"}
+          alignItems={"center"}
+          mb={2}
+          mx={2}
+        >
+          <Button onClick={sendLeaveApplication} variant="contained">
+            Send Application
+          </Button>
+        </Box>
+
+        <Box component={Paper} elevation={3} p={10}>
+          <Box
+            display={"flex"}
+            flexDirection={"column"}
+            justifyContent={"center"}
+            alignItems={"center"}
+            pt={5}
+            pb={3}
+          >
+            <Box pb={1}>
+              <img src={bg} alt="" width={380} />
+            </Box>
+            <Typography variant="body2" textAlign={"center"}>
+              B-343, Pagganwala Street, Near Cheema Masjid, Shadman Colony,
+              Gujrat, Pakistan.
+            </Typography>
+            <Typography variant="body2" textAlign={"center"}>
+              Mobile: 0322-5930603, 0346-5930603, Landline: 053-3709168,
+              053-3728469
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography variant="body2">
+                URL:
+                <Link
+                  href="https://www.example.com"
+                  target="_blank"
+                  rel="noopener"
+                  sx={{ marginLeft: 1 }}
+                >
+                  https://www.visionbird.com
+                </Link>
+              </Typography>
+              <Typography variant="body2" sx={{ paddingLeft: 1 }}>
+                Email:
+                <Link
+                  href="https://www.example.com"
+                  target="_blank"
+                  rel="noopener"
+                  sx={{ marginLeft: 1 }}
+                >
+                  info@visionbird.com
+                </Link>
+              </Typography>
+            </Box>
+          </Box>
+
+          <Typography
+            fontSize={25}
+            fontWeight={500}
+            mb={6}
+            p={2}
+            color={"white"}
+            textAlign="center"
+            bgcolor={palette.primary.main}
+          >
+            Leave Applicant Form
+          </Typography>
+
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                value={name}
+                label="Employee's Name"
+                variant="outlined"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={5}>
+              <TextField
+                value={employeeID}
+                label="Employee's ID"
+                variant="outlined"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={7}>
+              <TextField
+                value={employeeDesignation}
+                label="Designation"
+                variant="outlined"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+
+            {role == "manager" ? null : (
+              <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel
+                    id="demo-simple-select-label"
+                    sx={{ color: "grey" }}
+                  >
+                    Select Manager
+                  </InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    label="Select Manager"
+                    value={selectedManager}
+                    onChange={(e) => setSelectedManager(e.target.value)}
+                  >
+                    {managers.map((manager) => (
+                      <MenuItem key={manager._id} value={manager._id}>
+                        {manager.employeeName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
+
+            <Grid item xs={6}>
+              <FormControl fullWidth>
+                <InputLabel
+                  id="demo-simple-select-label"
+                  sx={{ color: "grey" }}
+                >
+                  Select Leave Type
+                </InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="Select Leave Type"
+                  value={leaveType}
+                  onChange={(event) => {
+                    setLeaveType(event.target.value);
+                  }}
+                >
+                  <MenuItem value="Full Leave">Full Leave</MenuItem>
+                  <MenuItem value="Half Leave">Half Leave</MenuItem>
+                  <MenuItem value="Long Leaves">Long Leaves</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={6}>
+              <FormControl fullWidth>
+                <InputLabel
+                  id="demo-simple-select-label"
+                  sx={{ color: "grey" }}
+                >
+                  Select Leave Category
+                </InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  label="Select Leave Category"
+                  value={leaveCategory}
+                  onChange={(event) => {
+                    setLeaveCategory(event.target.value);
+                  }}
+                >
+                  <MenuItem value="Paid Leave">Paid Leave</MenuItem>
+                  <MenuItem value="Unpaid Leave">Unpaid Leave</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid spacing={2} container xs={12} item>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                {leaveType == "Half Leave" ? (
+                  <>
+                    <Grid xs={6} item fullWidth>
+                      <DatePicker
+                        sx={{ width: "100%" }}
+                        label="Select Half Leave Date"
+                        format="dddd, DD MMMM, YYYY"
+                        value={selectedDate}
+                        onChange={(newValue) => setSelectedDate(newValue)}
+                        // renderInput={(params) => <TextField {...params} />}
+                        minDate={dayjs(new Date())}
+                      />
+                    </Grid>
+                    <Grid xs={3} item>
+                      <TimePicker
+                        label="From"
+                        value={
+                          fromTime ? dayjs(`2000-01-01T${fromTime}`) : null
+                        }
+                        onChange={(newValue) => {
+                          const time = newValue
+                            ? newValue.format("HH:mm")
+                            : null;
+                          setFromTime(time);
+
+                          if (time && toTime) {
+                            const from = dayjs(`2000-01-01T${time}`);
+                            const to = dayjs(`2000-01-01T${toTime}`);
+                            const diffInMinutes = to.diff(from, "minute");
+                            if (diffInMinutes > 240) {
+                              setLeaveType("Full Leave");
+                              toast.error(
+                                "Half leave more than 4hrs will be considered Full leave."
+                              );
+                            }
+                          }
+                        }}
+                        renderInput={(params) => <TextField {...params} />}
+                      />
+                    </Grid>
+                    <Grid xs={3} item>
+                      <TimePicker
+                        label="To"
+                        value={toTime ? dayjs(`2000-01-01T${toTime}`) : null}
+                        onChange={(newValue) => {
+                          const time = newValue
+                            ? newValue.format("HH:mm")
+                            : null;
+                          setToTime(time);
+
+                          if (time && fromTime) {
+                            const from = dayjs(`2000-01-01T${fromTime}`);
+                            const to = dayjs(`2000-01-01T${time}`);
+                            const diffInMinutes = to.diff(from, "minute");
+                            if (diffInMinutes > 240) {
+                              setLeaveType("Full Leave");
+                              toast.error(
+                                "Half Leave more than 4hrs will be considered Full Leave."
+                              );
+                            }
+                          }
+                        }}
+                        renderInput={(params) => <TextField {...params} />}
+                      />
+                    </Grid>
+                  </>
+                ) : null}
+
+                {leaveType == "Full Leave" ? (
+                  <>
+                    <Grid xs={12} item fullWidth>
+                      <DatePicker
+                        sx={{ width: "100%" }}
+                        label="Select Full Leave Date"
+                        format="dddd, DD MMMM, YYYY"
+                        value={selectedDate}
+                        onChange={(newValue) => setSelectedDate(newValue)}
+                        minDate={dayjs(new Date())}
+                      />
+                    </Grid>
+                  </>
+                ) : null}
+
+                {leaveType == "Long Leaves" ? (
+                  <>
+                    <Grid xs={6} item fullWidth>
+                      <DatePicker
+                        sx={{ width: "100%" }}
+                        label="Leaves Start"
+                        format="dddd, DD MMMM, YYYY"
+                        value={leavesStart}
+                        onChange={(newValue) => setLeavesStart(newValue)}
+                        minDate={dayjs(new Date())}
+                      />
+                    </Grid>
+
+                    <Grid xs={6} item fullWidth>
+                      <DatePicker
+                        sx={{ width: "100%" }}
+                        label="Leaves End"
+                        format="dddd, DD MMMM, YYYY"
+                        value={leavesEnd}
+                        onChange={(newValue) => setLeavesEnd(newValue)}
+                        minDate={dayjs(new Date())}
+                      />
+                    </Grid>
+                  </>
+                ) : null}
+              </LocalizationProvider>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField
+                value={reason}
+                onChange={(event) => {
+                  setReason(event.target.value);
+                }}
+                label="Reason / Purpose of Leave"
+                rows={4}
+                multiline
+                variant="outlined"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+          </Grid>
+
+          {/* <Grid container spacing={10} mt={10} mb={10}>
+                    <Grid item xs={6}  display={'flex'} justifyContent={'center'} alignItems={'center'}>
+                        <Typography variant="body1">
+                            Signature Of Applicant:
+                        </Typography>
+                        <Divider sx={{ flexGrow: 1, borderBottomWidth: 1, borderColor: 'black', marginLeft: 2, maxWidth: 200 }} />
+
+                    </Grid>
+                    <Grid item xs={6}   display={'flex'}  justifyContent={'center'} alignItems={'center'} >
+                        <Typography variant="body1">
+                            Approved by:
+                        </Typography>
+                        <Divider sx={{ flexGrow: 1, borderBottomWidth: 1, borderColor: 'black', marginLeft: 2, maxWidth: 200 }} />
+                    </Grid>
+                    <Grid item xs={12}   display={'flex'}  justifyContent={'center'} alignItems={'center'} mt={20}>
+                        <Typography variant="body1">
+                            Authorization Signature (CEO):
+                        </Typography>
+                        <Divider sx={{ flexGrow: 1, borderBottomWidth: 1, borderColor: 'black', marginLeft: 2, maxWidth: 200 }} />
+                    </Grid>
+                </Grid> */}
+        </Box>
+      </Box>
+    </>
+  );
+}
+
+export default LeaveForm;

@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*  img base layer is modified for Pdf to work properly. Default img styling in base layer is Block */
+@layer base {
+  img,
+  canvas {
+    @apply inline-block;
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.page-item {
+  margin: 0 4px;
+}
+
+.page-link {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: #666cff;
+  text-decoration: none;
+}
+
+.page-link:hover {
+  background-color: #f1f1f1;
+}
+
+.active .page-link {
+  background-color: #666cff;
+  color: white;
+  border: 1px solid #666cff;
+}
