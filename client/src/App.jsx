@@ -60,6 +60,9 @@ import { useMessage } from "./components/MessageContext";
 import { useSelector } from "react-redux";
 import EmployeeTaskTableCom from "./pages/TaskModule/EmployeeTaskModule/EmployeeTaskTableCom";
 import { Toaster } from "react-hot-toast";
+import UpdateInterneeForm from "./pages/ManageEmployee/UpdateInterneeForm";
+
+
 const App = () => {
   const socket = useSelector((state) => state.socket.socket);
   const { currentUser } = useSelector((state) => state.user);
@@ -162,6 +165,18 @@ const App = () => {
             <Route path="/evaluation-form" element={<InterviewEvalForm />} />
             <Route path="/evaluation-page/:id" element={<EvaluationPage />} />
             <Route path="/internee-profile/:id" element={<InterneeProfile />} />
+ <Route
+              path="/update-internee/:id"
+              element={<UpdateInterneeForm />}
+            />
+
+
+
+
+
+
+
+
 
             {/* Portfolio Routes */}
             <Route

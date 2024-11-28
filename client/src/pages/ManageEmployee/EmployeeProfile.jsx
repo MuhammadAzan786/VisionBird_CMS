@@ -104,8 +104,8 @@ const EmployeeProfile = () => {
 
   const handleDelete = async () => {
     setLoading(true);
-    const response = await axios
-      .delete(`http://localhost:4000/api/employee/delete_employee/${id}`, {
+    await axios
+      .delete(`/api/employee/delete_employee/${id}`, {
         withCredentials: true,
       })
       .then((data) => {

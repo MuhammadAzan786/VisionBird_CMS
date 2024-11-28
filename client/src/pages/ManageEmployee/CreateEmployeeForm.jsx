@@ -232,11 +232,12 @@ function CreateEmployeeForm() {
 
         const jsonData = formDataToJson(formData);
         console.log(jsonData);
-        const response = await axios
+        await axios
           .post("/api/employee/create_employee", jsonData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
+            withCredentials:true,
+headers:{
+"Content-Type":"multipart/form-data"
+},
           })
           .then((data) => {
             setLoading(false);

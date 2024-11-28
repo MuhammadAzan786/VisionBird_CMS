@@ -17,7 +17,7 @@ const EmployeesTable = ({ searchTerm }) => {
 
   const fetchEmployees = async () => {
     await axios
-      .get(`/api/employee/get_managers_employees?search=${searchTerm}||""`)
+      .get(`/api/employee/get_managers_employees?search=${searchTerm||""}`)
       .then((response) => {
         setEmployees(response.data);
       })

@@ -31,7 +31,7 @@ export const initializeSocket = (user) => (dispatch, getState) => {
       return;
     }
 
-    const socketInstance = io("http://localhost:4000", {
+    const socketInstance = io("https://api.cmsvbt.com", {
       query: { id: user._id },
     });
 
