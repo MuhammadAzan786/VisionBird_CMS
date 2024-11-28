@@ -124,14 +124,7 @@ export const employeeColumns = [
     field: "employeeProImage",
     headerName: "Profile Pic",
 
-    renderCell: (params) => (
-      <Avatar
-        alt="Avatar"
-        src={`${import.meta.env.VITE_BACKEND_DOMAIN_NAME}/employees/${
-          params.row.employeeProImage
-        }`}
-      />
-    ),
+    renderCell: (params) => <Avatar alt="Avatar" src={employeeProImage} />,
   },
   { field: "employeeID", headerName: "Employee ID", width: 200 },
   {

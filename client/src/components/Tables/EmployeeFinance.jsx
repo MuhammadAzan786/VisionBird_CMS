@@ -54,12 +54,7 @@ export default function EmployeeFinance() {
       headerName: "Profile Pic",
       width: 100,
       renderCell: (params) => (
-        <Avatar
-          alt="Avatar"
-          src={`${import.meta.env.VITE_BACKEND_DOMAIN_NAME}/employees/${
-            params.row.employeeProImage
-          }`}
-        />
+        <Avatar alt="Avatar" src={params.row.employeeProImage} />
       ),
     },
     {

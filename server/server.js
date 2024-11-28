@@ -33,23 +33,21 @@ const Notification = require("./models/notificationModel");
 const EmployeeOfWeekModel = require("./models/emp_of_week.model");
 
 // Middlewares
-
-
-
-
 const app = express();
 
-app.use(
-  cors({
-    origin: "https://www.cmsvbt.com",
-methods:['GET','POST','PUT','DELETE','PATCH'],
-    credentials: true,
-    optionsSuccessStatus: 200,
-  })
+const corsOptions = {
+  origin:
+    process.env.NODE_ENV === "production"
+      ? process.env.FRONTEND_DOMAIN_NAME
+      : process.env.FRONTEND_LOCAL_ADDRESS,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
 
-);
+app.use(cors(corsOptions));
 
-app.use(express.json({limit:"50mb"}));
+app.use(express.json({ limit: "50mb" }));
 
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
@@ -88,7 +86,10 @@ app.use("/api/empOfWeek", employeeOfWeekRoutes);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://www.cmsvbt.com",
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.FRONTEND_DOMAIN_NAME
+        : process.env.FRONTEND_LOCAL_ADDRESS,
   },
 });
 
