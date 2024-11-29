@@ -97,11 +97,46 @@ const ManageEmployees = () => {
           <EmployeesTable searchTerm={searchTerm} />
         </TabPanel>
 
-        <TabPanel value="present_employees">
-          <ActiveEmployeesTable />
+        <TabPanel value="present_employees" sx={{ p: 0 }}>
+          <Box>
+            <Box sx={{ width: "50%", my: 2 }}>
+              <TextField
+                label="Search"
+                variant="outlined"
+                size="small"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                fullWidth
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "5px",
+                  },
+                }}
+              />
+            </Box>
+            <ActiveEmployeesTable searchTerm={searchTerm} />
+          </Box>
         </TabPanel>
-        <TabPanel value="past_employees">
-          <InActiveEmployeesTable/>
+        <TabPanel value="past_employees" sx={{ p: 0 }}>
+          <Box>
+            <Box sx={{ width: "50%", my: 2 }}>
+              <TextField
+                label="Search"
+                variant="outlined"
+                size="small"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                fullWidth
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "5px",
+                  },
+                }}
+              />
+            </Box>
+
+            <InActiveEmployeesTable searchTerm={searchTerm} />
+          </Box>
         </TabPanel>
       </TabContext>
     </Paper>

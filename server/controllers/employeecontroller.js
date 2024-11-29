@@ -368,8 +368,16 @@ module.exports = {
 
   //! Fetch active employees
   active_employees: async (req, res) => {
+    const search = req.query.search || "";
     try {
-      const employees = await Employee.find({ employeeStatus: "active" });
+      const employees = await Employee.find({
+        employeeStatus: "active",
+        role: { $in: ["employee", "manager"] },
+        $or: [
+          { employeeName: { $regex: search, $options: "i" } },
+          { employeeID: { $regex: search, $options: "i" } },
+        ],
+      });
       if (!employees || employees.length === 0) {
         return res.status(404).json({ message: "No active employees found" });
       }
@@ -382,8 +390,16 @@ module.exports = {
 
   //! Fetch inactive employees
   inactive_employees: async (req, res) => {
+    const search = req.query.search || "";
     try {
-      const employees = await Employee.find({ employeeStatus: "inactive" });
+      const employees = await Employee.find({
+        employeeStatus: "inactive",
+        role: { $in: ["employee", "manager"] },
+        $or: [
+          { employeeName: { $regex: search, $options: "i" } },
+          { employeeID: { $regex: search, $options: "i" } },
+        ],
+      });
       if (!employees || employees.length === 0) {
         return res.status(404).json({ message: "No inactive employees found" });
       }
