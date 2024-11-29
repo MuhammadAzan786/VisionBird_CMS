@@ -1,23 +1,27 @@
-import { useEffect, useState } from "react";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import { TextField } from "formik-material-ui";
-import Paper from "@mui/material/Paper";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography";
-import { object } from "yup";
 import { Field, Form, Formik } from "formik";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { signOut } from "../redux/user/userSlice";
-import { loginSuccess } from "../redux/user/userSlice";
-import { initializeSocket } from "../redux/socketSlice";
-import { clearSocket } from "../redux/socketSlice";
+import { useEffect, useState } from "react";
+
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Paper from "@mui/material/Paper";
+import { TextField } from "formik-material-ui";
+import Typography from "@mui/material/Typography";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import axios from "axios";
+import { clearSocket } from "../redux/socketSlice";
+import { initializeSocket } from "../redux/socketSlice";
+import { loginSuccess } from "../redux/user/userSlice";
+import { object } from "yup";
+import { signOut } from "../redux/user/userSlice";
 import toast from "react-hot-toast";
-import CustomOverlay from "../components/Styled/CustomOverlay";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const validationSchema = object().shape({});
 const LOGIN_URL = "/api/auth/sign-in";
@@ -26,6 +30,11 @@ export default function Signin() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
 
   const handleError = (error) => {
     if (error && error.status === 404) {
@@ -35,8 +44,6 @@ export default function Signin() {
     } else {
       toast.error("Login Failed");
     }
-
-    // showMessage("error", "Login failed.");
   };
 
   useEffect(() => {
@@ -137,9 +144,25 @@ export default function Signin() {
                       fullWidth
                       name="password"
                       label="Password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       id="password"
                       autoComplete="password"
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={togglePasswordVisibility}
+                              edge="end"
+                            >
+                              {showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
                     />
                     <Button
                       type="submit"

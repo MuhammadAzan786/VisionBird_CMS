@@ -1,28 +1,41 @@
-import { ErrorMessage, Field, Form, Formik } from "formik";
-import { TextField } from "formik-material-ui";
-import { useEffect, useState } from "react";
-import { object, string } from "yup";
-// import "../../index.css";
 import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Button,
-  Typography,
-  Box,
-  Paper,
-  Grid,
   Backdrop,
+  Box,
+  Button,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Typography,
 } from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import { object, string } from "yup";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import LoadingAnim from "../../components/LoadingAnim";
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
+import { TextField } from "formik-material-ui";
 import UploadIcon from "@mui/icons-material/Upload";
 import axios from "../../utils/axiosInterceptor";
-import { useParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import dayjs from "dayjs";
 import { useMessage } from "../../components/MessageContext";
-import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
-import LoadingAnim from "../../components/LoadingAnim";
+import { useSelector } from "react-redux";
+
+// import "../../index.css";
+
+
+
+
+
+
+
+
+
 
 const validationSchema = object().shape({
   firstName: string()
@@ -124,9 +137,12 @@ const UpdateInterneeForm = () => {
         rules: user.rules || "",
         slack: user.slack || "",
         cnicFile: user.cnicFile || "",
-        internshipFrom: user.internshipFrom
-          ? user.internshipFrom.split("T")[0]
-          : "",
+        internshipFrom: dayjs().format(
+          user.internshipFrom ? user.internshipFrom.split("T")[0] : ""
+        ),
+        // internshipFrom: user.internshipFrom
+        //   ? user.internshipFrom.split("T")[0]
+        //   : "",
         internshipTo: user.internshipTo ? user.internshipTo.split("T")[0] : "",
         internId: user.internId || "",
         designation: user.designation || "",
@@ -302,7 +318,7 @@ const UpdateInterneeForm = () => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Field
+                {/* <Field
                   label="Date Of Birth"
                   InputLabelProps={{ shrink: true }}
                   component={TextField}
@@ -314,7 +330,34 @@ const UpdateInterneeForm = () => {
                       borderRadius: "5px",
                     },
                   }}
-                />
+                /> */}
+                <FormControl
+                  fullWidth
+                  variant="outlined"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "5px",
+                    },
+                  }}
+                >
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Date Of Birth"
+                      format="DD/MM/YYYY"
+                      name="dob"
+                      value={dayjs(values.dob) || dayjs()}
+                      onChange={(newValue) => {
+                        const fromDate = dayjs(newValue);
+                        setFieldValue("dob", fromDate.format("YYYY-MM-DD"));
+                      }}
+                      slotProps={{
+                        textField: {
+                          helperText: "DD/MM/YYYY",
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </FormControl>
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -727,9 +770,11 @@ const UpdateInterneeForm = () => {
                           const formattedDate = toDate
                             .toISOString()
                             .substring(0, 10);
+                          const fromDate = new Date();
 
                           setFieldValue("offered_By", selectedCompany); // Corrected field name
                           setFieldValue("internshipTo", formattedDate);
+                          setFieldValue("internshipFrom", fromDate);
                         }}
                       >
                         <MenuItem value="VBT">
@@ -762,7 +807,61 @@ const UpdateInterneeForm = () => {
                       </label>
                     </div>
                     <div className="grid grid-cols-2 gap-5  my-4">
-                      <Field
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        {/* From Date Picker */}
+                        <DatePicker
+                          label="From"
+                          format="DD/MM/YYYY"
+                          name="internshipFrom"
+                          value={dayjs(values.internshipFrom)}
+                          onChange={(newValue) => {
+                            const fromDate = dayjs(newValue);
+                            setFieldValue(
+                              "internshipFrom",
+                              fromDate.format("YYYY-MM-DD")
+                            );
+
+                            // Calculate new "To" date
+                            const selectedCompany = values.offered_By;
+                            let monthsToAdd = 0;
+
+                            if (
+                              selectedCompany === "Pasha" ||
+                              selectedCompany === "PSEB"
+                            ) {
+                              monthsToAdd = 6;
+                            } else if (selectedCompany === "VBT") {
+                              monthsToAdd = 3;
+                            }
+
+                            const toDate = fromDate.add(monthsToAdd, "month");
+                            setFieldValue(
+                              "internshipTo",
+                              toDate.format("YYYY-MM-DD")
+                            );
+                          }}
+                          slotProps={{
+                            textField: {
+                              helperText: "DD/MM/YYYY",
+                            },
+                          }}
+                        />
+
+                        {/* To Date Picker */}
+                        <DatePicker
+                          label="To"
+                          name="internshipTo"
+                          format="DD/MM/YYYY"
+                          value={dayjs(values.internshipTo)}
+                          //  readOnly // To ensure "To" date is not manually editable
+                          slotProps={{
+                            textField: {
+                              helperText: "DD/MM/YYYY",
+                            },
+                          }}
+                        />
+                      </LocalizationProvider>
+                      {/* <Field
                         label="From"
                         InputLabelProps={{ shrink: true }}
                         component={TextField}
@@ -785,7 +884,7 @@ const UpdateInterneeForm = () => {
                             borderRadius: "5px",
                           },
                         }}
-                      />
+                      /> */}
                     </div>
                   </>
                 )}
@@ -1008,7 +1107,34 @@ const UpdateInterneeForm = () => {
               </Grid>
 
               <Grid item xs={12} sm={6} md={6}>
-                <Field
+                <FormControl
+                  fullWidth
+                  variant="outlined"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "5px",
+                    },
+                  }}
+                >
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Given on"
+                      format="DD/MM/YYYY"
+                      name="givenOn"
+                      value={dayjs(values.dob) || dayjs()}
+                      onChange={(newValue) => {
+                        const fromDate = dayjs(newValue);
+                        setFieldValue("givenOn", fromDate.format("YYYY-MM-DD"));
+                      }}
+                      slotProps={{
+                        textField: {
+                          helperText: "DD/MM/YYYY",
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </FormControl>
+                {/* <Field
                   label="Given On"
                   InputLabelProps={{ shrink: true }}
                   component={TextField}
@@ -1020,7 +1146,7 @@ const UpdateInterneeForm = () => {
                       borderRadius: "5px",
                     },
                   }}
-                />
+                /> */}
               </Grid>
             </Grid>
 
