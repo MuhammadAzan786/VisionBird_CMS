@@ -240,12 +240,6 @@ const PaySalaries = () => {
 
   return (
     <>
-      <Link to={"/manage-salaries"}>
-        <Button startIcon={<KeyboardReturnIcon />}>
-          Back to Salaries Table
-        </Button>
-      </Link>
-
       <Paper>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={4}>

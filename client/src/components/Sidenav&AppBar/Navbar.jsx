@@ -3,6 +3,7 @@ import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
+import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import {
   AssignmentOutlined,
   DashboardOutlined,
@@ -40,6 +41,11 @@ const Navbar = ({
       label: "Employees",
       icon: <BadgeOutlinedIcon />,
       path: "/manage-employees",
+    },
+    {
+      label: "Internees",
+      icon: <AssignmentIndIcon />,
+      path: "/manage-internees",
     },
     {
       label: "Salary",
@@ -147,6 +153,11 @@ const Navbar = ({
       label: "Employees",
       icon: <BadgeOutlinedIcon />,
       path: "/manage-employees",
+    },
+    {
+      label: "Internees",
+      icon: <AssignmentIndIcon />,
+      path: "/manage-internees",
     },
     {
       label: "Interview Evaluation",

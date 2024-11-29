@@ -8,6 +8,7 @@ import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
 import PropTypes from "prop-types";
 
 const InterneeTable = ({ searchTerm }) => {
+  console.log(searchTerm);
   const navigate = useNavigate();
   const [internees, setInternees] = useState([]);
 
@@ -18,7 +19,7 @@ const InterneeTable = ({ searchTerm }) => {
   const fetchInternees = async () => {
     try {
       const response = await axios.get(
-        `/api/internee/get_internees?search=${searchTerm}||""`
+        `/api/internee/get_internees?search=${searchTerm || ""}`
       );
       setInternees(response.data);
     } catch (error) {

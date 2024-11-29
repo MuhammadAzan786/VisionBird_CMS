@@ -234,8 +234,6 @@ module.exports = {
         }
       }
 
-      
-      
       // Merge the updated fields with the rest of the request body
       const updateData = {
         ...req.body,
@@ -334,6 +332,65 @@ module.exports = {
     } catch (error) {
       console.log(error);
       res.status(500).send({ error: error.message });
+    }
+  },
+
+  //! Update employee status
+  update_employee_status: async (req, res) => {
+    const { id } = req.params;
+    const { employeeStatus } = req.body;
+
+    // Validate status
+    if (!["active", "inactive"].includes(employeeStatus)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    try {
+      const employee = await Employee.findByIdAndUpdate(
+        id,
+        { employeeStatus },
+        { new: true } // Return the updated document
+      );
+
+      if (!employee) {
+        return res.status(404).json({ message: "Employee not found" });
+      }
+
+      res.status(200).json({
+        message: "Employee status updated successfully",
+        employee,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  //! Fetch active employees
+  active_employees: async (req, res) => {
+    try {
+      const employees = await Employee.find({ employeeStatus: "active" });
+      if (!employees || employees.length === 0) {
+        return res.status(404).json({ message: "No active employees found" });
+      }
+      res.status(200).json(employees);
+    } catch (error) {
+      console.error("Error fetching active employees:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  //! Fetch inactive employees
+  inactive_employees: async (req, res) => {
+    try {
+      const employees = await Employee.find({ employeeStatus: "inactive" });
+      if (!employees || employees.length === 0) {
+        return res.status(404).json({ message: "No inactive employees found" });
+      }
+      res.status(200).json(employees);
+    } catch (error) {
+      console.error("Error fetching inactive employees:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
     }
   },
 };

@@ -6,6 +6,7 @@ import { CustomChip } from "../Styled/CustomChip";
 import { WordCaptitalize } from "../../utils/common";
 import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
 import PropTypes from "prop-types";
+import { Box } from "@mui/material";
 
 const EmployeesTable = ({ searchTerm }) => {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ const EmployeesTable = ({ searchTerm }) => {
 
   const fetchEmployees = async () => {
     await axios
-      .get(`/api/employee/get_managers_employees?search=${searchTerm||""}`)
+      .get(`/api/employee/get_managers_employees?search=${searchTerm || ""}`)
       .then((response) => {
         setEmployees(response.data);
       })
