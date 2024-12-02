@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Box, Button, Paper, Tab, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Paper,
+  Tab,
+  Typography,
+} from "@mui/material";
 import { useSelector } from "react-redux";
 import { TextField } from "@mui/material";
 import CreateEmployee from "./CreateEmployee";
@@ -88,6 +95,9 @@ const ManageEmployees = () => {
                   },
                 }}
               />
+              <FormHelperText sx={{ marginTop: 1, color: "text.secondary" }}>
+                Search by Employee Name or Employee Id (XXX-XXX).
+              </FormHelperText>
             </Box>
 
             <Box sx={{ width: "50%", textAlign: "end" }}>
@@ -113,6 +123,9 @@ const ManageEmployees = () => {
                   },
                 }}
               />
+              <FormHelperText sx={{ marginTop: 1, color: "text.secondary" }}>
+                Search by Employee Name or Employee Id (XXX-XXX).
+              </FormHelperText>
             </Box>
             <ActiveEmployeesTable searchTerm={searchTerm} />
           </Box>
@@ -133,6 +146,9 @@ const ManageEmployees = () => {
                   },
                 }}
               />
+              <FormHelperText sx={{ marginTop: 1, color: "text.secondary" }}>
+                Search by Employee Name or Employee Id (XXX-XXX).
+              </FormHelperText>
             </Box>
 
             <InActiveEmployeesTable searchTerm={searchTerm} />

@@ -94,4 +94,11 @@ router.get(
   Employee_controller.inactive_employees
 );
 
+router.put(
+  "/update_employee_status/:id",
+  auth,
+  authorizeRoles("admin"),
+  Employee_controller.update_employee_status
+);
+
 module.exports = router;

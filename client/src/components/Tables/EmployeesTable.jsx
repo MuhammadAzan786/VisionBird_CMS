@@ -6,7 +6,9 @@ import { CustomChip } from "../Styled/CustomChip";
 import { WordCaptitalize } from "../../utils/common";
 import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
 import PropTypes from "prop-types";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import toast, { Toaster } from "react-hot-toast";
 import {
   Box,
   Typography,
@@ -19,6 +21,7 @@ import {
 
 const EmployeesTable = ({ searchTerm }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const navigateTo = (employee) => {
     navigate(`/employee-profile/${employee.id}`);
   };
@@ -31,6 +34,17 @@ const EmployeesTable = ({ searchTerm }) => {
     return response.data;
   };
 
+  const updateEmployeeStatus = async (data) => {
+    try {
+      await axios.put(`/api/employee/update_employee_status/${data.id}`, {
+        employeeStatus: data.newStatus,
+      });
+      toast.success(`Status Updated to ${data.newStatus}`);
+    } catch (error) {
+      console.error("Error updating employee status:", error.message);
+    }
+  };
+
   const {
     data: employees = [],
     isLoading,
@@ -41,24 +55,20 @@ const EmployeesTable = ({ searchTerm }) => {
     queryFn: fetchEmployees,
     enabled: true,
   });
-
-  const handleStatusUpdate = async (id, newStatus, setRows) => {
-    try {
-      // Update the status in your database
-      await axios.put(`/api/employees/${id}`, { status: newStatus });
-
-      // Update the rows locally to reflect the change
-      setRows((prevRows) =>
-        prevRows.map((row) =>
-          row.id === id ? { ...row, employeeStatus: newStatus } : row
-        )
-      );
-      alert("Status updated successfully!");
-    } catch (error) {
-      console.error("Failed to update status:", error);
-      alert("Error updating status.");
-    }
-  };
+  const finalemployees = Array.isArray(employees) ? employees : [];
+  const mutation = useMutation({
+    mutationFn: updateEmployeeStatus, // Pass the mutation function
+    onSuccess: () => {
+      console.log("Employee status updated successfully!");
+      queryClient.invalidateQueries("activeEmployees");
+      queryClient.invalidateQueries("inactiveEmployees");
+      queryClient.refetchQueries("activeEmployees");
+      queryClient.refetchQueries("inactiveEmployees");
+    },
+    onError: (error) => {
+      console.error("Error updating employee status:", error.message);
+    },
+  });
 
   const employeeColumns = [
     {
@@ -107,12 +117,15 @@ const EmployeesTable = ({ searchTerm }) => {
       flex: 1,
       renderCell: (params) => {
         const { id } = params.row;
+        console.log("idddd", id);
         const [status, setStatus] = React.useState(params.value);
         console.log(status);
-        const handleChange = async (event) => {
+        const handleChange = (event) => {
           const newStatus = event.target.value;
           setStatus(newStatus);
-          await handleStatusUpdate(id, newStatus, params.api.setRows); // API call
+          // Trigger the mutation to update the status
+          const data = { id, newStatus };
+          mutation.mutate(data);
         };
 
         return (
@@ -127,8 +140,20 @@ const EmployeesTable = ({ searchTerm }) => {
               borderRadius: 1,
             }}
           >
-            <MenuItem value="active">Active</MenuItem>
-            <MenuItem value="inactive">Inactive</MenuItem>
+            <MenuItem value="active">
+              <Box display="flex" alignItems="center">
+                <RadioButtonCheckedIcon
+                  sx={{ color: "green", marginRight: 1 }}
+                />
+                Active
+              </Box>
+            </MenuItem>
+            <MenuItem value="inactive">
+              <Box display="flex" alignItems="center">
+                <RadioButtonCheckedIcon sx={{ color: "red", marginRight: 1 }} />
+                Inactive
+              </Box>
+            </MenuItem>
           </Select>
         );
       },
@@ -175,20 +200,23 @@ const EmployeesTable = ({ searchTerm }) => {
   }
 
   return (
-    <DataGrid
-      rows={employees.map((employee) => ({
-        ...employee,
-        id: employee._id,
-      }))}
-      columns={employeeColumns}
-      onRowDoubleClick={navigateTo}
-      pagination
-      autoPageSize
-      sx={{
-        cursor: "pointer",
-      }}
-      disableRowSelectionOnClick
-    />
+    <>
+      <DataGrid
+        rows={finalemployees?.map((employee) => ({
+          ...employee,
+          id: employee._id,
+        }))}
+        columns={employeeColumns}
+        onRowDoubleClick={navigateTo}
+        pagination
+        autoPageSize
+        sx={{
+          cursor: "pointer",
+        }}
+        disableRowSelectionOnClick
+      />
+      <Toaster position="top-center" reverseOrder={false} />
+    </>
   );
 };
 

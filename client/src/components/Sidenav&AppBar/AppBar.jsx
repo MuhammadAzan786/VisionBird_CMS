@@ -140,14 +140,12 @@ export default function Appbar({
 
   // Function to handle task notifications
   const handleTaskNotification = (data) => {
-    console.log("in task notification");
     const notification = new Notification("Task Update", {
       body: `Task: ${data.message}`,
       icon: "/task-icon.png", // Customize icon for task notification
     });
 
     notification.onclick = () => {
-      console.log('notificatioon clickedd')
       navigate(`/employeetaskboard/${currentUser._id}`);
       deleteNotification(data._id);
 
@@ -159,14 +157,12 @@ export default function Appbar({
 
   // handleEOWNotification
   const handleEOWNotification = (data) => {
-    console.log("in eow  notification");
     const notification = new Notification("Employee of week Notification", {
       body: `Employee of the Week: ${data.message}`,
       icon: "/task-icon.png", // Customize icon for task notification
     });
 
     notification.onclick = () => {
-      console.log("setting true ");
       dispatch(setCelebrationData(data));
       dispatch(setShowCelebration(true));
       deleteNotification(data._id);
@@ -229,17 +225,16 @@ export default function Appbar({
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleMenuClick = (event) => {
-    console.log(event.currentTarget);
     setAnchorEl(event.currentTarget);
     setMenuOpen(true);
   };
-  console.log("anchor ", anchorEl);
+
 
   const handleClose = () => {
     setMenuOpen(false);
   };
 
-  console.log(anchorEl);
+
 
   return (
     <MuiAppBar
@@ -378,7 +373,7 @@ export default function Appbar({
                                 // Determine path based on notification type
                                 let path = "/";
 
-                                const isAdmin=currentUser.role === "admin"; 
+                                const isAdmin = currentUser.role === "admin";
                                 const isManagerOrAdmin =
                                   currentUser.role === "manager" ||
                                   currentUser.role === "admin"; // Adjust role checks as needed

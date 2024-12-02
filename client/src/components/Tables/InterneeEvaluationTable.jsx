@@ -497,8 +497,8 @@ const InterneeEvaluationTable = () => {
               sx={{ borderRadius: "5px" }} // Rounded corners for the input
             />
             <FormHelperText sx={{ marginTop: 1, color: "text.secondary" }}>
-              You can search by name, contact number (e.g., 0310-7747768), or
-              CNIC (e.g., 34201-8603239-7).
+              Search by name, contact number (e.g., 0310-7747768), or CNIC
+              (e.g., 34201-8603239-7).
             </FormHelperText>
           </Grid>
           <Grid item md={6}>

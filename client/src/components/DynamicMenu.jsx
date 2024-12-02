@@ -45,8 +45,6 @@ const DynamicMenu = ({
     }));
   };
 
-  console.log("ye hai", openStates);
-
   return (
     <CustomList
       sx={{

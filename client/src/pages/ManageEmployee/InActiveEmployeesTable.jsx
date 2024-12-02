@@ -32,7 +32,7 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
     queryFn: fetchEmployees,
     enabled: true,
   });
-
+  const finalemployees = Array.isArray(employees) ? employees : [];
   const employeeColumns = [
     {
       field: "employeeName",
@@ -117,7 +117,7 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
 
   return (
     <DataGrid
-      rows={employees.map((employee) => ({
+      rows={finalemployees?.map((employee) => ({
         ...employee,
         id: employee._id,
       }))}

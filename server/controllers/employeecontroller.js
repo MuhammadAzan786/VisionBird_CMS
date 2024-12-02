@@ -299,12 +299,15 @@ module.exports = {
         ],
       });
 
-      if (!employees || employees.length === 0) {
-        return res.status(404).json({ message: "No Employees found" });
+      if (employees.length === 0) {
+        return res
+          .status(200)
+          .json({ message: "No employees found", employees: [] });
       }
+
       res.status(200).json(employees);
     } catch (error) {
-      res.status(500).json({ error });
+      res.status(500).json({ error: error.message || "An error occurred" });
     }
   },
 
@@ -338,12 +341,8 @@ module.exports = {
   //! Update employee status
   update_employee_status: async (req, res) => {
     const { id } = req.params;
+    console.log("iddd", id);
     const { employeeStatus } = req.body;
-
-    // Validate status
-    if (!["active", "inactive"].includes(employeeStatus)) {
-      return res.status(400).json({ message: "Invalid status value" });
-    }
 
     try {
       const employee = await Employee.findByIdAndUpdate(
@@ -351,7 +350,7 @@ module.exports = {
         { employeeStatus },
         { new: true } // Return the updated document
       );
-
+      console.log(employee);
       if (!employee) {
         return res.status(404).json({ message: "Employee not found" });
       }
@@ -378,9 +377,13 @@ module.exports = {
           { employeeID: { $regex: search, $options: "i" } },
         ],
       });
-      if (!employees || employees.length === 0) {
-        return res.status(404).json({ message: "No active employees found" });
+
+      if (employees.length === 0) {
+        return res
+          .status(200)
+          .json({ message: "No active employees found", employees: [] });
       }
+
       res.status(200).json(employees);
     } catch (error) {
       console.error("Error fetching active employees:", error);
@@ -400,9 +403,13 @@ module.exports = {
           { employeeID: { $regex: search, $options: "i" } },
         ],
       });
-      if (!employees || employees.length === 0) {
-        return res.status(404).json({ message: "No inactive employees found" });
+
+      if (employees.length === 0) {
+        return res
+          .status(200)
+          .json({ message: "No inactive employees found", employees: [] });
       }
+
       res.status(200).json(employees);
     } catch (error) {
       console.error("Error fetching inactive employees:", error);
