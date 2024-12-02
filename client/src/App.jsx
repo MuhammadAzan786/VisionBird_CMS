@@ -61,6 +61,7 @@ import { useSelector } from "react-redux";
 import EmployeeTaskTableCom from "./pages/TaskModule/EmployeeTaskModule/EmployeeTaskTableCom";
 import { Toaster } from "react-hot-toast";
 import UpdateInterneeForm from "./pages/ManageEmployee/UpdateInterneeForm";
+import ManageInternees from "./pages/ManageEmployee/ManageInternees";
 
 
 const App = () => {
@@ -150,6 +151,7 @@ const App = () => {
             element={<PrivateRoutes allowedRoles={["admin", "manager"]} />}
           >
             <Route path="/manage-employees" element={<ManageEmployees />} />
+            <Route path="/manage-internees" element={<ManageInternees />} />
             <Route path="/create-employee" element={<CreateEmployeeForm />} />
             <Route path="/create-internee" element={<CreateInterneeForm />} />
             <Route

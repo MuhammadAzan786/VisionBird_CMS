@@ -175,7 +175,6 @@ const EmployeeSchema = new mongoose.Schema({
   },
   AllowancesAfterProbationPeriod: {
     type: Number,
-    
   },
   employeeUsername: {
     type: String,
@@ -183,6 +182,12 @@ const EmployeeSchema = new mongoose.Schema({
   },
   employeePassword: {
     type: String,
+    required: true,
+  },
+  employeeStatus: {
+    type: String,
+    enum: ["active", "inactive"],
+    default: "active",
     required: true,
   },
 });
