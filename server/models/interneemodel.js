@@ -33,6 +33,12 @@ const interneeSchema = new Schema({
   experienceLetter: { type: String },
   interneeProImage: { type: String },
   givenOn: { type: Date, required: true },
+  interneeStatus: {
+    type: String,
+    enum: ["active", "inactive"],
+    default: "active",
+    required: true,
+  },
   disability: {
     type: String,
     enum: ["yes", "no"],

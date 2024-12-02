@@ -1,35 +1,65 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "../../utils/axiosInterceptor";
 import { useNavigate } from "react-router-dom";
-import { Typography } from "@mui/material";
+import { Box, MenuItem, Select, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
 import PropTypes from "prop-types";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast, { Toaster } from "react-hot-toast";
 
 const InterneeTable = ({ searchTerm }) => {
-  console.log(searchTerm);
   const navigate = useNavigate();
-  const [internees, setInternees] = useState([]);
-
+  const queryClient = useQueryClient();
   const navigateTo = (internee) => {
     navigate(`/internee-profile/${internee.id}`);
   };
 
-  const fetchInternees = async () => {
+  const fetchInternees = async ({ queryKey }) => {
+    const [, searchTerm] = queryKey;
+    const response = await axios.get(
+      `/api/internee/get_internees?search=${searchTerm || ""}`
+    );
+    return response.data;
+  };
+
+  const updateInterneeStatus = async (data) => {
     try {
-      const response = await axios.get(
-        `/api/internee/get_internees?search=${searchTerm || ""}`
-      );
-      setInternees(response.data);
+      await axios.put(`/api/internee/update_internee_status/${data.id}`, {
+        interneeStatus: data.newStatus,
+      });
+      toast.success(`Status Updated to ${data.newStatus}`);
     } catch (error) {
-      console.error("Error fetching internee data:", error.message);
+      console.error("Error updating internee status:", error.message);
     }
   };
 
-  useEffect(() => {
-    fetchInternees();
-  }, [searchTerm]);
+  const {
+    data: internees = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["internees", searchTerm],
+    queryFn: fetchInternees,
+    enabled: true,
+  });
+  const finalinternees = Array.isArray(internees) ? internees : [];
+  const mutation = useMutation({
+    mutationFn: updateInterneeStatus,
+    onSuccess: () => {
+      console.log("Internee status updated successfully!");
+      queryClient.invalidateQueries("activeInternees");
+      queryClient.invalidateQueries("inactiveInternees");
+      queryClient.refetchQueries("activeInternees");
+      queryClient.refetchQueries("inactiveInternees");
+    },
+    onError: (error) => {
+      console.error("Error updating internee status:", error.message);
+    },
+  });
 
   const interneeColumns = [
     {
@@ -41,7 +71,52 @@ const InterneeTable = ({ searchTerm }) => {
         <EmployeeNameCell userId={row.internId} name={row.firstName} />
       ),
     },
+    { field: "designation", headerName: "Designation", width: 250 },
     { field: "email", headerName: "Email", width: 260 },
+    {
+      field: "interneeStatus",
+      headerName: "Status",
+      width: 250,
+      renderCell: (params) => {
+        const { id } = params.row;
+        const [status, setStatus] = React.useState(params.value);
+        const handleChange = (event) => {
+          const newStatus = event.target.value;
+          setStatus(newStatus);
+          const data = { id, newStatus };
+          mutation.mutate(data);
+        };
+
+        return (
+          <Select
+            value={status}
+            onChange={handleChange}
+            size="small"
+            variant="outlined"
+            sx={{
+              minWidth: 120,
+              backgroundColor: "white",
+              borderRadius: 1,
+            }}
+          >
+            <MenuItem value="active">
+              <Box display="flex" alignItems="center">
+                <RadioButtonCheckedIcon
+                  sx={{ color: "green", marginRight: 1 }}
+                />
+                Active
+              </Box>
+            </MenuItem>
+            <MenuItem value="inactive">
+              <Box display="flex" alignItems="center">
+                <RadioButtonCheckedIcon sx={{ color: "red", marginRight: 1 }} />
+                Inactive
+              </Box>
+            </MenuItem>
+          </Select>
+        );
+      },
+    },
     {
       field: "internshipFrom",
       headerName: "Internship From",
@@ -62,7 +137,7 @@ const InterneeTable = ({ searchTerm }) => {
         </Typography>
       ),
     },
-    { field: "designation", headerName: "Designation", width: 250 },
+
     { field: "offered_By", headerName: "Offered by", width: 100 },
     {
       field: "givenOn",
@@ -77,19 +152,22 @@ const InterneeTable = ({ searchTerm }) => {
   ];
 
   return (
-    <DataGrid
-      rows={internees.map((internee) => ({
-        ...internee,
-        id: internee._id,
-      }))}
-      columns={interneeColumns}
-      pageSize={5}
-      rowsPerPageOptions={[5, 10, 20]}
-      onRowDoubleClick={navigateTo}
-      pagination
-      autoPageSize
-      sx={{ cursor: "pointer" }}
-    />
+    <>
+      <DataGrid
+        rows={finalinternees?.map((internee) => ({
+          ...internee,
+          id: internee._id,
+        }))}
+        columns={interneeColumns}
+        pageSize={5}
+        rowsPerPageOptions={[5, 10, 20]}
+        onRowDoubleClick={navigateTo}
+        pagination
+        autoPageSize
+        sx={{ cursor: "pointer" }}
+      />
+      <Toaster position="top-center" reverseOrder={false} />
+    </>
   );
 };
 
