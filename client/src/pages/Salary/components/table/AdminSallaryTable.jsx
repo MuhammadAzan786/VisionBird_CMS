@@ -14,6 +14,7 @@ import { CustomDataGrid } from "../styled/CustomDataGrid";
 import { GridActionsCellItem, GridRowModes } from "@mui/x-data-grid";
 import { CustomChip } from "../../../../components/Styled/CustomChip";
 import EmployeeNameCell from "../../../../components/Grid Cells/EmployeeProfileCell";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const status = ["pending", "approved", "rejected"];
 const colStyle = {
@@ -23,40 +24,80 @@ const colStyle = {
 
 const AdminSalaryTable = () => {
   const { currentUser } = useSelector((state) => state.user);
-  const [rows, setRows] = useState([]);
+  //
+ // const [rows, setRows] = useState([]);
   const [rowModesModel, setRowModesModel] = useState({});
 
-  const fetchAllRequests = async () => {
-    try {
-      const result = await axios.post(
-        "/api/advance_payments/admin/advance/salary/list",
-        {
-          currentUser,
-        }
-      );
+   const queryClient = useQueryClient();
+const [rows, setRows] = useState([]);
 
-      return result.data;
-    } catch (error) {
-      toast.error("there is an error retreiving all data");
-    }
-  };
-  useEffect(() => {
-    fetchAllRequests().then((response) => {
-      const newData = response.map((item) => {
-        return {
-          ...item,
-          id: item._id,
-          employee_name: item.employee_obj_id.employeeName,
-          employee_img: item.employee_obj_id.employeeProImage,
-          employee_id: item.employee_obj_id.employeeID,
-          current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
-          request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
-        };
-      });
+const {
+  data: fetchAllRequests = [],
+  isError,
+  isLoading,
+  error,
+} = useQuery({
+  queryKey: ["advance-applications", currentUser],
+  queryFn: async () => {
+    if (!currentUser) return [];
+    const result = await axios.post(
+      "/api/advance_payments/admin/advance/salary/list",
+      { currentUser }
+    );
+    return result.data || [];
+  },
+  enabled: !!currentUser,
+});
 
-      setRows(newData);
-    });
-  }, []);
+if (fetchAllRequests && fetchAllRequests.length > 0 && rows.length === 0) {
+  const newData = fetchAllRequests.map((item) => ({
+    ...item,
+    id: item._id,
+    employee_name: item.employee_obj_id.employeeName,
+    employee_img: item.employee_obj_id.employeeProImage,
+    employee_id: item.employee_obj_id.employeeID,
+    current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
+    request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
+  }));
+  setRows(newData); // Only set rows if they haven't been set already
+}
+
+
+   if (error) {
+     toast.error(error.message);
+  }
+  
+  // const fetchAllRequests = async () => {
+  //   try {
+  //     const result = await axios.post(
+  //       "/api/advance_payments/admin/advance/salary/list",
+  //       {
+  //         currentUser,
+  //       }
+  //     );
+
+  //     return result.data;
+  //   } catch (error) {
+  //     toast.error("there is an error retreiving all data");
+  //   }
+  // };
+  // useEffect(() => {
+    // fetchAllRequests().then((response) => {
+      // const newData = fetchAllRequests.map((item) => {
+      //   return {
+      //     ...item,
+      //     id: item._id,
+      //     employee_name: item.employee_obj_id.employeeName,
+      //     employee_img: item.employee_obj_id.employeeProImage,
+      //     employee_id: item.employee_obj_id.employeeID,
+      //     current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
+      //     request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
+      //   };
+      // });
+
+      // setRows(newData);
+    // });
+  // }, []);
 
   const columns = [
     {
