@@ -61,7 +61,7 @@ import { useSelector } from "react-redux";
 import EmployeeTaskTableCom from "./pages/TaskModule/EmployeeTaskModule/EmployeeTaskTableCom";
 import { Toaster } from "react-hot-toast";
 import UpdateInterneeForm from "./pages/ManageEmployee/UpdateInterneeForm";
-
+import Test from "./pages/Test/Test";
 
 const App = () => {
   const socket = useSelector((state) => state.socket.socket);
@@ -165,18 +165,10 @@ const App = () => {
             <Route path="/evaluation-form" element={<InterviewEvalForm />} />
             <Route path="/evaluation-page/:id" element={<EvaluationPage />} />
             <Route path="/internee-profile/:id" element={<InterneeProfile />} />
- <Route
+            <Route
               path="/update-internee/:id"
               element={<UpdateInterneeForm />}
             />
-
-
-
-
-
-
-
-
 
             {/* Portfolio Routes */}
             <Route
@@ -286,6 +278,9 @@ const App = () => {
             />
             {/* Role Routes */}
             <Route path="/role" element={<Role />} />
+
+            {/* Test ========================= ============================================================Routes */}
+            <Route path="/test" element={<Test />} />
 
             <Route path="*" element={<NotFound />} />
           </Route>

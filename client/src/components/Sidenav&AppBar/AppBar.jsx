@@ -147,7 +147,7 @@ export default function Appbar({
     });
 
     notification.onclick = () => {
-      console.log('notificatioon clickedd')
+      console.log("notificatioon clickedd");
       navigate(`/employeetaskboard/${currentUser._id}`);
       deleteNotification(data._id);
 
@@ -233,13 +233,13 @@ export default function Appbar({
     setAnchorEl(event.currentTarget);
     setMenuOpen(true);
   };
-  console.log("anchor ", anchorEl);
+  // console.log("anchor ", anchorEl);
 
   const handleClose = () => {
     setMenuOpen(false);
   };
 
-  console.log(anchorEl);
+  // console.log(anchorEl);
 
   return (
     <MuiAppBar
@@ -378,7 +378,7 @@ export default function Appbar({
                                 // Determine path based on notification type
                                 let path = "/";
 
-                                const isAdmin=currentUser.role === "admin"; 
+                                const isAdmin = currentUser.role === "admin";
                                 const isManagerOrAdmin =
                                   currentUser.role === "manager" ||
                                   currentUser.role === "admin"; // Adjust role checks as needed

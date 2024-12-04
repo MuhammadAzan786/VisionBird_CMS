@@ -13,55 +13,25 @@ module.exports = {
   // ! Add Employee page
   create_employee: async (req, res) => {
     try {
-      if (
-        !req.files["cnicScanCopy"][0] ||
-        !req.files["policeCertificateUpload"][0] ||
-        !req.files["degreesScanCopy"][0] ||
-        !req.files["employeeProImage"][0]
-      ) {
-        return res.status(400).json({ error: "Missing required files" });
+      const { updateData, deletedFiles } = req.body;
+      console.log("Emp Add, Delete File List: ", deletedFiles);
+
+      //for deleting files on cloudinary
+      if (deletedFiles.length > 0) {
+        const images = deletedFiles.filter((file) => !file.includes("."));
+        const rawFiles = deletedFiles.filter((file) => file.includes("."));
+
+        if (images.length > 0) {
+          await cloudinary.api.delete_resources(images, { resource_type: "image" });
+          console.log("Emp Add, Images Deleted");
+        }
+
+        if (rawFiles.length > 0) {
+          await cloudinary.api.delete_resources(rawFiles, { resource_type: "raw" });
+          console.log("Emp Add, Raw Files Deleted");
+        }
       }
-
-      const cnicScanCopyBuffer = req.files["cnicScanCopy"][0].buffer;
-      const policeCertificateUploadBuffer =
-        req.files["policeCertificateUpload"][0].buffer;
-      const degreesScanCopyBuffer = req.files["degreesScanCopy"][0].buffer;
-      const empProImgBuffer = req.files["employeeProImage"][0].buffer;
-
-      // Cloudinary upload for each file using streams
-      const uploadToCloudinary = (buffer) => {
-        return new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { resource_type: "auto", folder: "employeePhotos" },
-            (error, result) => {
-              if (error) {
-                console.error("Cloudinary upload error:", error);
-                return reject(error);
-              }
-              resolve(result);
-            }
-          );
-          streamifier.createReadStream(buffer).pipe(stream);
-        });
-      };
-
-      const cnicScanCopyUpload = await uploadToCloudinary(cnicScanCopyBuffer);
-      const policeCertificateUploadUpload = await uploadToCloudinary(
-        policeCertificateUploadBuffer
-      );
-      const degreesScanCopyUpload = await uploadToCloudinary(
-        degreesScanCopyBuffer
-      );
-      const employeeProImageUpload = await uploadToCloudinary(empProImgBuffer);
-
-      const employee = new Employee({
-        ...req.body,
-        cnicScanCopy: cnicScanCopyUpload.secure_url,
-        policeCertificateUpload: policeCertificateUploadUpload.secure_url,
-        degreesScanCopy: degreesScanCopyUpload.secure_url,
-        employeeProImage: employeeProImageUpload.secure_url,
-      });
-
+      const employee = new Employee(updateData);
       await employee.save();
       res.json({ message: "Employee data saved successfully!" });
     } catch (error) {
@@ -69,6 +39,7 @@ module.exports = {
       res.status(400).json({ error: error.message });
     }
   },
+  // ===============================================================
 
   // ! Get All the Employee
   get_employees: async (req, res) => {
@@ -79,11 +50,13 @@ module.exports = {
       res.status(400).json({ error: error.message });
     }
   },
+
   // ! Get the Single Employee
   get_employee: async (req, res) => {
     const userId = req.params.id;
     try {
       const employee = await Employee.findById(userId);
+
       res.status(200).json(employee);
     } catch (error) {
       console.log(`Error in getting the Employee Record` + error);
@@ -96,9 +69,7 @@ module.exports = {
       res.status(200).json(managers);
     } catch (error) {
       console.error("Error fetching managers:", error);
-      res
-        .status(500)
-        .json({ error: "An error occurred while fetching managers" });
+      res.status(500).json({ error: "An error occurred while fetching managers" });
     }
   },
 
@@ -133,10 +104,7 @@ module.exports = {
         if (url) {
           const segments = url.split("/");
           // Extract the public ID which includes folder and file name but excludes extension
-          const publicId =
-            segments.slice(7, segments.length - 1).join("/") +
-            "/" +
-            segments.pop().split(".")[0];
+          const publicId = segments.slice(7, segments.length - 1).join("/") + "/" + segments.pop().split(".")[0];
 
           console.log("Deleting", publicId);
           try {
@@ -165,91 +133,34 @@ module.exports = {
   update_employee: async (req, res) => {
     const userId = req.params.id;
     try {
-      // Retrieve the current document
+      const { updateData, deletedFiles } = req.body;
+      console.log("Emp Update, Delete File List: ", deletedFiles);
+
       const document = await Employee.findById(userId);
       if (!document) {
         return res.status(404).json({ error: "Employee not found" });
       }
 
-      // Function to delete a file from Cloudinary if it exists
-      const deleteFileFromCloudinary = async (url) => {
-        if (url) {
-          const segments = url.split("/");
-          // Extract the public ID which includes folder and file name but excludes extension
-          const publicId =
-            segments.slice(7, segments.length - 1).join("/") +
-            "/" +
-            segments.pop().split(".")[0];
+      //for deleting files on cloudinary
+      if (deletedFiles.length > 0) {
+        const images = deletedFiles.filter((file) => !file.includes("."));
+        const rawFiles = deletedFiles.filter((file) => file.includes("."));
 
-          console.log("Deleting", publicId);
-          try {
-            await cloudinary.uploader.destroy(publicId);
-            console.log(`Deleted Cloudinary file: ${publicId}`);
-          } catch (err) {
-            console.log(`Failed to delete Cloudinary file: ${publicId}`, err);
-          }
+        if (images.length > 0) {
+          await cloudinary.api.delete_resources(images, { resource_type: "image" });
+          console.log("Emp Add, Images Deleted");
         }
-      };
 
-      // Fields to check for updates
-      const fieldsToCheck = [
-        "cnicScanCopy",
-        "employeeProImage",
-        "policeCertificateUpload",
-        "degreesScanCopy",
-      ];
-
-      let updateFields = {};
-
-      for (const field of fieldsToCheck) {
-        if (req.files[field]) {
-          const newFileBuffer = req.files[field][0].buffer; // Get the new file buffer
-          const oldCloudinaryUrl = document[field]; // Get the old Cloudinary URL from the document
-
-          // Upload new file to Cloudinary using streams
-          const uploadNewFile = async (buffer) => {
-            return new Promise((resolve, reject) => {
-              const stream = cloudinary.uploader.upload_stream(
-                { resource_type: "auto", folder: "employeePhotos" },
-                (error, result) => {
-                  if (error) {
-                    console.error("Cloudinary upload error:", error);
-                    return reject(error);
-                  }
-                  resolve(result);
-                }
-              );
-              streamifier.createReadStream(buffer).pipe(stream);
-            });
-          };
-
-          // Upload the new file
-          const newFileUpload = await uploadNewFile(newFileBuffer);
-
-          // If upload is successful, delete the old file and update the field with the new URL
-          if (newFileUpload) {
-            await deleteFileFromCloudinary(oldCloudinaryUrl); // Delete the old Cloudinary file
-            updateFields[field] = newFileUpload.secure_url; // Update the field with the new file URL
-          }
+        if (rawFiles.length > 0) {
+          await cloudinary.api.delete_resources(rawFiles, { resource_type: "raw" });
+          console.log("Emp Add, Raw Files Deleted");
         }
       }
 
-      
-      
-      // Merge the updated fields with the rest of the request body
-      const updateData = {
-        ...req.body,
-        ...updateFields,
-      };
-
       // Update the document with only the changed fields
-      const updatedEmployee = await Employee.findByIdAndUpdate(
-        userId,
-        updateData,
-        {
-          new: true,
-        }
-      );
+      const updatedEmployee = await Employee.findByIdAndUpdate(userId, updateData, {
+        new: true,
+      });
 
       res.status(200).json(updatedEmployee);
     } catch (error) {
@@ -269,9 +180,7 @@ module.exports = {
       // Delete all posts associated with the user
       await Post.deleteMany({ employee_obj_id: userId });
 
-      res
-        .status(200)
-        .json({ message: "Employee and its all posts deleted successfully" });
+      res.status(200).json({ message: "Employee and its all posts deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -295,10 +204,7 @@ module.exports = {
     try {
       const employees = await Employee.find({
         role: { $in: ["employee", "manager"] },
-        $or: [
-          { employeeName: { $regex: search, $options: "i" } },
-          { employeeID: { $regex: search, $options: "i" } },
-        ],
+        $or: [{ employeeName: { $regex: search, $options: "i" } }, { employeeID: { $regex: search, $options: "i" } }],
       });
 
       if (!employees || employees.length === 0) {
@@ -325,15 +231,79 @@ module.exports = {
     try {
       const search = req.query.search || "";
       const employees = await Employee.find({
-        $or: [
-          { employeeName: { $regex: search, $options: "i" } },
-          { employeeID: { $regex: search, $options: "i" } },
-        ],
+        $or: [{ employeeName: { $regex: search, $options: "i" } }, { employeeID: { $regex: search, $options: "i" } }],
       });
       res.status(200).json(employees);
     } catch (error) {
       console.log(error);
       res.status(500).send({ error: error.message });
+    }
+  },
+
+  delete_employee_documents: async (req, res) => {
+    try {
+      const { public_id } = req.query;
+
+      console.log("deleting document", public_id);
+      const result = await cloudinary.uploader.destroy(public_id);
+      if (result.result === "ok") {
+        return res.status(200).json({ message: "Document deleted successfully" });
+      } else {
+        return res.status(400).json({ message: "Failed to delete document" });
+      }
+    } catch (error) {
+      console.log("Error deleting document from Cloudinary:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  grabge_collector: async (req, res) => {
+    // data shape : Employee/Tayyab_/o18zzgxtbdaxxy49rq3d
+    console.log("Garbage Collector", req.body);
+
+    try {
+      const parsedData = JSON.parse(req.body);
+      if (parsedData.length === 0) {
+        console.log("nothing to delete");
+        return;
+      }
+
+      const images = parsedData.filter((file) => !file.includes("."));
+      const rawFiles = parsedData.filter((file) => file.includes("."));
+
+      if (images.length > 0) {
+        await cloudinary.api.delete_resources(images, { resource_type: "image" });
+        console.log("Emp Add, Images Deleted");
+      }
+
+      if (rawFiles.length > 0) {
+        await cloudinary.api.delete_resources(rawFiles, { resource_type: "raw" });
+        console.log("Emp Add, Raw Files Deleted");
+      }
+
+      // await cloudinary.api.delete_resources(parsedData, { type: "upload" });
+      // console.log("Deleted files:");
+
+      const folderName = parsedData[0].split("/").slice(0, -1).join("/");
+      console.log("folder", folderName);
+
+      const filesInFolder = await cloudinary.api.resources({
+        type: "upload",
+        prefix: folderName + "/",
+        max_results: 1,
+      });
+
+      console.log("Files length:", filesInFolder.resources.length);
+
+      if (filesInFolder.resources.length === 0) {
+        // Delete the folder if it's empty
+        await cloudinary.api.delete_folder(folderName);
+        console.log("Deleted folder:");
+      } else {
+        console.log("Folder is not empty, cannot delete.");
+      }
+    } catch (error) {
+      console.log("Error during deletion:", error);
     }
   },
 };

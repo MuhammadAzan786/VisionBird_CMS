@@ -98,12 +98,7 @@ const EmployeeSchema = new mongoose.Schema({
     enum: ["yes", "no"],
     required: true,
   },
-  cnicScanCopy: {
-    type: String,
-  },
-  employeeProImage: {
-    type: String,
-  },
+
   attendanceBiometric: {
     type: String,
     enum: ["yes", "no"],
@@ -144,12 +139,7 @@ const EmployeeSchema = new mongoose.Schema({
       return this.bankAccount === "yes";
     },
   },
-  policeCertificateUpload: {
-    type: String,
-  },
-  degreesScanCopy: {
-    type: String,
-  },
+
   employeeID: {
     type: String,
     required: true,
@@ -175,7 +165,6 @@ const EmployeeSchema = new mongoose.Schema({
   },
   AllowancesAfterProbationPeriod: {
     type: Number,
-    
   },
   employeeUsername: {
     type: String,
@@ -184,6 +173,44 @@ const EmployeeSchema = new mongoose.Schema({
   employeePassword: {
     type: String,
     required: true,
+  },
+
+  // Document Objects
+  employeeProImage: {
+    type: Object, // Changed from String to Object
+    required: false,
+    default: {},
+    public_id: { type: String },
+    secure_url: { type: String },
+    original_file_name: { type: String },
+    resource_type: { type: String },
+  },
+  cnicScanCopy: {
+    type: [Object], // Changed from [String] to [Object]
+    required: false,
+    default: [],
+    public_id: { type: String },
+    secure_url: { type: String },
+    original_file_name: { type: String },
+    resource_type: { type: String },
+  },
+  policeCertificateUpload: {
+    type: [Object], // Changed from [String] to [Object]
+    required: false,
+    default: [],
+    public_id: { type: String },
+    secure_url: { type: String },
+    original_file_name: { type: String },
+    resource_type: { type: String },
+  },
+  degreesScanCopy: {
+    type: [Object], // Changed from [String] to [Object]
+    required: false,
+    default: [],
+    public_id: { type: String },
+    secure_url: { type: String },
+    original_file_name: { type: String },
+    resource_type: { type: String },
   },
 });
 
