@@ -101,4 +101,6 @@ router.put(
   Employee_controller.update_employee_status
 );
 
+router.get("/check_username", Employee_controller.check_username);
+
 module.exports = router;

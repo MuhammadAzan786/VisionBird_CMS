@@ -416,4 +416,23 @@ module.exports = {
       return res.status(500).json({ message: "Internal Server Error" });
     }
   },
+
+  //! check username availability
+  check_username: async (req, res) => {
+    const { username } = req.query; // Extract username from query params
+
+    if (!username) {
+      return res.status(400).json({ message: "Username is required" });
+    }
+
+    try {
+      const userExists = await Employee.findOne({ employeeUsername: username });
+      res.json({ exists: !!userExists }); // Respond with true if user exists, otherwise false
+    } catch (error) {
+      console.error("Error checking username:", error);
+      res
+        .status(500)
+        .json({ message: "Server error. Please try again later." });
+    }
+  },
 };

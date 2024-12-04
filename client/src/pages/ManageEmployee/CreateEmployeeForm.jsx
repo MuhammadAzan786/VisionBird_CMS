@@ -81,7 +81,20 @@ const validationSchema = object().shape({
   bankAccount: string().required("Required Field"),
   empId: string().required("Required Field"),
   designation: string().required("Required Field"),
-  userName: string().required("Required Field"),
+  userName: string()
+    .required("Required Field")
+    .test("unique-username", "Username already exists", async (value) => {
+      if (!value) return true; // Skip validation if the field is empty
+      try {
+        const response = await axios.get("/api/employee/check_username", {
+          params: { username: value },
+        });
+        return !response.data.exists;
+      } catch (error) {
+        console.error("Error checking username:", error);
+        return false; // Treat as invalid if the API call fails
+      }
+    }),
   password: string().required("Required Field"),
   role: string().required("Required Field"),
 });
@@ -234,10 +247,10 @@ function CreateEmployeeForm() {
         console.log(jsonData);
         await axios
           .post("/api/employee/create_employee", jsonData, {
-            withCredentials:true,
-headers:{
-"Content-Type":"multipart/form-data"
-},
+            withCredentials: true,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
           })
           .then((data) => {
             setLoading(false);
@@ -689,6 +702,7 @@ headers:{
                   className="w-full"
                   disabled={role === "manager"}
                 />
+                <ErrorMessage name="username" component="div" />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Field
