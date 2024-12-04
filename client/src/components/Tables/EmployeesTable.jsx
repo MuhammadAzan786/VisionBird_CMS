@@ -143,7 +143,7 @@ const EmployeesTable = ({ searchTerm }) => {
   };
 
   if (role === "admin") {
-    employeeColumns.splice(0, 3, employeeStatus);
+    employeeColumns.splice(3, 0, employeeStatus);
   }
 
   if (isLoading) {
