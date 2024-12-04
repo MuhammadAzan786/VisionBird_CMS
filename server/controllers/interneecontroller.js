@@ -61,6 +61,84 @@ module.exports = {
       res.status(400).json({ error: error.message });
     }
   },
+
+  //! Update internee status
+  update_internee_status: async (req, res) => {
+    const { id } = req.params;
+
+    const { interneeStatus } = req.body;
+
+    try {
+      const internee = await Internee.findByIdAndUpdate(
+        id,
+        { interneeStatus },
+        { new: true }
+      );
+
+      if (!internee) {
+        return res.status(404).json({ message: "Internee not found" });
+      }
+
+      res.status(200).json({
+        message: "Internee status updated successfully",
+        internee,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  //! Fetch active internee
+  active_internees: async (req, res) => {
+    const search = req.query.search || "";
+    try {
+      const internees = await Internee.find({
+        interneeStatus: "active",
+        $or: [
+          { firstName: { $regex: search, $options: "i" } },
+          { internId: { $regex: search, $options: "i" } },
+        ],
+      });
+
+      if (internees.length === 0) {
+        return res
+          .status(200)
+          .json({ message: "No active internees found", internees: [] });
+      }
+
+      res.status(200).json(internees);
+    } catch (error) {
+      console.error("Error fetching active internees:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  //! Fetch inactive employees
+  inactive_internees: async (req, res) => {
+    const search = req.query.search || "";
+    try {
+      const internees = await Internee.find({
+        interneeStatus: "inactive",
+        $or: [
+          { firstName: { $regex: search, $options: "i" } },
+          { internId: { $regex: search, $options: "i" } },
+        ],
+      });
+
+      if (internees.length === 0) {
+        return res
+          .status(200)
+          .json({ message: "No inactive internees found", internees: [] });
+      }
+
+      res.status(200).json(internees);
+    } catch (error) {
+      console.error("Error fetching inactive internees:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
   Get_internee: async (req, res) => {
     try {
       const intern_id = req.params.id;

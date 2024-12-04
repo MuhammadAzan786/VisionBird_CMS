@@ -1,25 +1,32 @@
 import { useState } from "react";
-import { Box, Button, Paper } from "@mui/material";
-import Tab from "@mui/material/Tab";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
+import {
+  Box,
+  Button,
+  FormHelperText,
+  Paper,
+  Tab,
+  Typography,
+} from "@mui/material";
 import { useSelector } from "react-redux";
 import { TextField } from "@mui/material";
 import CreateEmployee from "./CreateEmployee";
-import CreateInternee from "./CreateInternee";
 import EmployeesTable from "../../components/Tables/EmployeesTable";
-import InterneeTable from "../../components/Tables/InterneeTable";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
+import GroupIcon from "@mui/icons-material/Group";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import HistoryIcon from "@mui/icons-material/History";
+import ActiveEmployeesTable from "./ActiveEmployeesTable";
+import InActiveEmployeesTable from "./InActiveEmployeesTable";
 
 const ManageEmployees = () => {
-  const [value, setValue] = useState("1");
   const { currentUser } = useSelector((state) => state.user);
+  const [tabValue, setTabValue] = useState("all_employees");
   const role = currentUser.role;
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+  const handleTabValue = (event, newValue) => {
+    setTabValue(newValue);
   };
 
   const handleSearchChange = (e) => {
@@ -28,23 +35,42 @@ const ManageEmployees = () => {
 
   return (
     <Paper sx={{ padding: "40px" }}>
-      <TabContext value={value}>
-        <TabList
-          onChange={handleChange}
-          variant="fullWidth"
-          aria-label="lab API tabs example"
-          sx={{ marginBottom: "30px" }}
+      <TabContext value={tabValue}>
+        <Box
+          sx={{
+            borderBottom: 1,
+            borderColor: "divider",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "30px",
+          }}
         >
-          <Tab
-            component={Button}
-            onClick={() => setValue("1")}
-            label="Employees"
-            value="1"
-          />
-          <Tab onClick={() => setValue("2")} label="Internees" value="2" />
-        </TabList>
+          <TabList onChange={handleTabValue}>
+            <Tab
+              label="All Employees"
+              icon={<GroupIcon />}
+              value="all_employees"
+              sx={{ letterSpacing: 1 }}
+            />
+            <Tab
+              label="Present Employees"
+              icon={<CheckCircleOutlineIcon />}
+              value="present_employees"
+              sx={{ letterSpacing: 1 }}
+            />
+            <Tab
+              label="Past Employees"
+              icon={<HistoryIcon />}
+              value="past_employees"
+              sx={{ letterSpacing: 1 }}
+            />
+          </TabList>
+        </Box>
 
-        <TabPanel value="1" sx={{ padding: 0 }}>
+        {/* Tab panels */}
+        <TabPanel value="all_employees" sx={{ p: 0 }}>
+          {" "}
           <Box
             sx={{
               display: "flex",
@@ -69,6 +95,9 @@ const ManageEmployees = () => {
                   },
                 }}
               />
+              <FormHelperText sx={{ marginTop: 1, color: "text.secondary" }}>
+                Search by Employee Name or Employee Id (XXX-XXX).
+              </FormHelperText>
             </Box>
 
             <Box sx={{ width: "50%", textAlign: "end" }}>
@@ -78,16 +107,9 @@ const ManageEmployees = () => {
           <EmployeesTable searchTerm={searchTerm} />
         </TabPanel>
 
-        <TabPanel value="2" sx={{ padding: 0 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginY: 2,
-            }}
-          >
-            <Box sx={{ width: "50%" }}>
-              {/* Search bar */}
+        <TabPanel value="present_employees" sx={{ p: 0 }}>
+          <Box>
+            <Box sx={{ width: "50%", my: 2 }}>
               <TextField
                 label="Search"
                 variant="outlined"
@@ -95,14 +117,42 @@ const ManageEmployees = () => {
                 value={searchTerm}
                 onChange={handleSearchChange}
                 fullWidth
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "5px",
+                  },
+                }}
               />
+              <FormHelperText sx={{ marginTop: 1, color: "text.secondary" }}>
+                Search by Employee Name or Employee Id (XXX-XXX).
+              </FormHelperText>
+            </Box>
+            <ActiveEmployeesTable searchTerm={searchTerm} />
+          </Box>
+        </TabPanel>
+        <TabPanel value="past_employees" sx={{ p: 0 }}>
+          <Box>
+            <Box sx={{ width: "50%", my: 2 }}>
+              <TextField
+                label="Search"
+                variant="outlined"
+                size="small"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                fullWidth
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "5px",
+                  },
+                }}
+              />
+              <FormHelperText sx={{ marginTop: 1, color: "text.secondary" }}>
+                Search by Employee Name or Employee Id (XXX-XXX).
+              </FormHelperText>
             </Box>
 
-            <Box sx={{ width: "50%", textAlign: "end" }}>
-              {role === "admin" && <CreateInternee />}
-            </Box>
+            <InActiveEmployeesTable searchTerm={searchTerm} />
           </Box>
-          <InterneeTable searchTerm={searchTerm} />
         </TabPanel>
       </TabContext>
     </Paper>

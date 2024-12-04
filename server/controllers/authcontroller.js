@@ -4,12 +4,10 @@ const { errorHandler } = require("../utils/error");
 
 module.exports.signin = async (req, res, next) => {
   const { employeeUsername, employeePassword } = req.body;
-console.log("name",employeeUsername,"password",employeePassword);
   try {
-const employees=await Employee.find();
-console.log("employees hazir",employees)
     const validUser = await Employee.findOne({
       employeeUsername: employeeUsername,
+      employeeStatus: "active",
     });
     if (!validUser) {
       return next(errorHandler(404, "User Not Found !!!"));

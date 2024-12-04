@@ -174,6 +174,12 @@ const EmployeeSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  employeeStatus: {
+    type: String,
+    enum: ["active", "inactive"],
+    default: "active",
+    required: true,
+  },
 
   // Document Objects
   employeeProImage: {

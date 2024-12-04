@@ -207,12 +207,13 @@ module.exports = {
         $or: [{ employeeName: { $regex: search, $options: "i" } }, { employeeID: { $regex: search, $options: "i" } }],
       });
 
-      if (!employees || employees.length === 0) {
-        return res.status(404).json({ message: "No Employees found" });
+      if (employees.length === 0) {
+        return res.status(200).json({ message: "No employees found", employees: [] });
       }
+
       res.status(200).json(employees);
     } catch (error) {
-      res.status(500).json({ error });
+      res.status(500).json({ error: error.message || "An error occurred" });
     }
   },
 
@@ -304,6 +305,75 @@ module.exports = {
       }
     } catch (error) {
       console.log("Error during deletion:", error);
+    }
+  },
+
+  //! Update employee status
+  update_employee_status: async (req, res) => {
+    const { id } = req.params;
+    console.log("iddd", id);
+    const { employeeStatus } = req.body;
+
+    try {
+      const employee = await Employee.findByIdAndUpdate(
+        id,
+        { employeeStatus },
+        { new: true } // Return the updated document
+      );
+      console.log(employee);
+      if (!employee) {
+        return res.status(404).json({ message: "Employee not found" });
+      }
+
+      res.status(200).json({
+        message: "Employee status updated successfully",
+        employee,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  //! Fetch active employees
+  active_employees: async (req, res) => {
+    const search = req.query.search || "";
+    try {
+      const employees = await Employee.find({
+        employeeStatus: "active",
+        role: { $in: ["employee", "manager"] },
+        $or: [{ employeeName: { $regex: search, $options: "i" } }, { employeeID: { $regex: search, $options: "i" } }],
+      });
+
+      if (employees.length === 0) {
+        return res.status(200).json({ message: "No active employees found", employees: [] });
+      }
+
+      res.status(200).json(employees);
+    } catch (error) {
+      console.error("Error fetching active employees:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  //! Fetch inactive employees
+  inactive_employees: async (req, res) => {
+    const search = req.query.search || "";
+    try {
+      const employees = await Employee.find({
+        employeeStatus: "inactive",
+        role: { $in: ["employee", "manager"] },
+        $or: [{ employeeName: { $regex: search, $options: "i" } }, { employeeID: { $regex: search, $options: "i" } }],
+      });
+
+      if (employees.length === 0) {
+        return res.status(200).json({ message: "No inactive employees found", employees: [] });
+      }
+
+      res.status(200).json(employees);
+    } catch (error) {
+      console.error("Error fetching inactive employees:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
     }
   },
 };

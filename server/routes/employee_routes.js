@@ -5,6 +5,8 @@ const multer = require("multer");
 
 const auth = require("../Middlewares/auth");
 const authorizeRoles = require("../Middlewares/authorization");
+// const auth = require("../Middlewares/auth");
+// const authorizeRoles = require("../Middlewares/authorization");
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -55,5 +57,16 @@ router.delete(
 );
 router.get("/get_employee_ids", Employee_controller.get_employee_ids);
 router.get("/searchEmployee", Employee_controller.search_employee);
+router.get("/get_active_employees", auth, authorizeRoles("admin", "manager"), Employee_controller.active_employees);
+
+router.get("/get_inactive_employees", auth, authorizeRoles("admin", "manager"), Employee_controller.inactive_employees);
+
+router.put("/update_employee_status/:id", auth, authorizeRoles("admin"), Employee_controller.update_employee_status);
+
+router.get("/get_active_employees", auth, authorizeRoles("admin", "manager"), Employee_controller.active_employees);
+
+router.get("/get_inactive_employees", auth, authorizeRoles("admin", "manager"), Employee_controller.inactive_employees);
+
+router.put("/update_employee_status/:id", auth, authorizeRoles("admin"), Employee_controller.update_employee_status);
 
 module.exports = router;
