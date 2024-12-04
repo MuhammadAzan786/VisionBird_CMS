@@ -221,7 +221,7 @@ function UpdateForm() {
             updateData: fieldMap,
             deletedFiles: deletedFilesRef.current,
           })
-          .then((data) => {
+          .then(() => {
             setLoading(false);
             toast.success("Employee Updated Successfully!");
             navigate("/manage-employees");

@@ -347,7 +347,7 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
 
                                 const isAdmin = currentUser.role === "admin";
 
-                                const isManagerOrAdmin = currentUser.role === "manager" || currentUser.role === "admin"; // Adjust role checks as needed
+                                // const isManagerOrAdmin = currentUser.role === "manager" || currentUser.role === "admin"; // Adjust role checks as needed
 
                                 switch (notification.NotificationName) {
                                   case "Leave_Notification":

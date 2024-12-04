@@ -69,6 +69,20 @@ const validationSchema = object().shape({
 });
 
 function CreateEmployeeForm() {
+  // const handleBlock = ({ confirm, cancel }) => {
+  //   const userConfirmed = window.confirm("You have unsaved changes. Do you want to leave?");
+  //   if (userConfirmed) {
+  //     confirm(); // Proceed with navigation
+  //   } else {
+  //     cancel(); // Cancel navigation
+  //   }
+  // };
+
+  // useNavBlocker({
+  //   onBlock: handleBlock,
+  //   enabled: true, // Enable only when there are unsaved changes
+  // });
+
   const { currentUser } = useSelector((state) => state.user);
   const role = currentUser.role;
 
@@ -200,7 +214,7 @@ function CreateEmployeeForm() {
               withCredentials: true,
             }
           )
-          .then((data) => {
+          .then(() => {
             setLoading(false);
             toast.success("Employee Added Successfully!");
             navigate("/manage-employees");
