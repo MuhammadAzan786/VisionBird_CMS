@@ -68,6 +68,13 @@ const validationSchema = object().shape({
 });
 
 function CreateEmployeeForm() {
+  const base =
+    import.meta.env.NODE_ENV === "production"
+      ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
+      : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
+
+  console.log("base", base);
+
   const { currentUser } = useSelector((state) => state.user);
   const role = currentUser.role;
 

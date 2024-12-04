@@ -14,6 +14,10 @@ import "../../index.css";
 import axios from "../../utils/axiosInterceptor";
 import Test from "../Test/Test";
 import { ScrollToErrorField } from "../../utils/common";
+const baseUrl =
+  import.meta.env.NODE_ENV === "production"
+    ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
+    : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
 
 const validationSchema = object().shape({
   firstName: string()
@@ -85,7 +89,7 @@ function UpdateForm() {
     };
 
     const handleUnload = () => {
-      const url = "http://localhost:4000/api/employee/grabage_collector";
+      const url = `${baseUrl}/api/employee/grabage_collector`;
       navigator.sendBeacon(url, JSON.stringify(tempFilesRef.current));
     };
 
