@@ -1159,7 +1159,7 @@ function UpdateForm() {
                   />
                 </Grid>
               </Grid>
-              <Button variant="contained" onClick={toggleUploadModal} disabled={!values.userName && !values.empId}>
+              {/* <Button variant="contained" onClick={toggleUploadModal} disabled={!values.userName && !values.empId}>
                 Upload Document
               </Button>
               <Modal
@@ -1179,7 +1179,7 @@ function UpdateForm() {
                   deletedFilesRef={deletedFilesRef}
                   parentFolder="Employee"
                 />
-              </Modal>
+              </Modal> */}
 
               <div className="flex justify-end">
                 <Button
