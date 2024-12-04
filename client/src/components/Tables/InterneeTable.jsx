@@ -2,17 +2,27 @@ import React, { useState, useEffect } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "../../utils/axiosInterceptor";
 import { useNavigate } from "react-router-dom";
-import { Box, MenuItem, Select, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  CircularProgress,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
 import dayjs from "dayjs";
 import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
 import PropTypes from "prop-types";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast, { Toaster } from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 const InterneeTable = ({ searchTerm }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { currentUser } = useSelector((state) => state.user);
+  const role = currentUser.role;
   const navigateTo = (internee) => {
     navigate(`/internee-profile/${internee.id}`);
   };
@@ -73,50 +83,7 @@ const InterneeTable = ({ searchTerm }) => {
     },
     { field: "designation", headerName: "Designation", width: 250 },
     { field: "email", headerName: "Email", width: 260 },
-    {
-      field: "interneeStatus",
-      headerName: "Status",
-      width: 250,
-      renderCell: (params) => {
-        const { id } = params.row;
-        const [status, setStatus] = React.useState(params.value);
-        const handleChange = (event) => {
-          const newStatus = event.target.value;
-          setStatus(newStatus);
-          const data = { id, newStatus };
-          mutation.mutate(data);
-        };
 
-        return (
-          <Select
-            value={status}
-            onChange={handleChange}
-            size="small"
-            variant="outlined"
-            sx={{
-              minWidth: 120,
-              backgroundColor: "white",
-              borderRadius: 1,
-            }}
-          >
-            <MenuItem value="active">
-              <Box display="flex" alignItems="center">
-                <RadioButtonCheckedIcon
-                  sx={{ color: "green", marginRight: 1 }}
-                />
-                Active
-              </Box>
-            </MenuItem>
-            <MenuItem value="inactive">
-              <Box display="flex" alignItems="center">
-                <RadioButtonCheckedIcon sx={{ color: "red", marginRight: 1 }} />
-                Inactive
-              </Box>
-            </MenuItem>
-          </Select>
-        );
-      },
-    },
     {
       field: "internshipFrom",
       headerName: "Internship From",
@@ -150,6 +117,92 @@ const InterneeTable = ({ searchTerm }) => {
       ),
     },
   ];
+
+  const statusColumn = {
+    field: "interneeStatus",
+    headerName: "Status",
+    width: 250,
+    renderCell: (params) => {
+      const { id } = params.row;
+      const [status, setStatus] = React.useState(params.value);
+      const handleChange = (event) => {
+        const newStatus = event.target.value;
+        setStatus(newStatus);
+        const data = { id, newStatus };
+        mutation.mutate(data);
+      };
+
+      return (
+        <Select
+          value={status}
+          onChange={handleChange}
+          size="small"
+          variant="outlined"
+          sx={{
+            minWidth: 120,
+            backgroundColor: "white",
+            borderRadius: 1,
+          }}
+        >
+          <MenuItem value="active">
+            <Box display="flex" alignItems="center">
+              <RadioButtonCheckedIcon sx={{ color: "green", marginRight: 1 }} />
+              Active
+            </Box>
+          </MenuItem>
+          <MenuItem value="inactive">
+            <Box display="flex" alignItems="center">
+              <RadioButtonCheckedIcon sx={{ color: "red", marginRight: 1 }} />
+              Inactive
+            </Box>
+          </MenuItem>
+        </Select>
+      );
+    },
+  };
+
+  if (role === "admin") {
+    interneeColumns.splice(3, 0, statusColumn);
+  }
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "50vh",
+          gap: 2,
+        }}
+      >
+        <CircularProgress />
+        <Typography variant="h6" color="text.secondary">
+          Loading Internees...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "50vh",
+          padding: 2,
+        }}
+      >
+        <Alert severity="error" sx={{ maxWidth: 400, textAlign: "center" }}>
+          <Typography variant="h6">Error</Typography>
+          <Typography>{error.message}</Typography>
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <>

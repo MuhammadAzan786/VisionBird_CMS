@@ -80,6 +80,45 @@ const InActiveInterneesTable = ({ searchTerm }) => {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "50vh",
+          gap: 2,
+        }}
+      >
+        <CircularProgress />
+        <Typography variant="h6" color="text.secondary">
+          Loading Internees...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "50vh",
+          padding: 2,
+        }}
+      >
+        <Alert severity="error" sx={{ maxWidth: 400, textAlign: "center" }}>
+          <Typography variant="h6">Error</Typography>
+          <Typography>{error.message}</Typography>
+        </Alert>
+      </Box>
+    );
+  }
+
   return (
     <>
       <DataGrid

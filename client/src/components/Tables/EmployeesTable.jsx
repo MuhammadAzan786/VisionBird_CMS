@@ -18,10 +18,13 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import { useSelector } from "react-redux";
 
 const EmployeesTable = ({ searchTerm }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { currentUser } = useSelector((state) => state.user);
+  const role = currentUser.role;
   const navigateTo = (employee) => {
     navigate(`/employee-profile/${employee.id}`);
   };
@@ -111,54 +114,57 @@ const EmployeesTable = ({ searchTerm }) => {
         />
       ),
     },
-    {
-      field: "employeeStatus",
-      headerName: "Status",
-      flex: 1,
-      renderCell: (params) => {
-        const { id } = params.row;
-        console.log("idddd", id);
-        const [status, setStatus] = React.useState(params.value);
-        console.log(status);
-        const handleChange = (event) => {
-          const newStatus = event.target.value;
-          setStatus(newStatus);
-          // Trigger the mutation to update the status
-          const data = { id, newStatus };
-          mutation.mutate(data);
-        };
-
-        return (
-          <Select
-            value={status}
-            onChange={handleChange}
-            size="small"
-            variant="outlined"
-            sx={{
-              minWidth: 120,
-              backgroundColor: "white",
-              borderRadius: 1,
-            }}
-          >
-            <MenuItem value="active">
-              <Box display="flex" alignItems="center">
-                <RadioButtonCheckedIcon
-                  sx={{ color: "green", marginRight: 1 }}
-                />
-                Active
-              </Box>
-            </MenuItem>
-            <MenuItem value="inactive">
-              <Box display="flex" alignItems="center">
-                <RadioButtonCheckedIcon sx={{ color: "red", marginRight: 1 }} />
-                Inactive
-              </Box>
-            </MenuItem>
-          </Select>
-        );
-      },
-    },
   ];
+
+  const employeeStatus = {
+    field: "employeeStatus",
+    headerName: "Status",
+    flex: 1,
+    renderCell: (params) => {
+      const { id } = params.row;
+      console.log("idddd", id);
+      const [status, setStatus] = React.useState(params.value);
+      console.log(status);
+      const handleChange = (event) => {
+        const newStatus = event.target.value;
+        setStatus(newStatus);
+        // Trigger the mutation to update the status
+        const data = { id, newStatus };
+        mutation.mutate(data);
+      };
+
+      return (
+        <Select
+          value={status}
+          onChange={handleChange}
+          size="small"
+          variant="outlined"
+          sx={{
+            minWidth: 120,
+            backgroundColor: "white",
+            borderRadius: 1,
+          }}
+        >
+          <MenuItem value="active">
+            <Box display="flex" alignItems="center">
+              <RadioButtonCheckedIcon sx={{ color: "green", marginRight: 1 }} />
+              Active
+            </Box>
+          </MenuItem>
+          <MenuItem value="inactive">
+            <Box display="flex" alignItems="center">
+              <RadioButtonCheckedIcon sx={{ color: "red", marginRight: 1 }} />
+              Inactive
+            </Box>
+          </MenuItem>
+        </Select>
+      );
+    },
+  };
+
+  if (role === "admin") {
+    employeeColumns.splice(0, 3, employeeStatus);
+  }
 
   if (isLoading) {
     return (
