@@ -9,7 +9,6 @@ import {
   Grid,
   InputLabel,
   MenuItem,
-  Modal,
   Paper,
   Select,
   Typography,
@@ -18,7 +17,7 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import { ErrorMessage, FastField, Field, Form, Formik } from "formik";
 import { TextField } from "formik-material-ui";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +27,7 @@ import UploadFiles from "../../components/upload/UploadFiles";
 import "../../index.css";
 import axios from "../../utils/axiosInterceptor";
 import { ScrollToErrorField } from "../../utils/common";
+import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
 
 const validationSchema = object().shape({
   firstName: string()
@@ -68,13 +68,6 @@ const validationSchema = object().shape({
 });
 
 function CreateEmployeeForm() {
-  const base =
-    import.meta.env.NODE_ENV === "production"
-      ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
-      : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
-
-  console.log("base", base);
-
   const { currentUser } = useSelector((state) => state.user);
   const role = currentUser.role;
 
@@ -86,27 +79,8 @@ function CreateEmployeeForm() {
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
 
-  useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-
-    const handleUnload = () => {
-      const url = "http://localhost:4000/api/employee/grabage_collector";
-      navigator.sendBeacon(url, JSON.stringify(tempFilesRef.current));
-    };
-
-    // Attach event listeners
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("unload", handleUnload);
-
-    // Cleanup event listeners
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("unload", handleUnload);
-    };
-  }, []);
+  // Custom Hook to prevent WindowClose
+  useWindowCloseHandler(tempFilesRef);
 
   return (
     <Formik

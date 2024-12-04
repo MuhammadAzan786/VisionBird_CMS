@@ -20,15 +20,14 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import LoadingAnim from "../../components/LoadingAnim";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import { TextField } from "formik-material-ui";
-import UploadIcon from "@mui/icons-material/Upload";
 import axios from "../../utils/axiosInterceptor";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { ScrollToErrorField } from "../../utils/common";
-import UploadFiles from "../../components/upload/UploadFiles";
 import UploadFilesInternee from "../../components/upload/UploadFilesInternee";
+import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
 
 const validationSchema = object().shape({
   firstName: string()
@@ -72,6 +71,8 @@ const CreateInterneeForm = () => {
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
 
+  useWindowCloseHandler(tempFilesRef);
+
   return (
     <Formik
       initialValues={{
@@ -109,7 +110,7 @@ const CreateInterneeForm = () => {
       }}
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
-        setLoading(true);
+        // setLoading(true);
         setSubmitting(false);
 
         const fieldMap = {
@@ -143,10 +144,14 @@ const CreateInterneeForm = () => {
           appointmentFile: values.appointmentFile,
           experienceLetter: values.experienceLetter,
         };
-        console.log("filedddddddd", fieldMap);
+        console.log("Internee Form Data", fieldMap);
+        console.log("Deleted Files List", deletedFilesRef.current);
 
         await axios
-          .post("/api/internee/create_internee", fieldMap)
+          .post("/api/internee/create_internee", {
+            updateData: fieldMap,
+            deletedFiles: deletedFilesRef.current,
+          })
           .then(() => {
             setLoading(false);
             // navigate("/manage-employees");
@@ -155,11 +160,11 @@ const CreateInterneeForm = () => {
           .catch((err) => {
             setLoading(false);
             console.log(err);
-            toast.error("error", "Internee Creation failed!");
+            toast.error("Internee Creation failed!");
           });
       }}
     >
-      {({ values, setFieldValue, isSubmitting, errors, setTouched, handleSubmit }) => (
+      {({ values, setFieldValue, errors, setTouched, handleSubmit }) => (
         <Box m={5}>
           <Form>
             <Grid container spacing={2} component={Paper} elevation={2} borderRadius={"5px"} p={3}>

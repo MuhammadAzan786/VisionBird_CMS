@@ -98,7 +98,7 @@ export const MuiCard = {
 export const MuiDataGrid = {
   defaultProps: {
     disableColumnMenu: true,
-
+    // hideFooter: true,
     rowHeight: 80,
     columnHeaderHeight: 45,
     disableColumnSorting: true,

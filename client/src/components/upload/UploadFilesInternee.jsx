@@ -32,8 +32,6 @@ const UploadFilesInternee = ({
     setTabValue(newValue);
   };
 
-  console.log("ye valuees hain", values);
-
   const sendtoCloudinary = async (file) => {
     const isImage = /image\/(jpeg|png|gif|bmp|svg|webp|tiff)/i.test(file.type);
     const resourceType = isImage ? "image" : "raw";
@@ -87,7 +85,8 @@ const UploadFilesInternee = ({
   const handleDelete = async (public_id) => {
     // =================== TODO
     deletedFilesRef.current.push(public_id);
-    console.log("Files to be Deleted: ", deletedFilesRef);
+
+    console.log("Handle Delete! Files to be Deleted: ", deletedFilesRef);
 
     const currentData = values[tabValue];
     if (Array.isArray(currentData)) {
