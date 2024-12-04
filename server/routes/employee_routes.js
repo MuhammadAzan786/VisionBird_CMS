@@ -11,18 +11,6 @@ const authorizeRoles = require("../Middlewares/authorization");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-//creating an employee
-// router.post(
-//   "/create_employee",auth,  authorizeRoles('admin','manager'),
-//   upload.fields([
-//     { name: "cnicScanCopy", maxCount: 1 },
-//     { name: "policeCertificateUpload", maxCount: 1 },
-//     { name: "degreesScanCopy", maxCount: 1 },
-//     { name: "employeeProImage", maxCount: 1 },
-//   ]),
-//   Employee_controller.create_employee
-// );
-
 router.post("/create_employee", auth, authorizeRoles("admin", "manager"), Employee_controller.create_employee);
 
 router.patch(

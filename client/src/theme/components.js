@@ -98,7 +98,7 @@ export const MuiCard = {
 export const MuiDataGrid = {
   defaultProps: {
     disableColumnMenu: true,
-    hideFooter: true,
+
     rowHeight: 80,
     columnHeaderHeight: 45,
     disableColumnSorting: true,
@@ -123,10 +123,9 @@ export const MuiDataGrid = {
         fontWeight: 500,
       },
 
-      "& .MuiDataGrid-columnHeaders, & .MuiDataGrid-filler,.MuiDataGrid-filler div, .MuiDataGrid-footerContainer":
-        {
-          border: "none !important",
-        },
+      "& .MuiDataGrid-columnHeaders, & .MuiDataGrid-filler,.MuiDataGrid-filler div, .MuiDataGrid-footerContainer": {
+        border: "none !important",
+      },
       "& .MuiDataGrid-columnSeparator": {
         display: "none",
       },

@@ -58,3 +58,17 @@ export const shortDateWithMonthName = (date) => {
     year: "numeric",
   }).format(newDate);
 };
+
+export const ScrollToErrorField = (errors, setTouched) => {
+  const firstErrorField = Object.keys(errors)[0];
+  const touchedFields = Object.keys(errors).reduce((acc, key) => {
+    acc[key] = true;
+    return acc;
+  }, {});
+  setTouched(touchedFields);
+
+  const fieldElement = document.querySelector(`[name="${firstErrorField}"]`);
+  console.log("field element", fieldElement);
+  fieldElement.scrollIntoView({ behavior: "smooth" });
+  fieldElement.focus(); // Optionally focus the field
+};

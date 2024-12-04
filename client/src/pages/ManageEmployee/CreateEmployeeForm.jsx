@@ -18,28 +18,27 @@ import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import { ErrorMessage, FastField, Field, Form, Formik } from "formik";
 import { TextField } from "formik-material-ui";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { object, string } from "yup";
 import LoadingAnim from "../../components/LoadingAnim";
+import UploadFiles from "../../components/upload/UploadFiles";
 import "../../index.css";
 import axios from "../../utils/axiosInterceptor";
-import Test from "../Test/Test";
+import { ScrollToErrorField } from "../../utils/common";
 
 const validationSchema = object().shape({
   firstName: string()
     .required("Required Name")
     .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
-
   fatherName: string()
     .required("Required Name")
     .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters are allowed"),
   cnic: string()
     .required("Required CNIC")
     .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) => /^\d{5}-\d{7}-\d$/.test(value || "")),
-
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
   disability: string().required("Required Field"),
@@ -69,20 +68,6 @@ const validationSchema = object().shape({
 });
 
 function CreateEmployeeForm() {
-  // const handleBlock = ({ confirm, cancel }) => {
-  //   const userConfirmed = window.confirm("You have unsaved changes. Do you want to leave?");
-  //   if (userConfirmed) {
-  //     confirm(); // Proceed with navigation
-  //   } else {
-  //     cancel(); // Cancel navigation
-  //   }
-  // };
-
-  // useNavBlocker({
-  //   onBlock: handleBlock,
-  //   enabled: true, // Enable only when there are unsaved changes
-  // });
-
   const { currentUser } = useSelector((state) => state.user);
   const role = currentUser.role;
 
@@ -93,14 +78,28 @@ function CreateEmployeeForm() {
 
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
-  const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
-  const toggleUploadModal = () => {
-    setUploadModalOpen(!uploadModalOpen);
-  };
-  const closeUploadModal = () => {
-    setUploadModalOpen(false);
-  };
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    const handleUnload = () => {
+      const url = "http://localhost:4000/api/employee/grabage_collector";
+      navigator.sendBeacon(url, JSON.stringify(tempFilesRef.current));
+    };
+
+    // Attach event listeners
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
+    };
+  }, []);
 
   return (
     <Formik
@@ -151,7 +150,6 @@ function CreateEmployeeForm() {
       }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
-        console.log("these are valuesss", values);
         setLoading(false);
         const fieldMap = {
           employeeName: values.firstName,
@@ -1100,28 +1098,31 @@ function CreateEmployeeForm() {
               </Grid>
             </Grid>
 
-            {/* =================================================== */}
-            <Button variant="contained" onClick={toggleUploadModal}>
-              Upload Document
-            </Button>
-            <Modal
-              open={uploadModalOpen}
-              onClose={closeUploadModal}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Test
-                values={values}
-                setFieldValue={setFieldValue}
-                tempFilesRef={tempFilesRef}
-                deletedFilesRef={deletedFilesRef}
-                parentFolder="Employee"
-                folderName={`${values.userName}_${values.empId}`}
-              />
-            </Modal>
+            {/* ============================================  Documents   ============================================== */}
+
+            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+              <Grid item xs={12}>
+                <Typography
+                  sx={{
+                    fontWeight: "600",
+                    fontSize: "20px",
+                    color: "#3b4056",
+                    mb: 5,
+                  }}
+                >
+                  Upload Documents
+                </Typography>
+
+                <UploadFiles
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  tempFilesRef={tempFilesRef}
+                  deletedFilesRef={deletedFilesRef}
+                  parentFolder="Employee"
+                  folderName={`${values.userName}_${values.empId}`}
+                />
+              </Grid>
+            </Grid>
 
             <div className="flex justify-end">
               <Button
@@ -1134,24 +1135,9 @@ function CreateEmployeeForm() {
                     }}
                   />
                 }
+                //ScrollToErrorField is a custom utlity function
                 onClick={() => {
-                  if (Object.keys(errors).length > 0) {
-                    const firstErrorField = Object.keys(errors)[0];
-                    console.log("asda", firstErrorField);
-                    // setFieldTouched(firstErrorField);
-                    const touchedFields = Object.keys(errors).reduce((acc, key) => {
-                      acc[key] = true;
-                      return acc;
-                    }, {});
-                    setTouched(touchedFields);
-
-                    const fieldElement = document.querySelector(`[name="${firstErrorField}"]`);
-                    console.log("field element", fieldElement);
-                    fieldElement.scrollIntoView({ behavior: "smooth" });
-                    fieldElement.focus(); // Optionally focus the field
-                  } else {
-                    handleSubmit();
-                  }
+                  Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
                 }}
               >
                 Create

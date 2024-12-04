@@ -9,9 +9,11 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { object, string } from "yup";
 import LoadingAnim from "../../components/LoadingAnim";
+import UploadFiles from "../../components/upload/UploadFiles";
 import "../../index.css";
 import axios from "../../utils/axiosInterceptor";
 import Test from "../Test/Test";
+import { ScrollToErrorField } from "../../utils/common";
 
 const validationSchema = object().shape({
   firstName: string()
@@ -233,7 +235,7 @@ function UpdateForm() {
           });
       }}
     >
-      {({ values, setFieldValue, handleSubmit, errors }) => (
+      {({ values, setFieldValue, handleSubmit, errors, setTouched }) => (
         <Box m={5}>
           <Grid ml={2}>
             <Form className=" my-5 ">
@@ -594,7 +596,8 @@ function UpdateForm() {
                     label="Employee Id"
                     name="empId"
                     className="w-full"
-                    disabled={role === "manager"}
+                    //disabled={role === "manager"}
+                    disabled
                   />
                 </Grid>
 
@@ -624,7 +627,8 @@ function UpdateForm() {
                     label="User Name"
                     name="userName"
                     className="w-full"
-                    disabled={role === "manager"}
+                    // disabled={role === "manager"}
+                    disabled
                   />
                 </Grid>
 
@@ -1127,7 +1131,31 @@ function UpdateForm() {
               </Grid>
 
               {/* ===================================== Documents ======================================== */}
-              <Button variant="contained" onClick={toggleUploadModal}>
+
+              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+                <Grid item xs={12}>
+                  <Typography
+                    sx={{
+                      fontWeight: "600",
+                      fontSize: "20px",
+                      color: "#3b4056",
+                      mb: 5,
+                    }}
+                  >
+                    Upload Documents
+                  </Typography>
+
+                  <UploadFiles
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    tempFilesRef={tempFilesRef}
+                    deletedFilesRef={deletedFilesRef}
+                    parentFolder="Employee"
+                    folderName={`${values.userName}_${values.empId}`}
+                  />
+                </Grid>
+              </Grid>
+              <Button variant="contained" onClick={toggleUploadModal} disabled={!values.userName && !values.empId}>
                 Upload Document
               </Button>
               <Modal
@@ -1161,17 +1189,8 @@ function UpdateForm() {
                     />
                   }
                   onClick={() => {
-                    if (Object.keys(errors).length > 0) {
-                      const firstErrorField = Object.keys(errors)[0];
-                      console.log("asda", firstErrorField);
-
-                      const fieldElement = document.querySelector(`[name="${firstErrorField}"]`);
-                      console.log("field element", fieldElement);
-                      fieldElement.scrollIntoView({ behavior: "smooth" });
-                      fieldElement.focus(); // Optionally focus the field
-                    } else {
-                      handleSubmit();
-                    }
+                    //ScrollToErrorField is a custom utlity function
+                    Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
                   }}
                 >
                   UPDATE

@@ -28,11 +28,7 @@ const interneeSchema = new Schema({
   internId: { type: String, required: true },
   designation: { type: String, required: true },
   offered_By: { type: String, required: true },
-  appointmentFile: { type: String },
-  cnicFile: { type: String },
-  experienceLetter: { type: String },
-  interneeProImage: { type: String },
-  givenOn: { type: Date, required: true },
+
   interneeStatus: {
     type: String,
     enum: ["active", "inactive"],
@@ -49,6 +45,46 @@ const interneeSchema = new Schema({
     required: function () {
       return this.disability === "yes";
     },
+  },
+
+  givenOn: { type: Date, required: true },
+
+  // Documents
+  interneeProImage: {
+    type: Object, // Changed from String to Object
+    required: false,
+    default: {},
+    public_id: { type: String },
+    secure_url: { type: String },
+    original_file_name: { type: String },
+    resource_type: { type: String },
+  },
+  cnicFile: {
+    type: [Object],
+    required: false,
+    default: [],
+    public_id: { type: String },
+    secure_url: { type: String },
+    original_file_name: { type: String },
+    resource_type: { type: String },
+  },
+  experienceLetter: {
+    type: [Object],
+    required: false,
+    default: [],
+    public_id: { type: String },
+    secure_url: { type: String },
+    original_file_name: { type: String },
+    resource_type: { type: String },
+  },
+  appointmentFile: {
+    type: [Object],
+    required: false,
+    default: [],
+    public_id: { type: String },
+    secure_url: { type: String },
+    original_file_name: { type: String },
+    resource_type: { type: String },
   },
 });
 

@@ -14,9 +14,8 @@ module.exports = {
   create_employee: async (req, res) => {
     try {
       const { updateData, deletedFiles } = req.body;
-      console.log("Emp Add, Delete File List: ", deletedFiles);
 
-      //for deleting files on cloudinary
+      // for deleting files on cloudinary
       if (deletedFiles.length > 0) {
         const images = deletedFiles.filter((file) => !file.includes("."));
         const rawFiles = deletedFiles.filter((file) => file.includes("."));
@@ -33,6 +32,7 @@ module.exports = {
       }
       const employee = new Employee(updateData);
       await employee.save();
+      console.log("Employee Created Successfully");
       res.json({ message: "Employee data saved successfully!" });
     } catch (error) {
       console.error("Error in create_employee:", error);
