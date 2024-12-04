@@ -16,7 +16,7 @@ module.exports.signin = async (req, res, next) => {
       return next(errorHandler(400, "Invalid Password!!!"));
     }
     const token = jwt.sign({ id: validUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "9h",
     });
     const { employeePassword: Password, ...rest } = validUser._doc;
 
