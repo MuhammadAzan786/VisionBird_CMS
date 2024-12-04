@@ -123,10 +123,9 @@ export const MuiDataGrid = {
         fontWeight: 500,
       },
 
-      "& .MuiDataGrid-columnHeaders, & .MuiDataGrid-filler,.MuiDataGrid-filler div, .MuiDataGrid-footerContainer":
-        {
-          border: "none !important",
-        },
+      "& .MuiDataGrid-columnHeaders, & .MuiDataGrid-filler,.MuiDataGrid-filler div, .MuiDataGrid-footerContainer": {
+        border: "none !important",
+      },
       "& .MuiDataGrid-columnSeparator": {
         display: "none",
       },

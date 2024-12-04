@@ -4,41 +4,11 @@ const cloudinary = require("../utils/cloudinaryConfig");
 
 module.exports = {
   Add_internee: async (req, res) => {
+    console.log("req ae hai", req.body);
+
     try {
-      const appointmentFile = req.files["appointmentFile"][0].buffer;
-      const cnicFile = req.files["cnicFile"][0].buffer;
-      const experienceLetter = req.files["experienceLetter"][0].buffer;
-      const interneeProImage = req.files["interneeProImage"][0].buffer;
-
-      // Cloudinary upload for each file using streams
-      const uploadToCloudinary = (buffer) => {
-        return new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { resource_type: "auto", folder: "internePhotos" },
-            (error, result) => {
-              if (error) {
-                console.error("Cloudinary upload error:", error);
-                return reject(error);
-              }
-              resolve(result);
-            }
-          );
-          streamifier.createReadStream(buffer).pipe(stream);
-        });
-      };
-
-      const appointmentFileUpload = await uploadToCloudinary(appointmentFile);
-      const cnicFileUpload = await uploadToCloudinary(cnicFile);
-      const experienceLetterUpload = await uploadToCloudinary(experienceLetter);
-      const interneeProImageUpload = await uploadToCloudinary(interneeProImage);
-
       const internee = new Internee({
         ...req.body,
-
-        appointmentFile: appointmentFileUpload.secure_url,
-        cnicFile: cnicFileUpload.secure_url,
-        experienceLetter: experienceLetterUpload.secure_url,
-        interneeProImage: interneeProImageUpload.secure_url,
       });
       await internee.save().then(() => {
         return res.json({ message: "Internee Data Saved" });
@@ -47,14 +17,12 @@ module.exports = {
       res.status(400).json({ error: error.message });
     }
   },
+
   Get_All_internees: async (req, res) => {
     try {
       const search = req.query.search || "";
       const internees = await Internee.find({
-        $or: [
-          { firstName: { $regex: search, $options: "i" } },
-          { internId: { $regex: search, $options: "i" } },
-        ],
+        $or: [{ firstName: { $regex: search, $options: "i" } }, { internId: { $regex: search, $options: "i" } }],
       });
       res.status(200).json(internees);
     } catch (error) {
@@ -69,11 +37,7 @@ module.exports = {
     const { interneeStatus } = req.body;
 
     try {
-      const internee = await Internee.findByIdAndUpdate(
-        id,
-        { interneeStatus },
-        { new: true }
-      );
+      const internee = await Internee.findByIdAndUpdate(id, { interneeStatus }, { new: true });
 
       if (!internee) {
         return res.status(404).json({ message: "Internee not found" });
@@ -95,16 +59,11 @@ module.exports = {
     try {
       const internees = await Internee.find({
         interneeStatus: "active",
-        $or: [
-          { firstName: { $regex: search, $options: "i" } },
-          { internId: { $regex: search, $options: "i" } },
-        ],
+        $or: [{ firstName: { $regex: search, $options: "i" } }, { internId: { $regex: search, $options: "i" } }],
       });
 
       if (internees.length === 0) {
-        return res
-          .status(200)
-          .json({ message: "No active internees found", internees: [] });
+        return res.status(200).json({ message: "No active internees found", internees: [] });
       }
 
       res.status(200).json(internees);
@@ -120,16 +79,11 @@ module.exports = {
     try {
       const internees = await Internee.find({
         interneeStatus: "inactive",
-        $or: [
-          { firstName: { $regex: search, $options: "i" } },
-          { internId: { $regex: search, $options: "i" } },
-        ],
+        $or: [{ firstName: { $regex: search, $options: "i" } }, { internId: { $regex: search, $options: "i" } }],
       });
 
       if (internees.length === 0) {
-        return res
-          .status(200)
-          .json({ message: "No inactive internees found", internees: [] });
+        return res.status(200).json({ message: "No inactive internees found", internees: [] });
       }
 
       res.status(200).json(internees);
@@ -162,10 +116,7 @@ module.exports = {
         if (url) {
           const segments = url.split("/");
           // Extract the public ID which includes folder and file name but excludes extension
-          const publicId =
-            segments.slice(7, segments.length - 1).join("/") +
-            "/" +
-            segments.pop().split(".")[0];
+          const publicId = segments.slice(7, segments.length - 1).join("/") + "/" + segments.pop().split(".")[0];
 
           console.log("Deleting", publicId);
           try {
@@ -178,12 +129,7 @@ module.exports = {
       };
 
       // Fields that contain Cloudinary URLs and may need updating
-      const fieldsToCheck = [
-        "experienceLetter",
-        "appointmentFile",
-        "cnicFile",
-        "interneeProImage",
-      ];
+      const fieldsToCheck = ["experienceLetter", "appointmentFile", "cnicFile", "interneeProImage"];
 
       // Initialize an object to hold the fields to update
       let updateFields = {};
@@ -230,13 +176,9 @@ module.exports = {
       };
 
       // Update the document with only the changed fields
-      const updatedInternee = await Internee.findByIdAndUpdate(
-        userId,
-        updateData,
-        {
-          new: true, // Return the updated document
-        }
-      );
+      const updatedInternee = await Internee.findByIdAndUpdate(userId, updateData, {
+        new: true, // Return the updated document
+      });
 
       res.status(200).json(updatedInternee);
     } catch (error) {
@@ -263,10 +205,7 @@ module.exports = {
         if (url) {
           const segments = url.split("/");
           // Extract the public ID which includes folder and file name but excludes extension
-          const publicId =
-            segments.slice(7, segments.length - 1).join("/") +
-            "/" +
-            segments.pop().split(".")[0];
+          const publicId = segments.slice(7, segments.length - 1).join("/") + "/" + segments.pop().split(".")[0];
 
           console.log("Deleting", publicId);
           try {

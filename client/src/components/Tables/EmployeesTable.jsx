@@ -1,24 +1,16 @@
-import React, { useState, useEffect } from "react";
-import axios from "../../utils/axiosInterceptor";
-import { useNavigate } from "react-router-dom";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import { Alert, Box, CircularProgress, MenuItem, Select, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { CustomChip } from "../Styled/CustomChip";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import PropTypes from "prop-types";
+import React from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import axios from "../../utils/axiosInterceptor";
 import { WordCaptitalize } from "../../utils/common";
 import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
-import PropTypes from "prop-types";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
-import toast, { Toaster } from "react-hot-toast";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Alert,
-  Button,
-  Select,
-  MenuItem,
-} from "@mui/material";
-import { useSelector } from "react-redux";
+import { CustomChip } from "../Styled/CustomChip";
 
 const EmployeesTable = ({ searchTerm }) => {
   const navigate = useNavigate();
@@ -31,9 +23,7 @@ const EmployeesTable = ({ searchTerm }) => {
 
   const fetchEmployees = async ({ queryKey }) => {
     const [, searchTerm] = queryKey;
-    const response = await axios.get(
-      `/api/employee/get_managers_employees?search=${searchTerm || ""}`
-    );
+    const response = await axios.get(`/api/employee/get_managers_employees?search=${searchTerm || ""}`);
     return response.data;
   };
 
@@ -79,11 +69,7 @@ const EmployeesTable = ({ searchTerm }) => {
       headerName: "Employee",
       flex: 1,
       renderCell: ({ row }) => (
-        <EmployeeNameCell
-          src={row.employeeProImage}
-          userId={row.employeeID}
-          name={row.employeeName}
-        />
+        <EmployeeNameCell src={row.employeeProImage} userId={row.employeeID} name={row.employeeName} />
       ),
     },
     {
@@ -106,13 +92,7 @@ const EmployeesTable = ({ searchTerm }) => {
       field: "role",
       headerName: "Role",
       flex: 1,
-      renderCell: (params) => (
-        <CustomChip
-          label={WordCaptitalize(params.value)}
-          size="small"
-          status={params.value}
-        />
-      ),
+      renderCell: (params) => <CustomChip label={WordCaptitalize(params.value)} size="small" status={params.value} />,
     },
   ];
 

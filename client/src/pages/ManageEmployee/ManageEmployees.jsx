@@ -1,21 +1,13 @@
-import { useState } from "react";
-import {
-  Box,
-  Button,
-  FormHelperText,
-  Paper,
-  Tab,
-  Typography,
-} from "@mui/material";
-import { useSelector } from "react-redux";
-import { TextField } from "@mui/material";
-import CreateEmployee from "./CreateEmployee";
-import EmployeesTable from "../../components/Tables/EmployeesTable";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
-import GroupIcon from "@mui/icons-material/Group";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import GroupIcon from "@mui/icons-material/Group";
 import HistoryIcon from "@mui/icons-material/History";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
+import { Box, FormHelperText, Paper, Tab, TextField } from "@mui/material";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import EmployeesTable from "../../components/Tables/EmployeesTable";
 import ActiveEmployeesTable from "./ActiveEmployeesTable";
+import CreateEmployee from "./CreateEmployee";
 import InActiveEmployeesTable from "./InActiveEmployeesTable";
 
 const ManageEmployees = () => {
@@ -47,24 +39,14 @@ const ManageEmployees = () => {
           }}
         >
           <TabList onChange={handleTabValue}>
-            <Tab
-              label="All Employees"
-              icon={<GroupIcon />}
-              value="all_employees"
-              sx={{ letterSpacing: 1 }}
-            />
+            <Tab label="All Employees" icon={<GroupIcon />} value="all_employees" sx={{ letterSpacing: 1 }} />
             <Tab
               label="Present Employees"
               icon={<CheckCircleOutlineIcon />}
               value="present_employees"
               sx={{ letterSpacing: 1 }}
             />
-            <Tab
-              label="Past Employees"
-              icon={<HistoryIcon />}
-              value="past_employees"
-              sx={{ letterSpacing: 1 }}
-            />
+            <Tab label="Past Employees" icon={<HistoryIcon />} value="past_employees" sx={{ letterSpacing: 1 }} />
           </TabList>
         </Box>
 
@@ -100,9 +82,7 @@ const ManageEmployees = () => {
               </FormHelperText>
             </Box>
 
-            <Box sx={{ width: "50%", textAlign: "end" }}>
-              {role === "admin" && <CreateEmployee />}
-            </Box>
+            <Box sx={{ width: "50%", textAlign: "end" }}>{role === "admin" && <CreateEmployee />}</Box>
           </Box>
           <EmployeesTable searchTerm={searchTerm} />
         </TabPanel>

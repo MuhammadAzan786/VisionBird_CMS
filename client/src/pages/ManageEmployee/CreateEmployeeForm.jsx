@@ -1,79 +1,60 @@
-/* eslint-disable no-unused-vars */
-import { useState } from "react";
-import { ErrorMessage, Field, Form, Formik, FastField } from "formik";
-import { TextField } from "formik-material-ui";
-import { object, string } from "yup";
-import "../../index.css";
-import InputAdornment from "@mui/material/InputAdornment";
-import IconButton from "@mui/material/IconButton";
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import UploadIcon from "@mui/icons-material/Upload";
-import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
-
-import axios from "../../utils/axiosInterceptor";
 import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Card,
-  Typography,
-  Button,
-  Grid,
-  Box,
   Backdrop,
+  Box,
+  Button,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Modal,
   Paper,
+  Select,
+  Typography,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import { ErrorMessage, FastField, Field, Form, Formik } from "formik";
+import { TextField } from "formik-material-ui";
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
-import { useMessage } from "../../components/MessageContext";
+import { useNavigate } from "react-router-dom";
+import { object, string } from "yup";
 import LoadingAnim from "../../components/LoadingAnim";
-import { palette } from "../../theme/colors";
+import UploadFiles from "../../components/upload/UploadFiles";
+import "../../index.css";
+import axios from "../../utils/axiosInterceptor";
+import { ScrollToErrorField } from "../../utils/common";
 
 const validationSchema = object().shape({
   firstName: string()
     .required("Required Name")
-    .matches(
-      /^[a-zA-Z\s]+$/,
-      "Only alphabetic characters and spaces are allowed"
-    ),
-
+    .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
   fatherName: string()
     .required("Required Name")
     .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters are allowed"),
   cnic: string()
     .required("Required CNIC")
-    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) =>
-      /^\d{5}-\d{7}-\d$/.test(value || "")
-    ),
-
+    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) => /^\d{5}-\d{7}-\d$/.test(value || "")),
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
   disability: string().required("Required Field"),
-  kindofdisability: string().matches(
-    /^[a-zA-Z\s]+$/,
-    "Only alphabetic characters and spaces are allowed"
-  ),
+  kindofdisability: string().matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
   mobile: string()
     .required("Required Field")
-    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) =>
-      /^03\d{2}-\d{7}$/.test(value || "")
-    ),
+    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
   email: string().email().required("Required Email"),
   gender: string().required("Required Field"),
   maritalStatus: string().required("Required Field"),
   otherMobile: string()
     .required("Required Field")
-    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) =>
-      /^03\d{2}-\d{7}$/.test(value || "")
-    ),
+    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
   whosMobile: string()
     .required("Required Name")
-    .matches(
-      /^[a-zA-Z\s]+$/,
-      "Only alphabetic characters and spaces are allowed"
-    ),
+    .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
   qualification: string().required("Required Field"),
   startDate: string().required("Date Required"),
   probation: string().required("Please select "),
@@ -100,26 +81,45 @@ const validationSchema = object().shape({
 });
 
 function CreateEmployeeForm() {
-  const { showMessage } = useMessage();
+  const base =
+    import.meta.env.NODE_ENV === "production"
+      ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
+      : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
+
+  console.log("base", base);
+
   const { currentUser } = useSelector((state) => state.user);
   const role = currentUser.role;
+
   const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSuccess = () => {
-    showMessage("success", "Employee Created successful!");
-  };
+  const tempFilesRef = useRef([]);
+  const deletedFilesRef = useRef([]);
 
-  const handleError = () => {
-    showMessage("error", "Employee Creation failed!");
-  };
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
 
-  const truncateFileName = (fileName, maxLength = 15) => {
-    if (!fileName) return "";
-    if (fileName.length <= maxLength) return fileName;
-    return `${fileName.slice(0, maxLength)}...`;
-  };
+    const handleUnload = () => {
+      const url = "http://localhost:4000/api/employee/grabage_collector";
+      navigator.sendBeacon(url, JSON.stringify(tempFilesRef.current));
+    };
+
+    // Attach event listeners
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
+    };
+  }, []);
 
   return (
     <Formik
@@ -154,10 +154,7 @@ function CreateEmployeeForm() {
         empCard: "",
         bankAccount: "",
         accountNo: "",
-        policeCertificateUpload: "",
-        degreesScanCopy: "",
         empId: "",
-        cnicScanCopy: "",
         designation: "",
         BasicPayInProbationPeriod: 0,
         BasicPayAfterProbationPeriod: 0,
@@ -166,13 +163,14 @@ function CreateEmployeeForm() {
         userName: "",
         password: "",
         role: "",
-        employeeProImage: "",
+        employeeProImage: {},
+        policeCertificateUpload: [],
+        cnicScanCopy: [],
+        degreesScanCopy: [],
       }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
-        console.log(values);
-        setLoading(true);
-        var formData = new FormData();
+        setLoading(false);
         const fieldMap = {
           employeeName: values.firstName,
           employeeFatherName: values.fatherName,
@@ -195,7 +193,7 @@ function CreateEmployeeForm() {
           appointmentLetterGiven: values.appointment,
           rulesAndRegulationsSigned: values.rules,
           annualLeavesSigned: values.annualLeave,
-          cnicScanCopy: values.cnicScanCopy,
+
           attendanceBiometric: values.attendence,
           localServerAccountCreated: values.localServerAccount,
           role: values.role,
@@ -204,76 +202,52 @@ function CreateEmployeeForm() {
           employeeCardGiven: values.empCard,
           bankAccount: values.bankAccount,
           bankAccountNumber: values.accountNo,
-          policeCertificateUpload: values.policeCertificateUpload,
-          degreesScanCopy: values.degreesScanCopy,
           employeeID: values.empId,
           employeeDesignation: values.designation,
           BasicPayInProbationPeriod: values.BasicPayInProbationPeriod || 0,
-          BasicPayAfterProbationPeriod:
-            values.BasicPayAfterProbationPeriod || 0,
+          BasicPayAfterProbationPeriod: values.BasicPayAfterProbationPeriod || 0,
           AllowancesInProbationPeriod: values.AllowancesInProbationPeriod || 0,
-          AllowancesAfterProbationPeriod:
-            values.AllowancesAfterProbationPeriod || 0,
+          AllowancesAfterProbationPeriod: values.AllowancesAfterProbationPeriod || 0,
           employeeUsername: values.userName,
           employeePassword: values.password,
-          employeeProImage: values.employeeProImage,
+
           superAdmin: values.superAdmin,
           whosMobile: values.whosMobile,
+
+          //Documents
+          employeeProImage: values.employeeProImage,
+          cnicScanCopy: values.cnicScanCopy,
+          policeCertificateUpload: values.policeCertificateUpload,
+          degreesScanCopy: values.degreesScanCopy,
         };
-        for (const [fieldName, value] of Object.entries(fieldMap)) {
-          formData.append(fieldName, value);
-        }
 
-        function formDataToJson(formData) {
-          const json = {};
-          formData.forEach((value, key) => {
-            // Check if the key already exists in the JSON object
-            if (Object.prototype.hasOwnProperty.call(json, key)) {
-              // If the key already exists, convert the value to an array
-              if (!Array.isArray(json[key])) {
-                json[key] = [json[key]];
-              }
-              // Push the new value to the array
-              json[key].push(value);
-            } else {
-              // If the key doesn't exist, set the value directly
-              json[key] = value;
-            }
-          });
-          return json;
-        }
-
-        const jsonData = formDataToJson(formData);
-        console.log(jsonData);
         await axios
-          .post("/api/employee/create_employee", jsonData, {
-            withCredentials: true,
-            headers: {
-              "Content-Type": "multipart/form-data",
+          .post(
+            "/api/employee/create_employee",
+            {
+              updateData: fieldMap,
+              deletedFiles: deletedFilesRef.current,
             },
-          })
-          .then((data) => {
+            {
+              withCredentials: true,
+            }
+          )
+          .then(() => {
             setLoading(false);
+            toast.success("Employee Added Successfully!");
             navigate("/manage-employees");
-            handleSuccess();
           })
           .catch((err) => {
             setLoading(false);
             console.log(err);
-            handleError();
+            toast.error("error", "Employee Creation failed!");
           });
       }}
     >
-      {({ isSubmitting, values, setFieldValue }) => (
+      {({ values, setFieldValue, handleSubmit, errors, setTouched }) => (
         <Box m={5}>
           <Form className="ml-5">
-            <Grid
-              container
-              spacing={2}
-              component={Paper}
-              sx={{ borderRadius: "5px" }}
-              p={3}
-            >
+            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} p={3}>
               <Grid item xs={12}>
                 <Typography
                   sx={{
@@ -379,20 +353,11 @@ function CreateEmployeeForm() {
                     }}
                   >
                     <InputLabel id="gender-label">Gender</InputLabel>
-                    <FastField
-                      name="gender"
-                      as={Select}
-                      labelId="gender-label"
-                      label="Gender"
-                    >
+                    <FastField name="gender" as={Select} labelId="gender-label" label="Gender">
                       <MenuItem value="male">Male</MenuItem>
                       <MenuItem value="female">Female</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="gender"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="gender" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -407,25 +372,14 @@ function CreateEmployeeForm() {
                       },
                     }}
                   >
-                    <InputLabel id="maritalStatus-label">
-                      Marital Status
-                    </InputLabel>
-                    <FastField
-                      name="maritalStatus"
-                      as={Select}
-                      labelId="maritalStatus-label"
-                      label="Marital Status"
-                    >
+                    <InputLabel id="maritalStatus-label">Marital Status</InputLabel>
+                    <FastField name="maritalStatus" as={Select} labelId="maritalStatus-label" label="Marital Status">
                       <MenuItem value="single">Single</MenuItem>
                       <MenuItem value="married">Married</MenuItem>
                       <MenuItem value="divorced">Divorced</MenuItem>
                       <MenuItem value="widowed">Widowed</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="maritalStatus"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="maritalStatus" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -440,25 +394,14 @@ function CreateEmployeeForm() {
                       },
                     }}
                   >
-                    <InputLabel id="qualification-label">
-                      Qualification
-                    </InputLabel>
-                    <FastField
-                      name="qualification"
-                      as={Select}
-                      labelId="qualification-label"
-                      label="Qualification"
-                    >
+                    <InputLabel id="qualification-label">Qualification</InputLabel>
+                    <FastField name="qualification" as={Select} labelId="qualification-label" label="Qualification">
                       <MenuItem value="matriculation">Matriculation</MenuItem>
                       <MenuItem value="intermediate">Intermediate</MenuItem>
                       <MenuItem value="graduation">Bachelors</MenuItem>
                       <MenuItem value="masters">Masters</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="qualification"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="qualification" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -475,9 +418,7 @@ function CreateEmployeeForm() {
                           },
                         }}
                       >
-                        <InputLabel id="disability-label">
-                          Disability
-                        </InputLabel>
+                        <InputLabel id="disability-label">Disability</InputLabel>
                         <FastField
                           name="disability"
                           as={Select}
@@ -490,11 +431,7 @@ function CreateEmployeeForm() {
                           <MenuItem value="yes">Yes</MenuItem>
                           <MenuItem value="no">No</MenuItem>
                         </FastField>
-                        <ErrorMessage
-                          name="disability"
-                          style={{ color: "red" }}
-                          component="div"
-                        />
+                        <ErrorMessage name="disability" style={{ color: "red" }} component="div" />
                       </FormControl>
                     </div>
                   </Grid>
@@ -522,14 +459,7 @@ function CreateEmployeeForm() {
               </Grid>
             </Grid>
 
-            <Grid
-              container
-              spacing={2}
-              component={Paper}
-              sx={{ borderRadius: "5px" }}
-              mt={2}
-              p={3}
-            >
+            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
               <Grid item xs={12}>
                 <Typography
                   sx={{
@@ -571,10 +501,7 @@ function CreateEmployeeForm() {
                   onInput={(event) => {
                     const input = event.target.value;
                     const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                    const formattedmob = formattedInput.replace(
-                      /(.{4})(.?)/,
-                      "$1-$2"
-                    ); // Add dash after the fifth character
+                    const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
                     event.target.value = formattedmob;
                   }}
                 />
@@ -595,10 +522,7 @@ function CreateEmployeeForm() {
                   onInput={(event) => {
                     const input = event.target.value;
                     const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                    const formattedmob = formattedInput.replace(
-                      /(.{4})(.?)/,
-                      "$1-$2"
-                    ); // Add dash after the fifth character
+                    const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
                     event.target.value = formattedmob;
                   }}
                 />
@@ -639,14 +563,7 @@ function CreateEmployeeForm() {
                 />
               </Grid>
             </Grid>
-            <Grid
-              container
-              spacing={2}
-              component={Paper}
-              sx={{ borderRadius: "5px" }}
-              mt={2}
-              p={3}
-            >
+            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
               <Grid item xs={12}>
                 <Typography
                   sx={{
@@ -720,10 +637,7 @@ function CreateEmployeeForm() {
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                           {showPassword ? <Visibility /> : <VisibilityOff />}
                         </IconButton>
                       </InputAdornment>
@@ -744,24 +658,13 @@ function CreateEmployeeForm() {
                           },
                         }}
                       >
-                        <InputLabel id="bankAccount-label">
-                          Bank Account
-                        </InputLabel>
-                        <Field
-                          name="bankAccount"
-                          as={Select}
-                          labelId="bankAccount-label"
-                          label="BankAccount"
-                        >
+                        <InputLabel id="bankAccount-label">Bank Account</InputLabel>
+                        <Field name="bankAccount" as={Select} labelId="bankAccount-label" label="BankAccount">
                           <MenuItem value="yes">Yes</MenuItem>
                           <MenuItem value="no">No</MenuItem>
                         </Field>
 
-                        <ErrorMessage
-                          name="bankAccount"
-                          style={{ color: "red" }}
-                          component="div"
-                        />
+                        <ErrorMessage name="bankAccount" style={{ color: "red" }} component="div" />
                       </FormControl>
                     </div>
                   </Grid>
@@ -796,20 +699,11 @@ function CreateEmployeeForm() {
                         }}
                       >
                         <InputLabel id="probation-label">Probation</InputLabel>
-                        <Field
-                          name="probation"
-                          as={Select}
-                          labelId="probation-label"
-                          label="Probation"
-                        >
+                        <Field name="probation" as={Select} labelId="probation-label" label="Probation">
                           <MenuItem value="yes">Yes</MenuItem>
                           <MenuItem value="no">No</MenuItem>
                         </Field>
-                        <ErrorMessage
-                          name="probation"
-                          style={{ color: "red" }}
-                          component="div"
-                        />
+                        <ErrorMessage name="probation" style={{ color: "red" }} component="div" />
                       </FormControl>
                     </div>
                   </Grid>
@@ -841,11 +735,7 @@ function CreateEmployeeForm() {
                       <option value="5">5 Months</option>
                       <option value="6">6 Months</option>
                     </Field>
-                    <ErrorMessage
-                      name="probationMonths"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="probationMonths" style={{ color: "red" }} component="div" />
                   </Grid>
                 </Grid>
               </Grid>
@@ -999,22 +889,11 @@ function CreateEmployeeForm() {
                   <option value="manager">Manager</option>
                   <option value="employee">Employee</option>
                 </FastField>
-                <ErrorMessage
-                  name="maritalStatus"
-                  style={{ color: "red" }}
-                  component="div"
-                />
+                <ErrorMessage name="maritalStatus" style={{ color: "red" }} component="div" />
               </Grid>
             </Grid>
 
-            <Grid
-              container
-              spacing={2}
-              component={Paper}
-              sx={{ borderRadius: "5px" }}
-              mt={2}
-              p={3}
-            >
+            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
               <Grid item xs={12}>
                 <Typography
                   sx={{
@@ -1039,23 +918,12 @@ function CreateEmployeeForm() {
                       },
                     }}
                   >
-                    <InputLabel id="policyBook-label">
-                      Policy Book Signed
-                    </InputLabel>
-                    <FastField
-                      name="policyBook"
-                      as={Select}
-                      labelId="policyBook-label"
-                      label="Policy Book Signed"
-                    >
+                    <InputLabel id="policyBook-label">Policy Book Signed</InputLabel>
+                    <FastField name="policyBook" as={Select} labelId="policyBook-label" label="Policy Book Signed">
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="policyBook"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="policyBook" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -1070,9 +938,7 @@ function CreateEmployeeForm() {
                       },
                     }}
                   >
-                    <InputLabel id="appointment-label">
-                      Appointment Letter Given
-                    </InputLabel>
+                    <InputLabel id="appointment-label">Appointment Letter Given</InputLabel>
                     <FastField
                       name="appointment"
                       as={Select}
@@ -1082,11 +948,7 @@ function CreateEmployeeForm() {
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="appointment"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="appointment" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -1101,23 +963,12 @@ function CreateEmployeeForm() {
                       },
                     }}
                   >
-                    <InputLabel id="annualLeave-label">
-                      Annual Leaves Signed
-                    </InputLabel>
-                    <FastField
-                      name="annualLeave"
-                      as={Select}
-                      labelId="annualLeave-label"
-                      label="Annual Leaves Signed"
-                    >
+                    <InputLabel id="annualLeave-label">Annual Leaves Signed</InputLabel>
+                    <FastField name="annualLeave" as={Select} labelId="annualLeave-label" label="Annual Leaves Signed">
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="annualLeave"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="annualLeave" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -1132,23 +983,12 @@ function CreateEmployeeForm() {
                       },
                     }}
                   >
-                    <InputLabel id="rules-label">
-                      Rules and Regulation Signed
-                    </InputLabel>
-                    <FastField
-                      name="rules"
-                      as={Select}
-                      labelId="rules-label"
-                      label="Rules and Regulation Signed"
-                    >
+                    <InputLabel id="rules-label">Rules and Regulation Signed</InputLabel>
+                    <FastField name="rules" as={Select} labelId="rules-label" label="Rules and Regulation Signed">
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="rules"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="rules" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -1163,23 +1003,12 @@ function CreateEmployeeForm() {
                       },
                     }}
                   >
-                    <InputLabel id="attendence-label">
-                      Attendance Biometric
-                    </InputLabel>
-                    <FastField
-                      name="attendence"
-                      as={Select}
-                      labelId="attendence-label"
-                      label="Attendance Biometric"
-                    >
+                    <InputLabel id="attendence-label">Attendance Biometric</InputLabel>
+                    <FastField name="attendence" as={Select} labelId="attendence-label" label="Attendance Biometric">
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="attendence"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="attendence" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -1194,9 +1023,7 @@ function CreateEmployeeForm() {
                       },
                     }}
                   >
-                    <InputLabel id="localServerAccount-label">
-                      Local Server Account Created
-                    </InputLabel>
+                    <InputLabel id="localServerAccount-label">Local Server Account Created</InputLabel>
                     <FastField
                       name="localServerAccount"
                       as={Select}
@@ -1206,11 +1033,7 @@ function CreateEmployeeForm() {
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="localServerAccount"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="localServerAccount" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -1226,20 +1049,11 @@ function CreateEmployeeForm() {
                     }}
                   >
                     <InputLabel id="slack-label">Added in Slack</InputLabel>
-                    <FastField
-                      name="slack"
-                      as={Select}
-                      labelId="slack-label"
-                      label="Added in Slack"
-                    >
+                    <FastField name="slack" as={Select} labelId="slack-label" label="Added in Slack">
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="slack"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="slack" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -1255,20 +1069,11 @@ function CreateEmployeeForm() {
                     }}
                   >
                     <InputLabel id="superAdmin-label">Super Admin</InputLabel>
-                    <FastField
-                      name="superAdmin"
-                      as={Select}
-                      labelId="superAdmin-label"
-                      label="Super Admin"
-                    >
+                    <FastField name="superAdmin" as={Select} labelId="superAdmin-label" label="Super Admin">
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="superAdmin"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="superAdmin" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -1283,23 +1088,12 @@ function CreateEmployeeForm() {
                       },
                     }}
                   >
-                    <InputLabel id="whatsApp-label">
-                      Added in Whatsapp
-                    </InputLabel>
-                    <FastField
-                      name="whatsApp"
-                      as={Select}
-                      labelId="whatsApp-label"
-                      label="Added in Whatsapp"
-                    >
+                    <InputLabel id="whatsApp-label">Added in Whatsapp</InputLabel>
+                    <FastField name="whatsApp" as={Select} labelId="whatsApp-label" label="Added in Whatsapp">
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="whatsApp"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="whatsApp" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
@@ -1315,220 +1109,46 @@ function CreateEmployeeForm() {
                     }}
                   >
                     <InputLabel id="empCard-label">Employee Card</InputLabel>
-                    <FastField
-                      name="empCard"
-                      as={Select}
-                      labelId="empCard-label"
-                      label="Employee Card"
-                    >
+                    <FastField name="empCard" as={Select} labelId="empCard-label" label="Employee Card">
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </FastField>
-                    <ErrorMessage
-                      name="empCard"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
+                    <ErrorMessage name="empCard" style={{ color: "red" }} component="div" />
                   </FormControl>
                 </div>
               </Grid>
             </Grid>
 
-            <Grid
-              container
-              spacing={2}
-              component={Paper}
-              sx={{ borderRadius: "5px" }}
-              mt={2}
-              p={3}
-            >
+            {/* ============================================  Documents   ============================================== */}
+
+            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
               <Grid item xs={12}>
                 <Typography
                   sx={{
                     fontWeight: "600",
                     fontSize: "20px",
                     color: "#3b4056",
-                    mb: 1,
+                    mb: 5,
                   }}
                 >
-                  Documents
+                  Upload Documents
                 </Typography>
-                <hr style={{ marginBottom: "10px" }} />
-              </Grid>
 
-              <Grid item xs={12} sm={6} md={6}>
-                {" "}
-                <div>
-                  <label className="block font-semibold  mb-2">CNIC</label>
-                  <div className="flex items-center justify-start border border-dashed border-gray-400 rounded py-2 px-10  bg-gray-50 hover:bg-gray-100 transition duration-150">
-                    <input
-                      type="file"
-                      name="cnicScanCopy"
-                      onChange={(event) => {
-                        setFieldValue("cnicScanCopy", event.target.files[0]);
-                      }}
-                      className="hidden"
-                      id="cnicScanCopy"
-                    />
-                    <label
-                      htmlFor="cnicScanCopy"
-                      className="text-center cursor-pointer py-2 px-4 bg-[#1976D2] text-white rounded hover:bg-[#00AFEF] transition duration-150"
-                    >
-                      <UploadIcon /> Choose File
-                    </label>
-                    {values.cnicScanCopy ? (
-                      <span className="ml-2 text-gray-700 whitespace-normal break-words max-w-xs">
-                        Selected file:{" "}
-                        {values.cnicScanCopy.name ||
-                          truncateFileName(user.cnicScanCopy)}
-                      </span>
-                    ) : (
-                      <span className="ml-2 text-gray-700">No File Chosen</span>
-                    )}
-                    <ErrorMessage
-                      name="cnicScanCopy"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
-                  </div>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={6}>
-                <div>
-                  <label className="block font-semibold mb-2">
-                    Police Certificate
-                  </label>
-                  <div className="flex items-center justify-start break-words border border-dashed border-gray-400 rounded py-2 px-10  bg-gray-50 hover:bg-gray-100 transition duration-150">
-                    <input
-                      type="file"
-                      name="policeCertificateUpload"
-                      onChange={(event) => {
-                        setFieldValue(
-                          "policeCertificateUpload",
-                          event.target.files[0]
-                        );
-                      }}
-                      className="hidden"
-                      id="policeCertificateUpload"
-                    />
-                    <label
-                      htmlFor="policeCertificateUpload"
-                      className="text-center cursor-pointer py-2 px-4  bg-[#1976D2] text-white rounded hover:bg-[#00AFEF] transition duration-150"
-                    >
-                      <UploadIcon /> Choose File
-                    </label>
-                    {values.policeCertificateUpload ? (
-                      <div className="ml-2 text-gray-700 whitespace-normal break-words max-w-xs">
-                        Selected file:{" "}
-                        {values.policeCertificateUpload.name ||
-                          truncateFileName(user.policeCertificateUpload)}
-                      </div>
-                    ) : (
-                      <span className="ml-2 text-gray-700">No File Chosen</span>
-                    )}
-                    <ErrorMessage
-                      name="cnicScanCopy"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
-                  </div>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={6}>
-                {" "}
-                <div>
-                  <label className="block font-semibold  mb-2">
-                    Qualification
-                  </label>
-                  <div className="flex items-center justify-start border border-dashed border-gray-400 rounded py-2 px-10  bg-gray-50 hover:bg-gray-100 transition duration-150">
-                    <input
-                      type="file"
-                      name="degreesScanCopy"
-                      onChange={(event) => {
-                        setFieldValue("degreesScanCopy", event.target.files[0]);
-                      }}
-                      className="hidden"
-                      id="degreesScanCopy"
-                    />
-                    <label
-                      htmlFor="degreesScanCopy"
-                      className="text-center cursor-pointer py-2 px-4 bg-[#1976D2] text-white rounded hover:bg-[#00AFEF] transition duration-150"
-                    >
-                      <UploadIcon /> Choose File
-                    </label>
-                    {values.degreesScanCopy ? (
-                      <div className="ml-2 text-gray-700 whitespace-normal break-words max-w-xs">
-                        Selected file:{" "}
-                        {values.degreesScanCopy.name ||
-                          truncateFileName(user.degreesScanCopy)}
-                      </div>
-                    ) : (
-                      <span className="ml-2 text-gray-700">No File Chosen</span>
-                    )}
-                    <ErrorMessage
-                      name="degreesScanCopy"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
-                  </div>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={6}>
-                <div>
-                  <div>
-                    <label className="block font-semibold mb-2">
-                      Profile image
-                    </label>
-                    <div className="flex items-center justify-start border border-dashed border-gray-400 rounded py-2 px-10  bg-gray-50 hover:bg-gray-100 transition duration-150">
-                      <input
-                        type="file"
-                        name="employeeProImage"
-                        onChange={(event) => {
-                          setFieldValue(
-                            "employeeProImage",
-                            event.target.files[0]
-                          );
-                        }}
-                        className="hidden"
-                        id="employeeProImage"
-                      />
-                      <label
-                        htmlFor="employeeProImage"
-                        className="text-center cursor-pointer py-2 px-4 bg-[#1976D2] text-white rounded hover:bg-[#00AFEF] transition duration-150"
-                      >
-                        <UploadIcon /> Choose File
-                      </label>
-                      {values.employeeProImage ? (
-                        <div className="ml-2 text-gray-700 whitespace-normal break-words max-w-xs">
-                          Selected file:{" "}
-                          {values.employeeProImage.name ||
-                            truncateFileName(user.employeeProImage)}
-                        </div>
-                      ) : (
-                        <span className="ml-2 text-gray-700">
-                          No File Chosen
-                        </span>
-                      )}{" "}
-                      <ErrorMessage
-                        name="employeeProImage"
-                        style={{ color: "red" }}
-                        component="div"
-                      />
-                    </div>
-                  </div>
-                </div>
+                <UploadFiles
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  tempFilesRef={tempFilesRef}
+                  deletedFilesRef={deletedFilesRef}
+                  parentFolder="Employee"
+                  folderName={`${values.userName}_${values.empId}`}
+                />
               </Grid>
             </Grid>
 
             <div className="flex justify-end">
               <Button
-                sx={{
-                  mt: 4,
-                }}
+                type="button"
                 variant="contained"
-                size="large"
-                type="submit"
-                disabled={isSubmitting}
                 endIcon={
                   <PersonAddAltIcon
                     sx={{
@@ -1536,16 +1156,17 @@ function CreateEmployeeForm() {
                     }}
                   />
                 }
+                //ScrollToErrorField is a custom utlity function
+                onClick={() => {
+                  Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
+                }}
               >
-                Submit
+                Create
               </Button>
             </div>
           </Form>
           {loading && (
-            <Backdrop
-              sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-              open={loading}
-            >
+            <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
               <LoadingAnim />
             </Backdrop>
           )}
