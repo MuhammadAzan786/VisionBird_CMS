@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Your global default settings
 axios.defaults.baseURL =
-  import.meta.env.NODE_ENV === "production"
+  import.meta.env.VITE_NODE_ENV === "production"
     ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
     : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
 axios.defaults.withCredentials = true;

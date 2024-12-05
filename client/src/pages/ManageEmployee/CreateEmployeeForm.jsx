@@ -29,7 +29,7 @@ import "../../index.css";
 import axios from "../../utils/axiosInterceptor";
 import { ScrollToErrorField } from "../../utils/common";
 const baseUrl =
-  import.meta.env.NODE_ENV === "production"
+  import.meta.env.VITE_NODE_ENV === "production"
     ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
     : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
 
@@ -101,7 +101,7 @@ const validationSchema = object().shape({
 
 function CreateEmployeeForm() {
   const base =
-    import.meta.env.NODE_ENV === "production"
+    import.meta.env.VITE_NODE_ENV === "production"
       ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
       : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
 
