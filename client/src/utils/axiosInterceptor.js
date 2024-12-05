@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// Your global default settings
+//Your global default settings
 axios.defaults.baseURL =
   import.meta.env.VITE_NODE_ENV === "production"
     ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
@@ -9,6 +9,8 @@ axios.defaults.baseURL =
 console.log("Axios Base URL:", axios.defaults.baseURL);
 axios.defaults.withCredentials = true;
 
+axios.create();
+
 // Adding the response interceptor globally to check for token expiration
 axios.interceptors.response.use(
   (response) => {
@@ -16,13 +18,9 @@ axios.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.log(
-      error.response.data.message === "Session expired, please log in again"
-    );
+    console.log(error.response.data.message === "Session expired, please log in again");
     // If the error message indicates session expired
-    if (
-      error.response.data.message === "Session expired, please log in again"
-    ) {
+    if (error.response.data.message === "Session expired, please log in again") {
       console.log("im innnn");
       // Token expired, handle the redirection to login
       window.location.href = "/login";

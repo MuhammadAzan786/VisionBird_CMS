@@ -20,15 +20,14 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import LoadingAnim from "../../components/LoadingAnim";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import { TextField } from "formik-material-ui";
-import UploadIcon from "@mui/icons-material/Upload";
 import axios from "../../utils/axiosInterceptor";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { ScrollToErrorField } from "../../utils/common";
-import UploadFiles from "../../components/upload/UploadFiles";
 import UploadFilesInternee from "../../components/upload/UploadFilesInternee";
+import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
 
 const validationSchema = object().shape({
   firstName: string()
@@ -63,6 +62,15 @@ const validationSchema = object().shape({
   designation: string().required("Required Field"),
   offered_By: string().required("Required Field"),
   givenOn: date().required("Date is required"),
+
+  disability: string()
+    .required("Disability is required")
+    .oneOf(["yes", "no"], "Disability must be either 'yes' or 'no'"),
+  kindofdisability: string().when("disability", {
+    is: "yes",
+    then: (schema) => schema.required("Required Field"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 const CreateInterneeForm = () => {
@@ -71,6 +79,8 @@ const CreateInterneeForm = () => {
 
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
+
+  useWindowCloseHandler(tempFilesRef);
 
   return (
     <Formik
@@ -97,8 +107,6 @@ const CreateInterneeForm = () => {
         designation: "",
 
         offered_By: "",
-        disability: "",
-        disabilityType: "",
 
         givenOn: "",
         // Documents
@@ -106,10 +114,14 @@ const CreateInterneeForm = () => {
         cnicFile: [],
         appointmentFile: [],
         experienceLetter: [],
+
+        disability: "",
+        //Ye field formik me nhi hai
+        disabilityType: "",
       }}
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
-        setLoading(true);
+        // setLoading(true);
         setSubmitting(false);
 
         const fieldMap = {
@@ -143,23 +155,27 @@ const CreateInterneeForm = () => {
           appointmentFile: values.appointmentFile,
           experienceLetter: values.experienceLetter,
         };
-        console.log("filedddddddd", fieldMap);
+        console.log("Internee Form Data", fieldMap);
+        console.log("Deleted Files List", deletedFilesRef.current);
 
         await axios
-          .post("/api/internee/create_internee", fieldMap)
+          .post("/api/internee/create_internee", {
+            updateData: fieldMap,
+            deletedFiles: deletedFilesRef.current,
+          })
           .then(() => {
             setLoading(false);
-            // navigate("/manage-employees");
+            navigate("/manage-internees");
             toast.success("Internee Added Successfully!");
           })
           .catch((err) => {
             setLoading(false);
             console.log(err);
-            toast.error("error", "Internee Creation failed!");
+            toast.error("Internee Creation failed!");
           });
       }}
     >
-      {({ values, setFieldValue, isSubmitting, errors, setTouched, handleSubmit }) => (
+      {({ values, setFieldValue, errors, setTouched, handleSubmit }) => (
         <Box m={5}>
           <Form>
             <Grid container spacing={2} component={Paper} elevation={2} borderRadius={"5px"} p={3}>
@@ -353,7 +369,19 @@ const CreateInterneeForm = () => {
                         }}
                       >
                         <InputLabel id="disability-label">Disability</InputLabel>
-                        <Field name="disability" as={Select} labelId="disability-label" label="Disability">
+                        <Field
+                          name="disability"
+                          as={Select}
+                          labelId="disability-label"
+                          label="Disability"
+                          onChange={(event) => {
+                            const { value } = event.target;
+                            setFieldValue("disability", value);
+                            if (value === "no") {
+                              setFieldValue("kindofdisability", "");
+                            }
+                          }}
+                        >
                           <MenuItem value="yes">Yes</MenuItem>
                           <MenuItem value="no">No</MenuItem>
                         </Field>
