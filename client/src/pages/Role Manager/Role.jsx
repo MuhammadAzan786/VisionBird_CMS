@@ -69,7 +69,9 @@ function Role() {
   };
 
   const handleChangeRole = (event) => {
+    console.log('roleeeeeeeeee')
     setDialogContent((prev) => ({ ...prev, role: event.target.value }));
+    
   };
 
   const getEmployees = async () => {
@@ -156,6 +158,7 @@ function Role() {
         `${employee.employeeName}'s role updated.`,
         "success"
       );
+      getEmployees()
       handleCloseDialog();
     } catch (error) {
       console.error(error);

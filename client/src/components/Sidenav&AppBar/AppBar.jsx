@@ -59,7 +59,7 @@ export default function Appbar({
   const { currentUser } = useSelector((state) => state.user);
   const [notifications, setNotifications] = React.useState([]);
   const [totalNotifications, setTotalNotifications] = React.useState(0);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
   const [permission, setPermission] = React.useState(Notification.permission);
   const [navScroll, setNavScroll] = useState();
 
@@ -229,12 +229,9 @@ export default function Appbar({
     setMenuOpen(true);
   };
 
-
   const handleClose = () => {
     setMenuOpen(false);
   };
-
-
 
   return (
     <MuiAppBar
@@ -252,7 +249,7 @@ export default function Appbar({
           transition: "0.4s ease-in-out",
         }}
       >
-        {/* {greaterthanlg && */}
+        {/* {grea terthanlg && */}
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "" }}>
           <Box
             sx={{

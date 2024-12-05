@@ -3,18 +3,12 @@ import axios from "../../utils/axiosInterceptor";
 import LeavesTable from "./leavesTable/LeavesTable";
 import {
   useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
 } from "@tanstack/react-query";
 import CustomOverlay from "../../components/Styled/CustomOverlay";
 import toast from "react-hot-toast";
 export default function AllLeaves() {
   const [allLeaves, setAllLeave] = useState([]);
 
-  // Access the client
-  const queryClient = useQueryClient();
 
   // Fetch All Leaves
   const query = useQuery({

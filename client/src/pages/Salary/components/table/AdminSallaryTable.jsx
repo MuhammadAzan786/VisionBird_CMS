@@ -25,48 +25,50 @@ const colStyle = {
 const AdminSalaryTable = () => {
   const { currentUser } = useSelector((state) => state.user);
   //
- // const [rows, setRows] = useState([]);
+  // const [rows, setRows] = useState([]);
   const [rowModesModel, setRowModesModel] = useState({});
 
-   const queryClient = useQueryClient();
-const [rows, setRows] = useState([]);
+  const queryClient = useQueryClient();
+  const [rows, setRows] = useState([]);
 
-const {
-  data: fetchAllRequests = [],
-  isError,
-  isLoading,
-  error,
-} = useQuery({
-  queryKey: ["advance-applications", currentUser],
-  queryFn: async () => {
-    if (!currentUser) return [];
-    const result = await axios.post(
-      "/api/advance_payments/admin/advance/salary/list",
-      { currentUser }
-    );
-    return result.data || [];
-  },
-  enabled: !!currentUser,
-});
+  const {
+    data: fetchAllRequests = [],
+    isError,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["al"],
+    queryFn: async () => {
+      if (!currentUser) return [];
+      const result = await axios.post(
+        "/api/advance_payments/admin/advance/salary/list",
+        { currentUser }
+      );
+      console.log("resultttttttttt",result.data)
+      return result.data || [];
+    },
+    // enabled: !!currentUser,
+    // staleTime: 1000,
+    // refetchInterval:5000
+  });
 
-if (fetchAllRequests && fetchAllRequests.length > 0 && rows.length === 0) {
-  const newData = fetchAllRequests.map((item) => ({
-    ...item,
-    id: item._id,
-    employee_name: item.employee_obj_id.employeeName,
-    employee_img: item.employee_obj_id.employeeProImage,
-    employee_id: item.employee_obj_id.employeeID,
-    current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
-    request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
-  }));
-  setRows(newData); // Only set rows if they haven't been set already
-}
-
-
-   if (error) {
-     toast.error(error.message);
+  if (fetchAllRequests && fetchAllRequests.length > 0 && rows.length === 0) {
+    const newData = fetchAllRequests.map((item) => ({
+      ...item,
+      id: item._id,
+      employee_name: item.employee_obj_id.employeeName,
+      employee_img: item.employee_obj_id.employeeProImage,
+      employee_id: item.employee_obj_id.employeeID,
+      current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
+      request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
+    }));
+    setRows(newData); // Only set rows if they haven't been set already
   }
-  
+
+  if (error) {
+    toast.error(error.message);
+  }
+
   // const fetchAllRequests = async () => {
   //   try {
   //     const result = await axios.post(
@@ -82,21 +84,21 @@ if (fetchAllRequests && fetchAllRequests.length > 0 && rows.length === 0) {
   //   }
   // };
   // useEffect(() => {
-    // fetchAllRequests().then((response) => {
-      // const newData = fetchAllRequests.map((item) => {
-      //   return {
-      //     ...item,
-      //     id: item._id,
-      //     employee_name: item.employee_obj_id.employeeName,
-      //     employee_img: item.employee_obj_id.employeeProImage,
-      //     employee_id: item.employee_obj_id.employeeID,
-      //     current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
-      //     request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
-      //   };
-      // });
+  // fetchAllRequests().then((response) => {
+  // const newData = fetchAllRequests.map((item) => {
+  //   return {
+  //     ...item,
+  //     id: item._id,
+  //     employee_name: item.employee_obj_id.employeeName,
+  //     employee_img: item.employee_obj_id.employeeProImage,
+  //     employee_id: item.employee_obj_id.employeeID,
+  //     current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
+  //     request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
+  //   };
+  // });
 
-      // setRows(newData);
-    // });
+  // setRows(newData);
+  // });
   // }, []);
 
   const columns = [
@@ -285,6 +287,31 @@ if (fetchAllRequests && fetchAllRequests.length > 0 && rows.length === 0) {
     console.error("Error during row update:", error);
     toast.error("An error occurred while updating the row.");
   };
+
+  
+  // const updateEmployeeStatus = async (data) => {
+  //   try {
+  //     await axios.put(`/api/employee/update_employee_status/${data.id}`, {
+  //       employeeStatus: data.newStatus,
+  //     });
+  //     toast.success(`Status Updated to ${data.newStatus}`);
+  //   } catch (error) {
+  //     console.error("Error updating employee status:", error.message);
+  //   }
+  // };
+  // const mutation = useMutation({
+  //   mutationFn: updateEmployeeStatus, // Pass the mutation function
+  //   onSuccess: () => {
+  //     console.log("Employee status updated successfully!");
+  //     queryClient.invalidateQueries("activeEmployees");
+  //     queryClient.invalidateQueries("inactiveEmployees");
+  //     queryClient.refetchQueries("activeEmployees");
+  //     queryClient.refetchQueries("inactiveEmployees");
+  //   },
+  //   onError: (error) => {
+  //     console.error("Error updating employee status:", error.message);
+  //   },
+  // });
 
   return (
     <CustomDataGrid
