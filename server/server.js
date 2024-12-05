@@ -86,15 +86,19 @@ app.use("/api/empOfWeek", employeeOfWeekRoutes);
 
 // Socket.io
 const server = http.createServer(app);
+const origin =
+  process.env.NODE_ENV === "production"
+    ? process.env.FRONTEND_DOMAIN_NAME
+    : process.env.FRONTEND_LOCAL_ADDRESS;
+console.log("CORS Origin :", origin);
 const io = new Server(server, {
   cors: {
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.FRONTEND_DOMAIN_NAME
-        : process.env.FRONTEND_LOCAL_ADDRESS,
+    origin,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
   },
 });
-
+console.log("Backend url :", process.env.NODE_ENV);
 setupIoInstance(io);
 setupTaskIoInstance(io);
 setupEOPIoInstance(io);

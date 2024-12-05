@@ -78,7 +78,11 @@ const InterneeTable = ({ searchTerm }) => {
       width: 300,
       // src={row.interneeProImage} fix internee image issue, image is not uploading
       renderCell: ({ row }) => (
-        <EmployeeNameCell userId={row.internId} name={row.firstName} />
+        <EmployeeNameCell
+          src={row.interneeProImage}
+          userId={row.internId}
+          name={row.firstName}
+        />
       ),
     },
     { field: "designation", headerName: "Designation", width: 250 },

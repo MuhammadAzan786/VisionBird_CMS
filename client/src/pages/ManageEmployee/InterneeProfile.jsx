@@ -4,22 +4,16 @@ import axios from "../../utils/axiosInterceptor";
 import { Box, Typography, Avatar, Divider, Button, Paper } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { usePDF } from "react-to-pdf";
-import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import { useMessage } from "../../components/MessageContext";
 import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
-
 import { Link as RouterLink, MemoryRouter } from "react-router-dom";
-
 import { useSelector } from "react-redux";
-
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
 import CakeOutlinedIcon from "@mui/icons-material/CakeOutlined";
 import ManOutlinedIcon from "@mui/icons-material/ManOutlined";
 import VolunteerActivismOutlinedIcon from "@mui/icons-material/VolunteerActivismOutlined";
 import EscalatorWarningOutlinedIcon from "@mui/icons-material/EscalatorWarningOutlined";
-import AssistWalkerOutlinedIcon from "@mui/icons-material/AssistWalkerOutlined";
-import BlindIcon from "@mui/icons-material/Blind";
 import AutoStoriesOutlinedIcon from "@mui/icons-material/AutoStoriesOutlined";
 import ContactMailOutlinedIcon from "@mui/icons-material/ContactMailOutlined";
 import SmartphoneOutlinedIcon from "@mui/icons-material/SmartphoneOutlined";
@@ -31,11 +25,6 @@ import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOu
 import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
-import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
-import CurrencyExchangeOutlinedIcon from "@mui/icons-material/CurrencyExchangeOutlined";
-import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
 const InterneeProfile = () => {
   const { currentUser } = useSelector((state) => state.user);

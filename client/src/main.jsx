@@ -36,7 +36,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         </MessageProvider>
       </ThemeProvider>
       {/** React Query Devtools */}
-      {process.env.VITE_NODE_ENV === "development" && (
+      {import.meta.env.VITE_NODE_ENV === "development" && (
         <ReactQueryDevtools initialIsOpen={false} />
       )}
     </QueryClientProvider>

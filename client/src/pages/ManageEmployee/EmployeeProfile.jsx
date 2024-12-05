@@ -41,7 +41,7 @@ const EmployeeProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState([]);
-  const profilePic = user.employeeProImage;
+  const profilePic = user.employeeProImage?.secure_url;
   const cnic = user.cnicScanCopy;
   const policecertificate = user.policeCertificateUpload;
   const degree = user.degreesScanCopy;
