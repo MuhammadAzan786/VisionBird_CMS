@@ -58,7 +58,7 @@ const InterneeProfile = () => {
   const color = getRandomColor();
 
   const [user, setUser] = useState([]);
-  const profilePic = user.interneeProImage;
+  const profilePic = user.interneeProImage?.secure_url;
   const cnicFile = user.cnicFile;
   const appointmentletter = user.appointmentFile;
   const experienceletter = user.experienceLetter;
