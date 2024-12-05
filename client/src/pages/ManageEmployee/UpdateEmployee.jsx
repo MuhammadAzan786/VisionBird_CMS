@@ -29,8 +29,7 @@ const validationSchema = object().shape({
 
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
-  disability: string().required("Required Field"),
-  kindofdisability: string().matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
+
   mobile: string()
     .required("Required Field")
     .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
@@ -53,6 +52,15 @@ const validationSchema = object().shape({
   userName: string().required("Required Field"),
   password: string().required("Required Field"),
   role: string().required("Required Field"),
+
+  disability: string()
+    .required("Disability is required")
+    .oneOf(["yes", "no"], "Disability must be either 'yes' or 'no'"),
+  kindofdisability: string().when("disability", {
+    is: "yes",
+    then: (schema) => schema.required("Required Field"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 function UpdateForm() {
@@ -405,7 +413,19 @@ function UpdateForm() {
                           }}
                         >
                           <InputLabel id="disability-label">Disability</InputLabel>
-                          <Field name="disability" as={Select} labelId="disability-label" label="Disability">
+                          <Field
+                            name="disability"
+                            as={Select}
+                            labelId="disability-label"
+                            label="Disability"
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              setFieldValue("disability", value);
+                              if (value === "no") {
+                                setFieldValue("kindofdisability", "");
+                              }
+                            }}
+                          >
                             <MenuItem value="yes">Yes</MenuItem>
                             <MenuItem value="no">No</MenuItem>
                           </Field>
@@ -426,10 +446,8 @@ function UpdateForm() {
                           },
                         }}
                         onKeyPress={(event) => {
-                          const keyCode = event.keyCode;
-                          const keyValue = String.fromCharCode(keyCode);
                           const regex = /^[a-zA-Z\s]+$/;
-                          if (!regex.test(keyValue)) {
+                          if (!regex.test(event.key)) {
                             event.preventDefault();
                           }
                         }}

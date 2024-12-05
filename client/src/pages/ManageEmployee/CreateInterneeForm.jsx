@@ -62,6 +62,15 @@ const validationSchema = object().shape({
   designation: string().required("Required Field"),
   offered_By: string().required("Required Field"),
   givenOn: date().required("Date is required"),
+
+  disability: string()
+    .required("Disability is required")
+    .oneOf(["yes", "no"], "Disability must be either 'yes' or 'no'"),
+  kindofdisability: string().when("disability", {
+    is: "yes",
+    then: (schema) => schema.required("Required Field"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 const CreateInterneeForm = () => {
@@ -98,8 +107,6 @@ const CreateInterneeForm = () => {
         designation: "",
 
         offered_By: "",
-        disability: "",
-        disabilityType: "",
 
         givenOn: "",
         // Documents
@@ -107,6 +114,10 @@ const CreateInterneeForm = () => {
         cnicFile: [],
         appointmentFile: [],
         experienceLetter: [],
+
+        disability: "",
+        //Ye field formik me nhi hai
+        disabilityType: "",
       }}
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
@@ -154,7 +165,7 @@ const CreateInterneeForm = () => {
           })
           .then(() => {
             setLoading(false);
-            // navigate("/manage-employees");
+            navigate("/manage-internees");
             toast.success("Internee Added Successfully!");
           })
           .catch((err) => {
@@ -358,7 +369,19 @@ const CreateInterneeForm = () => {
                         }}
                       >
                         <InputLabel id="disability-label">Disability</InputLabel>
-                        <Field name="disability" as={Select} labelId="disability-label" label="Disability">
+                        <Field
+                          name="disability"
+                          as={Select}
+                          labelId="disability-label"
+                          label="Disability"
+                          onChange={(event) => {
+                            const { value } = event.target;
+                            setFieldValue("disability", value);
+                            if (value === "no") {
+                              setFieldValue("kindofdisability", "");
+                            }
+                          }}
+                        >
                           <MenuItem value="yes">Yes</MenuItem>
                           <MenuItem value="no">No</MenuItem>
                         </Field>

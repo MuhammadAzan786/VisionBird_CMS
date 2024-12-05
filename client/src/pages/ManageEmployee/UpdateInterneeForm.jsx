@@ -20,12 +20,15 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import LoadingAnim from "../../components/LoadingAnim";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import { TextField } from "formik-material-ui";
-import axios from "../../utils/axiosInterceptor";
+
 import dayjs from "dayjs";
 import toast from "react-hot-toast";
 import { ScrollToErrorField } from "../../utils/common";
 import UploadFilesInternee from "../../components/upload/UploadFilesInternee";
-import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
+
+import axios from "../../utils/axiosInterceptor";
+
+// import axios from "axios";
 
 const validationSchema = object().shape({
   firstName: string()
@@ -59,6 +62,14 @@ const validationSchema = object().shape({
   internId: string().required("Required Field"),
   designation: string().required("Required Field"),
   offered_By: string().required("Required Field"),
+  disability: string()
+    .required("Disability is required")
+    .oneOf(["yes", "no"], "Disability must be either 'yes' or 'no'"),
+  kindofdisability: string().when("disability", {
+    is: "yes",
+    then: (schema) => schema.required("Required Field"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 const UpdateInterneeForm = () => {
@@ -72,7 +83,7 @@ const UpdateInterneeForm = () => {
   const nameRef = useRef("");
 
   // Custom Hook to prevent WindowClose
-  useWindowCloseHandler(tempFilesRef);
+  // useWindowCloseHandler(tempFilesRef);
 
   useEffect(() => {
     axios
@@ -160,7 +171,7 @@ const UpdateInterneeForm = () => {
           })
           .then(() => {
             setLoading(false);
-            // navigate("/manage-employees");
+            navigate("/manage-internees");
             toast.success("Internee Updated Successfully!");
           })
           .catch((err) => {
@@ -358,7 +369,20 @@ const UpdateInterneeForm = () => {
                         }}
                       >
                         <InputLabel id="disability-label">Disability</InputLabel>
-                        <Field name="disability" as={Select} labelId="disability-label" label="Disability">
+                        <Field
+                          name="disability"
+                          as={Select}
+                          labelId="disability-label"
+                          on
+                          label="Disability"
+                          onChange={(event) => {
+                            const { value } = event.target;
+                            setFieldValue("disability", value);
+                            if (value === "no") {
+                              setFieldValue("kindofdisability", "");
+                            }
+                          }}
+                        >
                           <MenuItem value="yes">Yes</MenuItem>
                           <MenuItem value="no">No</MenuItem>
                         </Field>

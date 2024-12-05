@@ -41,8 +41,7 @@ const validationSchema = object().shape({
     .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) => /^\d{5}-\d{7}-\d$/.test(value || "")),
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
-  disability: string().required("Required Field"),
-  kindofdisability: string().matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
+
   mobile: string()
     .required("Required Field")
     .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
@@ -65,6 +64,15 @@ const validationSchema = object().shape({
   userName: string().required("Required Field"),
   password: string().required("Required Field"),
   role: string().required("Required Field"),
+
+  disability: string()
+    .required("Disability is required")
+    .oneOf(["yes", "no"], "Disability must be either 'yes' or 'no'"),
+  kindofdisability: string().when("disability", {
+    is: "yes",
+    then: (schema) => schema.required("Required Field"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 function CreateEmployeeForm() {
@@ -205,598 +213,575 @@ function CreateEmployeeForm() {
           });
       }}
     >
-      {({ values, setFieldValue, handleSubmit, errors, setTouched }) => (
-        <Box m={5}>
-          <Form className="ml-5">
-            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} p={3}>
-              <Grid item xs={12}>
-                <Typography
-                  sx={{
-                    fontWeight: "600",
-                    fontSize: "20px",
-                    color: "#3b4056",
-                    mb: 1,
-                  }}
-                >
-                  Personal Info
-                </Typography>
-                <hr style={{ marginBottom: "10px" }} />
-              </Grid>
+      {({ values, setFieldValue, handleSubmit, errors, setTouched }) => {
+        return (
+          <Box m={5}>
+            <Form className="ml-5">
+              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} p={3}>
+                <Grid item xs={12}>
+                  <Typography
+                    sx={{
+                      fontWeight: "600",
+                      fontSize: "20px",
+                      color: "#3b4056",
+                      mb: 1,
+                    }}
+                  >
+                    Personal Info
+                  </Typography>
+                  <hr style={{ marginBottom: "10px" }} />
+                </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <FastField
-                  label="Name"
-                  component={TextField}
-                  name="firstName"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                  onKeyPress={(event) => {
-                    const keyCode = event.keyCode || event.which;
-                    const keyValue = String.fromCharCode(keyCode);
-                    const regex = /^[a-zA-Z\s]+$/;
-                    if (!regex.test(keyValue)) {
-                      event.preventDefault();
-                    }
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FastField
-                  label="Father Name"
-                  component={TextField}
-                  name="fatherName"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                  onKeyPress={(event) => {
-                    const keyCode = event.keyCode || event.which;
-                    const keyValue = String.fromCharCode(keyCode);
-                    const regex = /^[a-zA-Z\s]+$/;
-                    if (!regex.test(keyValue)) {
-                      event.preventDefault();
-                    }
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FastField
-                  label="CNIC"
-                  component={TextField}
-                  name="cnic"
-                  placeholder="XXXXX-XXXXXXX-X"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                  onInput={(event) => {
-                    const input = event.target.value;
-                    const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                    const formattedCnic = formattedInput
-                      .replace(/(.{5})(.?)/, "$1-$2") // Add dash after the fifth character
-                      .replace(/(.{13})(.?)/, "$1-$2"); // Add dash before the last character
-                    event.target.value = formattedCnic;
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FastField
-                  label="Date Of Birth"
-                  InputLabelProps={{ shrink: true }}
-                  component={TextField}
-                  type="date"
-                  name="dob"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <div>
-                  <FormControl
+                <Grid item xs={12} sm={6}>
+                  <FastField
+                    label="Name"
+                    component={TextField}
+                    name="firstName"
                     fullWidth
-                    variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "5px",
                       },
                     }}
-                  >
-                    <InputLabel id="gender-label">Gender</InputLabel>
-                    <FastField name="gender" as={Select} labelId="gender-label" label="Gender">
-                      <MenuItem value="male">Male</MenuItem>
-                      <MenuItem value="female">Female</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="gender" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <div>
-                  <FormControl
+                    onKeyPress={(event) => {
+                      const keyCode = event.keyCode || event.which;
+                      const keyValue = String.fromCharCode(keyCode);
+                      const regex = /^[a-zA-Z\s]+$/;
+                      if (!regex.test(keyValue)) {
+                        event.preventDefault();
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FastField
+                    label="Father Name"
+                    component={TextField}
+                    name="fatherName"
                     fullWidth
-                    variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "5px",
                       },
                     }}
-                  >
-                    <InputLabel id="maritalStatus-label">Marital Status</InputLabel>
-                    <FastField name="maritalStatus" as={Select} labelId="maritalStatus-label" label="Marital Status">
-                      <MenuItem value="single">Single</MenuItem>
-                      <MenuItem value="married">Married</MenuItem>
-                      <MenuItem value="divorced">Divorced</MenuItem>
-                      <MenuItem value="widowed">Widowed</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="maritalStatus" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
-              </Grid>
-              <Grid item xs={12}>
-                <div>
-                  <FormControl
+                    onKeyPress={(event) => {
+                      const keyCode = event.keyCode || event.which;
+                      const keyValue = String.fromCharCode(keyCode);
+                      const regex = /^[a-zA-Z\s]+$/;
+                      if (!regex.test(keyValue)) {
+                        event.preventDefault();
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FastField
+                    label="CNIC"
+                    component={TextField}
+                    name="cnic"
+                    placeholder="XXXXX-XXXXXXX-X"
                     fullWidth
-                    variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "5px",
                       },
                     }}
-                  >
-                    <InputLabel id="qualification-label">Qualification</InputLabel>
-                    <FastField name="qualification" as={Select} labelId="qualification-label" label="Qualification">
-                      <MenuItem value="matriculation">Matriculation</MenuItem>
-                      <MenuItem value="intermediate">Intermediate</MenuItem>
-                      <MenuItem value="graduation">Bachelors</MenuItem>
-                      <MenuItem value="masters">Masters</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="qualification" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
-              </Grid>
-              <Grid item xs={12}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={4} md={3}>
-                    <div>
-                      <FormControl
-                        fullWidth
-                        variant="outlined"
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "5px",
-                          },
-                        }}
-                      >
-                        <InputLabel id="disability-label">Disability</InputLabel>
-                        <FastField
-                          name="disability"
-                          as={Select}
-                          labelId="disability-label"
-                          label="Disability"
-                          onChange={(event) => {
-                            setFieldValue("disability", event.target.value);
+                    onInput={(event) => {
+                      const input = event.target.value;
+                      const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
+                      const formattedCnic = formattedInput
+                        .replace(/(.{5})(.?)/, "$1-$2") // Add dash after the fifth character
+                        .replace(/(.{13})(.?)/, "$1-$2"); // Add dash before the last character
+                      event.target.value = formattedCnic;
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FastField
+                    label="Date Of Birth"
+                    InputLabelProps={{ shrink: true }}
+                    component={TextField}
+                    type="date"
+                    name="dob"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                      },
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
+                    >
+                      <InputLabel id="gender-label">Gender</InputLabel>
+                      <FastField name="gender" as={Select} labelId="gender-label" label="Gender">
+                        <MenuItem value="male">Male</MenuItem>
+                        <MenuItem value="female">Female</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="gender" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
+                    >
+                      <InputLabel id="maritalStatus-label">Marital Status</InputLabel>
+                      <FastField name="maritalStatus" as={Select} labelId="maritalStatus-label" label="Marital Status">
+                        <MenuItem value="single">Single</MenuItem>
+                        <MenuItem value="married">Married</MenuItem>
+                        <MenuItem value="divorced">Divorced</MenuItem>
+                        <MenuItem value="widowed">Widowed</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="maritalStatus" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
+                    >
+                      <InputLabel id="qualification-label">Qualification</InputLabel>
+                      <FastField name="qualification" as={Select} labelId="qualification-label" label="Qualification">
+                        <MenuItem value="matriculation">Matriculation</MenuItem>
+                        <MenuItem value="intermediate">Intermediate</MenuItem>
+                        <MenuItem value="graduation">Bachelors</MenuItem>
+                        <MenuItem value="masters">Masters</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="qualification" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={4} md={3}>
+                      <div>
+                        <FormControl
+                          fullWidth
+                          variant="outlined"
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: "5px",
+                            },
                           }}
                         >
-                          <MenuItem value="yes">Yes</MenuItem>
-                          <MenuItem value="no">No</MenuItem>
-                        </FastField>
-                        <ErrorMessage name="disability" style={{ color: "red" }} component="div" />
-                      </FormControl>
-                    </div>
-                  </Grid>
-                  <Grid item xs={12} sm={8} md={9}>
-                    <Field
-                      label="What Kind of Disability?"
-                      component={TextField}
-                      disabled={values.disability !== "yes"}
-                      name="kindofdisability"
-                      fullWidth
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "5px",
-                        },
-                      }}
-                      onKeyPress={(event) => {
-                        const regex = /^[a-zA-Z\s]+$/;
-                        if (!regex.test(event.key)) {
-                          event.preventDefault();
-                        }
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Grid>
+                          <InputLabel id="disability-label">Disability</InputLabel>
+                          <FastField
+                            name="disability"
+                            as={Select}
+                            labelId="disability-label"
+                            label="Disability"
+                            // onChange={(event) => {
+                            //   setFieldValue("disability", event.target.value);
+                            // }}
 
-            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
-              <Grid item xs={12}>
-                <Typography
-                  sx={{
-                    fontWeight: "600",
-                    fontSize: "20px",
-                    color: "#3b4056",
-                    mb: 1,
-                  }}
-                >
-                  Contact Info
-                </Typography>
-                <hr style={{ marginBottom: "10px" }} />
-              </Grid>
-              <Grid item xs={12}>
-                <FastField
-                  label="Mailing Address"
-                  component={TextField}
-                  name="mailingAddress"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FastField
-                  label="Mobile Number"
-                  component={TextField}
-                  name="mobile"
-                  placeholder="03XX-XXXXXXX"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                  onInput={(event) => {
-                    const input = event.target.value;
-                    const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                    const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
-                    event.target.value = formattedmob;
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FastField
-                  label="Other Mobile Number"
-                  component={TextField}
-                  name="otherMobile"
-                  placeholder="03XX-XXXXXXX"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                  Number
-                  onInput={(event) => {
-                    const input = event.target.value;
-                    const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                    const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
-                    event.target.value = formattedmob;
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FastField
-                  label="Who's Mobile is this?"
-                  component={TextField}
-                  name="whosMobile"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                  onKeyPress={(event) => {
-                    const keyCode = event.keyCode || event.which;
-                    const keyValue = String.fromCharCode(keyCode);
-                    const regex = /^[a-zA-Z\s]+$/;
-                    if (!regex.test(keyValue)) {
-                      event.preventDefault();
-                    }
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FastField
-                  label="Email"
-                  component={TextField}
-                  name="email"
-                  type="email"
-                  fullWidth
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                />
-              </Grid>
-            </Grid>
-            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
-              <Grid item xs={12}>
-                <Typography
-                  sx={{
-                    fontWeight: "600",
-                    fontSize: "20px",
-                    color: "#3b4056",
-                    mb: 1,
-                  }}
-                >
-                  Employee Info
-                </Typography>
-                <hr style={{ marginBottom: "10px" }} />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FastField
-                  component={TextField}
-                  label="Employee Id"
-                  name="empId"
-                  className="w-full"
-                  disabled={role === "manager"}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FastField
-                  component={TextField}
-                  label="Designation"
-                  name="designation"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                  className="w-full"
-                  disabled={role === "manager"}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <FastField
-                  component={TextField}
-                  label="User Name"
-                  name="userName"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                  className="w-full"
-                  disabled={role === "manager"}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Field
-                  component={TextField}
-                  label="Password"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  className="w-full"
-                  disabled={role === "manager"}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                          {showPassword ? <Visibility /> : <VisibilityOff />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={4} md={3}>
-                    <div>
-                      <FormControl
-                        fullWidth
-                        variant="outlined"
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "5px",
-                          },
-                        }}
-                      >
-                        <InputLabel id="bankAccount-label">Bank Account</InputLabel>
-                        <Field name="bankAccount" as={Select} labelId="bankAccount-label" label="BankAccount">
-                          <MenuItem value="yes">Yes</MenuItem>
-                          <MenuItem value="no">No</MenuItem>
-                        </Field>
-
-                        <ErrorMessage name="bankAccount" style={{ color: "red" }} component="div" />
-                      </FormControl>
-                    </div>
-                  </Grid>
-                  <Grid item xs={12} sm={8} md={9}>
-                    <Field
-                      label="Account No"
-                      component={TextField}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: "5px",
-                        },
-                      }}
-                      name="accountNo"
-                      className="w-full"
-                      disabled={values.bankAccount !== "yes"}
-                    />
-                  </Grid>
-                </Grid>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={4} md={3}>
-                    <div>
-                      <FormControl
-                        fullWidth
-                        variant="outlined"
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "5px",
-                          },
-                        }}
-                      >
-                        <InputLabel id="probation-label">Probation</InputLabel>
-                        <Field name="probation" as={Select} labelId="probation-label" label="Probation">
-                          <MenuItem value="yes">Yes</MenuItem>
-                          <MenuItem value="no">No</MenuItem>
-                        </Field>
-                        <ErrorMessage name="probation" style={{ color: "red" }} component="div" />
-                      </FormControl>
-                    </div>
-                  </Grid>
-                  <Grid item xs={12} sm={8} md={9}>
-                    <Field
-                      as="select"
-                      name="probationMonths"
-                      onChange={(e) => {
-                        setFieldValue("probationMonths", e.target.value);
-                        setFieldValue(
-                          "endDate",
-                          new Date(
-                            new Date().getFullYear(),
-                            new Date().getMonth() + parseInt(e.target.value),
-                            new Date().getDate()
-                          )
-                            .toISOString()
-                            .substring(0, 10)
-                        );
-                      }}
-                      disabled={values.probation !== "yes"}
-                      className="block text-gray-600 px-3 py-4 w-full rounded-md border border-gray-600 "
-                    >
-                      <option value="">Please Select Month</option>
-                      <option value="1">1 Month</option>
-                      <option value="2">2 Months</option>
-                      <option value="3">3 Months</option>
-                      <option value="4">4 Months</option>
-                      <option value="5">5 Months</option>
-                      <option value="6">6 Months</option>
-                    </Field>
-                    <ErrorMessage name="probationMonths" style={{ color: "red" }} component="div" />
-                  </Grid>
-                </Grid>
-              </Grid>
-              <Grid item xs={12}>
-                {role === "admin" &&
-                  (values.probation === "yes" ? (
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <FastField
-                          label="Start Date"
-                          component={TextField}
-                          name="startDate"
-                          type="date"
-                          InputLabelProps={{ shrink: true }}
-                          fullWidth
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              borderRadius: "5px",
-                            },
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} sm={6}>
-                        <FastField
-                          label="End Date"
-                          component={TextField}
-                          name="endDate"
-                          type="date"
-                          InputLabelProps={{ shrink: true }}
-                          fullWidth
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              borderRadius: "5px",
-                            },
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} sm={6}>
-                        <FastField
-                          component={TextField}
-                          label="Basic Pay in Probation Period"
-                          type="number"
-                          name="BasicPayInProbationPeriod"
-                          className="w-full"
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              borderRadius: "5px",
-                            },
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} sm={6}>
-                        <FastField
-                          component={TextField}
-                          label="Allowances In Probation Period"
-                          type="number"
-                          name="AllowancesInProbationPeriod"
-                          className="w-full"
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              borderRadius: "5px",
-                            },
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} sm={6}>
-                        <FastField
-                          component={TextField}
-                          label="Basic Pay"
-                          type="number"
-                          name="BasicPayAfterProbationPeriod"
-                          className="w-full"
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              borderRadius: "5px",
-                            },
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <FastField
-                          component={TextField}
-                          label="Allowances"
-                          type="number"
-                          name="AllowancesAfterProbationPeriod"
-                          className="w-full"
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              borderRadius: "5px",
-                            },
-                          }}
-                        />
-                      </Grid>
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              setFieldValue("disability", value);
+                              if (value === "no") {
+                                setFieldValue("kindofdisability", "");
+                              }
+                            }}
+                          >
+                            <MenuItem value="yes">Yes</MenuItem>
+                            <MenuItem value="no">No</MenuItem>
+                          </FastField>
+                          <ErrorMessage name="disability" style={{ color: "red" }} component="div" />
+                        </FormControl>
+                      </div>
                     </Grid>
-                  ) : (
-                    values.probation === "no" && (
+                    <Grid item xs={12} sm={8} md={9}>
+                      <Field
+                        label="What Kind of Disability?"
+                        component={TextField}
+                        disabled={values.disability !== "yes"}
+                        name="kindofdisability"
+                        fullWidth
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "5px",
+                          },
+                        }}
+                        onKeyPress={(event) => {
+                          const regex = /^[a-zA-Z\s]+$/;
+                          if (!regex.test(event.key)) {
+                            event.preventDefault();
+                          }
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
+
+              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+                <Grid item xs={12}>
+                  <Typography
+                    sx={{
+                      fontWeight: "600",
+                      fontSize: "20px",
+                      color: "#3b4056",
+                      mb: 1,
+                    }}
+                  >
+                    Contact Info
+                  </Typography>
+                  <hr style={{ marginBottom: "10px" }} />
+                </Grid>
+                <Grid item xs={12}>
+                  <FastField
+                    label="Mailing Address"
+                    component={TextField}
+                    name="mailingAddress"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                      },
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FastField
+                    label="Mobile Number"
+                    component={TextField}
+                    name="mobile"
+                    placeholder="03XX-XXXXXXX"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                      },
+                    }}
+                    onInput={(event) => {
+                      const input = event.target.value;
+                      const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
+                      const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
+                      event.target.value = formattedmob;
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FastField
+                    label="Other Mobile Number"
+                    component={TextField}
+                    name="otherMobile"
+                    placeholder="03XX-XXXXXXX"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                      },
+                    }}
+                    Number
+                    onInput={(event) => {
+                      const input = event.target.value;
+                      const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
+                      const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
+                      event.target.value = formattedmob;
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FastField
+                    label="Who's Mobile is this?"
+                    component={TextField}
+                    name="whosMobile"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                      },
+                    }}
+                    onKeyPress={(event) => {
+                      const keyCode = event.keyCode || event.which;
+                      const keyValue = String.fromCharCode(keyCode);
+                      const regex = /^[a-zA-Z\s]+$/;
+                      if (!regex.test(keyValue)) {
+                        event.preventDefault();
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FastField
+                    label="Email"
+                    component={TextField}
+                    name="email"
+                    type="email"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                      },
+                    }}
+                  />
+                </Grid>
+              </Grid>
+              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+                <Grid item xs={12}>
+                  <Typography
+                    sx={{
+                      fontWeight: "600",
+                      fontSize: "20px",
+                      color: "#3b4056",
+                      mb: 1,
+                    }}
+                  >
+                    Employee Info
+                  </Typography>
+                  <hr style={{ marginBottom: "10px" }} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FastField
+                    component={TextField}
+                    label="Employee Id"
+                    name="empId"
+                    className="w-full"
+                    disabled={role === "manager"}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                      },
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FastField
+                    component={TextField}
+                    label="Designation"
+                    name="designation"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                      },
+                    }}
+                    className="w-full"
+                    disabled={role === "manager"}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FastField
+                    component={TextField}
+                    label="User Name"
+                    name="userName"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                      },
+                    }}
+                    className="w-full"
+                    disabled={role === "manager"}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Field
+                    component={TextField}
+                    label="Password"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                      },
+                    }}
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    className="w-full"
+                    disabled={role === "manager"}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={4} md={3}>
+                      <div>
+                        <FormControl
+                          fullWidth
+                          variant="outlined"
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: "5px",
+                            },
+                          }}
+                        >
+                          <InputLabel id="bankAccount-label">Bank Account</InputLabel>
+                          <Field name="bankAccount" as={Select} labelId="bankAccount-label" label="BankAccount">
+                            <MenuItem value="yes">Yes</MenuItem>
+                            <MenuItem value="no">No</MenuItem>
+                          </Field>
+
+                          <ErrorMessage name="bankAccount" style={{ color: "red" }} component="div" />
+                        </FormControl>
+                      </div>
+                    </Grid>
+                    <Grid item xs={12} sm={8} md={9}>
+                      <Field
+                        label="Account No"
+                        component={TextField}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "5px",
+                          },
+                        }}
+                        name="accountNo"
+                        className="w-full"
+                        disabled={values.bankAccount !== "yes"}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={4} md={3}>
+                      <div>
+                        <FormControl
+                          fullWidth
+                          variant="outlined"
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: "5px",
+                            },
+                          }}
+                        >
+                          <InputLabel id="probation-label">Probation</InputLabel>
+                          <Field name="probation" as={Select} labelId="probation-label" label="Probation">
+                            <MenuItem value="yes">Yes</MenuItem>
+                            <MenuItem value="no">No</MenuItem>
+                          </Field>
+                          <ErrorMessage name="probation" style={{ color: "red" }} component="div" />
+                        </FormControl>
+                      </div>
+                    </Grid>
+                    <Grid item xs={12} sm={8} md={9}>
+                      <Field
+                        as="select"
+                        name="probationMonths"
+                        onChange={(e) => {
+                          setFieldValue("probationMonths", e.target.value);
+                          setFieldValue(
+                            "endDate",
+                            new Date(
+                              new Date().getFullYear(),
+                              new Date().getMonth() + parseInt(e.target.value),
+                              new Date().getDate()
+                            )
+                              .toISOString()
+                              .substring(0, 10)
+                          );
+                        }}
+                        disabled={values.probation !== "yes"}
+                        className="block text-gray-600 px-3 py-4 w-full rounded-md border border-gray-600 "
+                      >
+                        <option value="">Please Select Month</option>
+                        <option value="1">1 Month</option>
+                        <option value="2">2 Months</option>
+                        <option value="3">3 Months</option>
+                        <option value="4">4 Months</option>
+                        <option value="5">5 Months</option>
+                        <option value="6">6 Months</option>
+                      </Field>
+                      <ErrorMessage name="probationMonths" style={{ color: "red" }} component="div" />
+                    </Grid>
+                  </Grid>
+                </Grid>
+                <Grid item xs={12}>
+                  {role === "admin" &&
+                    (values.probation === "yes" ? (
                       <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                          <FastField
+                            label="Start Date"
+                            component={TextField}
+                            name="startDate"
+                            type="date"
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: "5px",
+                              },
+                            }}
+                          />
+                        </Grid>
+
+                        <Grid item xs={12} sm={6}>
+                          <FastField
+                            label="End Date"
+                            component={TextField}
+                            name="endDate"
+                            type="date"
+                            InputLabelProps={{ shrink: true }}
+                            fullWidth
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: "5px",
+                              },
+                            }}
+                          />
+                        </Grid>
+
+                        <Grid item xs={12} sm={6}>
+                          <FastField
+                            component={TextField}
+                            label="Basic Pay in Probation Period"
+                            type="number"
+                            name="BasicPayInProbationPeriod"
+                            className="w-full"
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: "5px",
+                              },
+                            }}
+                          />
+                        </Grid>
+
+                        <Grid item xs={12} sm={6}>
+                          <FastField
+                            component={TextField}
+                            label="Allowances In Probation Period"
+                            type="number"
+                            name="AllowancesInProbationPeriod"
+                            className="w-full"
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: "5px",
+                              },
+                            }}
+                          />
+                        </Grid>
+
                         <Grid item xs={12} sm={6}>
                           <FastField
                             component={TextField}
@@ -826,312 +811,350 @@ function CreateEmployeeForm() {
                           />
                         </Grid>
                       </Grid>
-                    )
-                  ))}
-              </Grid>
+                    ) : (
+                      values.probation === "no" && (
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={6}>
+                            <FastField
+                              component={TextField}
+                              label="Basic Pay"
+                              type="number"
+                              name="BasicPayAfterProbationPeriod"
+                              className="w-full"
+                              sx={{
+                                "& .MuiOutlinedInput-root": {
+                                  borderRadius: "5px",
+                                },
+                              }}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <FastField
+                              component={TextField}
+                              label="Allowances"
+                              type="number"
+                              name="AllowancesAfterProbationPeriod"
+                              className="w-full"
+                              sx={{
+                                "& .MuiOutlinedInput-root": {
+                                  borderRadius: "5px",
+                                },
+                              }}
+                            />
+                          </Grid>
+                        </Grid>
+                      )
+                    ))}
+                </Grid>
 
-              <Grid item xs={12}>
-                <FastField
-                  as="select"
-                  name="role"
-                  className="block text-gray-600 px-3 py-4 w-full rounded-md border border-gray-600 "
-                  disabled={role === "manager"}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                >
-                  <option value="" disabled>
-                    Role
-                  </option>
-                  {/* <option value="admin">Admin</option> */}
-                  <option value="manager">Manager</option>
-                  <option value="employee">Employee</option>
-                </FastField>
-                <ErrorMessage name="maritalStatus" style={{ color: "red" }} component="div" />
-              </Grid>
-            </Grid>
-
-            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
-              <Grid item xs={12}>
-                <Typography
-                  sx={{
-                    fontWeight: "600",
-                    fontSize: "20px",
-                    color: "#3b4056",
-                    mb: 1,
-                  }}
-                >
-                  Onboarding Questionnaire
-                </Typography>
-                <hr style={{ marginBottom: "10px" }} />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <div>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
+                <Grid item xs={12}>
+                  <FastField
+                    as="select"
+                    name="role"
+                    className="block text-gray-600 px-3 py-4 w-full rounded-md border border-gray-600 "
+                    disabled={role === "manager"}
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "5px",
                       },
                     }}
                   >
-                    <InputLabel id="policyBook-label">Policy Book Signed</InputLabel>
-                    <FastField name="policyBook" as={Select} labelId="policyBook-label" label="Policy Book Signed">
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="policyBook" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
+                    <option value="" disabled>
+                      Role
+                    </option>
+                    {/* <option value="admin">Admin</option> */}
+                    <option value="manager">Manager</option>
+                    <option value="employee">Employee</option>
+                  </FastField>
+                  <ErrorMessage name="maritalStatus" style={{ color: "red" }} component="div" />
+                </Grid>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <div>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
+
+              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+                <Grid item xs={12}>
+                  <Typography
                     sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "5px",
-                      },
+                      fontWeight: "600",
+                      fontSize: "20px",
+                      color: "#3b4056",
+                      mb: 1,
                     }}
                   >
-                    <InputLabel id="appointment-label">Appointment Letter Given</InputLabel>
-                    <FastField
-                      name="appointment"
-                      as={Select}
-                      labelId="appointment-label"
-                      label="Appointment Letter Given"
+                    Onboarding Questionnaire
+                  </Typography>
+                  <hr style={{ marginBottom: "10px" }} />
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
                     >
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="appointment" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <div>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "5px",
-                      },
-                    }}
-                  >
-                    <InputLabel id="annualLeave-label">Annual Leaves Signed</InputLabel>
-                    <FastField name="annualLeave" as={Select} labelId="annualLeave-label" label="Annual Leaves Signed">
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="annualLeave" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <div>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "5px",
-                      },
-                    }}
-                  >
-                    <InputLabel id="rules-label">Rules and Regulation Signed</InputLabel>
-                    <FastField name="rules" as={Select} labelId="rules-label" label="Rules and Regulation Signed">
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="rules" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <div>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "5px",
-                      },
-                    }}
-                  >
-                    <InputLabel id="attendence-label">Attendance Biometric</InputLabel>
-                    <FastField name="attendence" as={Select} labelId="attendence-label" label="Attendance Biometric">
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="attendence" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <div>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "5px",
-                      },
-                    }}
-                  >
-                    <InputLabel id="localServerAccount-label">Local Server Account Created</InputLabel>
-                    <FastField
-                      name="localServerAccount"
-                      as={Select}
-                      labelId="localServerAccount-label"
-                      label="Local Server Account Created"
+                      <InputLabel id="policyBook-label">Policy Book Signed</InputLabel>
+                      <FastField name="policyBook" as={Select} labelId="policyBook-label" label="Policy Book Signed">
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="policyBook" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
                     >
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="localServerAccount" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
+                      <InputLabel id="appointment-label">Appointment Letter Given</InputLabel>
+                      <FastField
+                        name="appointment"
+                        as={Select}
+                        labelId="appointment-label"
+                        label="Appointment Letter Given"
+                      >
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="appointment" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
+                    >
+                      <InputLabel id="annualLeave-label">Annual Leaves Signed</InputLabel>
+                      <FastField
+                        name="annualLeave"
+                        as={Select}
+                        labelId="annualLeave-label"
+                        label="Annual Leaves Signed"
+                      >
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="annualLeave" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
+                    >
+                      <InputLabel id="rules-label">Rules and Regulation Signed</InputLabel>
+                      <FastField name="rules" as={Select} labelId="rules-label" label="Rules and Regulation Signed">
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="rules" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
+                    >
+                      <InputLabel id="attendence-label">Attendance Biometric</InputLabel>
+                      <FastField name="attendence" as={Select} labelId="attendence-label" label="Attendance Biometric">
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="attendence" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
+                    >
+                      <InputLabel id="localServerAccount-label">Local Server Account Created</InputLabel>
+                      <FastField
+                        name="localServerAccount"
+                        as={Select}
+                        labelId="localServerAccount-label"
+                        label="Local Server Account Created"
+                      >
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="localServerAccount" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
+                    >
+                      <InputLabel id="slack-label">Added in Slack</InputLabel>
+                      <FastField name="slack" as={Select} labelId="slack-label" label="Added in Slack">
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="slack" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
+                    >
+                      <InputLabel id="superAdmin-label">Super Admin</InputLabel>
+                      <FastField name="superAdmin" as={Select} labelId="superAdmin-label" label="Super Admin">
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="superAdmin" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
+                    >
+                      <InputLabel id="whatsApp-label">Added in Whatsapp</InputLabel>
+                      <FastField name="whatsApp" as={Select} labelId="whatsApp-label" label="Added in Whatsapp">
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="whatsApp" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
+                <Grid item xs={12} sm={6} md={4}>
+                  <div>
+                    <FormControl
+                      fullWidth
+                      variant="outlined"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "5px",
+                        },
+                      }}
+                    >
+                      <InputLabel id="empCard-label">Employee Card</InputLabel>
+                      <FastField name="empCard" as={Select} labelId="empCard-label" label="Employee Card">
+                        <MenuItem value="yes">Yes</MenuItem>
+                        <MenuItem value="no">No</MenuItem>
+                      </FastField>
+                      <ErrorMessage name="empCard" style={{ color: "red" }} component="div" />
+                    </FormControl>
+                  </div>
+                </Grid>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <div>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
+
+              {/* ============================================  Documents   ============================================== */}
+
+              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+                <Grid item xs={12}>
+                  <Typography
                     sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "5px",
-                      },
+                      fontWeight: "600",
+                      fontSize: "20px",
+                      color: "#3b4056",
+                      mb: 5,
                     }}
                   >
-                    <InputLabel id="slack-label">Added in Slack</InputLabel>
-                    <FastField name="slack" as={Select} labelId="slack-label" label="Added in Slack">
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="slack" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <div>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "5px",
-                      },
-                    }}
-                  >
-                    <InputLabel id="superAdmin-label">Super Admin</InputLabel>
-                    <FastField name="superAdmin" as={Select} labelId="superAdmin-label" label="Super Admin">
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="superAdmin" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <div>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "5px",
-                      },
-                    }}
-                  >
-                    <InputLabel id="whatsApp-label">Added in Whatsapp</InputLabel>
-                    <FastField name="whatsApp" as={Select} labelId="whatsApp-label" label="Added in Whatsapp">
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="whatsApp" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <div>
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "5px",
-                      },
-                    }}
-                  >
-                    <InputLabel id="empCard-label">Employee Card</InputLabel>
-                    <FastField name="empCard" as={Select} labelId="empCard-label" label="Employee Card">
-                      <MenuItem value="yes">Yes</MenuItem>
-                      <MenuItem value="no">No</MenuItem>
-                    </FastField>
-                    <ErrorMessage name="empCard" style={{ color: "red" }} component="div" />
-                  </FormControl>
-                </div>
-              </Grid>
-            </Grid>
+                    Upload Documents
+                  </Typography>
 
-            {/* ============================================  Documents   ============================================== */}
-
-            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
-              <Grid item xs={12}>
-                <Typography
-                  sx={{
-                    fontWeight: "600",
-                    fontSize: "20px",
-                    color: "#3b4056",
-                    mb: 5,
-                  }}
-                >
-                  Upload Documents
-                </Typography>
-
-                <UploadFiles
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  tempFilesRef={tempFilesRef}
-                  deletedFilesRef={deletedFilesRef}
-                  parentFolder="Employee"
-                  folderName={`${values.userName}_${values.empId}`}
-                />
-              </Grid>
-            </Grid>
-
-            <div className="flex justify-end">
-              <Button
-                type="button"
-                variant="contained"
-                endIcon={
-                  <PersonAddAltIcon
-                    sx={{
-                      transition: "transform 0.3s", // Transition for icon
-                    }}
+                  <UploadFiles
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    tempFilesRef={tempFilesRef}
+                    deletedFilesRef={deletedFilesRef}
+                    parentFolder="Employee"
+                    folderName={`${values.userName}_${values.empId}`}
                   />
-                }
-                //ScrollToErrorField is a custom utlity function
-                onClick={() => {
-                  Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
-                }}
-              >
-                Create
-              </Button>
-            </div>
-          </Form>
-          {loading && (
-            <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
-              <LoadingAnim />
-            </Backdrop>
-          )}
-        </Box>
-      )}
+                </Grid>
+              </Grid>
+
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="contained"
+                  endIcon={
+                    <PersonAddAltIcon
+                      sx={{
+                        transition: "transform 0.3s", // Transition for icon
+                      }}
+                    />
+                  }
+                  //ScrollToErrorField is a custom utlity function
+                  onClick={() => {
+                    Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
+                  }}
+                >
+                  Create
+                </Button>
+              </div>
+            </Form>
+            {loading && (
+              <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+                <LoadingAnim />
+              </Backdrop>
+            )}
+          </Box>
+        );
+      }}
     </Formik>
   );
 }
