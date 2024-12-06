@@ -1,35 +1,37 @@
-/* eslint-disable no-unused-vars */
-import { useState } from "react";
-import { ErrorMessage, Field, Form, Formik, FastField } from "formik";
-import { TextField } from "formik-material-ui";
-import { object, string } from "yup";
-import "../../index.css";
-import InputAdornment from "@mui/material/InputAdornment";
-import IconButton from "@mui/material/IconButton";
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import UploadIcon from "@mui/icons-material/Upload";
-import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
-
-import axios from "../../utils/axiosInterceptor";
 import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Card,
-  Typography,
-  Button,
-  Grid,
-  Box,
   Backdrop,
+  Box,
+  Button,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Modal,
   Paper,
+  Select,
+  Typography,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import { ErrorMessage, FastField, Field, Form, Formik } from "formik";
+import { TextField } from "formik-material-ui";
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
-import { useMessage } from "../../components/MessageContext";
+import { useNavigate } from "react-router-dom";
+import { object, string } from "yup";
 import LoadingAnim from "../../components/LoadingAnim";
-import { palette } from "../../theme/colors";
+import UploadFiles from "../../components/upload/UploadFiles";
+import "../../index.css";
+import axios from "../../utils/axiosInterceptor";
+import { ScrollToErrorField } from "../../utils/common";
+const baseUrl =
+  import.meta.env.NODE_ENV === "production"
+    ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
+    : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
 
 const validationSchema = object().shape({
   firstName: string()
@@ -38,7 +40,6 @@ const validationSchema = object().shape({
       /^[a-zA-Z\s]+$/,
       "Only alphabetic characters and spaces are allowed"
     ),
-
   fatherName: string()
     .required("Required Name")
     .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters are allowed"),
@@ -47,7 +48,6 @@ const validationSchema = object().shape({
     .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) =>
       /^\d{5}-\d{7}-\d$/.test(value || "")
     ),
-
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
   disability: string().required("Required Field"),
@@ -81,32 +81,64 @@ const validationSchema = object().shape({
   bankAccount: string().required("Required Field"),
   empId: string().required("Required Field"),
   designation: string().required("Required Field"),
-  userName: string().required("Required Field"),
+  userName: string()
+    .required("Required Field")
+    .test("unique-username", "Username already exists", async (value) => {
+      if (!value) return true; // Skip validation if the field is empty
+      try {
+        const response = await axios.get("/api/employee/check_username", {
+          params: { username: value },
+        });
+        return !response.data.exists;
+      } catch (error) {
+        console.error("Error checking username:", error);
+        return false; // Treat as invalid if the API call fails
+      }
+    }),
   password: string().required("Required Field"),
   role: string().required("Required Field"),
 });
 
 function CreateEmployeeForm() {
-  const { showMessage } = useMessage();
+  const base =
+    import.meta.env.NODE_ENV === "production"
+      ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
+      : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
+
+  console.log("base", base);
+
   const { currentUser } = useSelector((state) => state.user);
   const role = currentUser.role;
+
   const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSuccess = () => {
-    showMessage("success", "Employee Created successful!");
-  };
+  const tempFilesRef = useRef([]);
+  const deletedFilesRef = useRef([]);
 
-  const handleError = () => {
-    showMessage("error", "Employee Creation failed!");
-  };
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
 
-  const truncateFileName = (fileName, maxLength = 15) => {
-    if (!fileName) return "";
-    if (fileName.length <= maxLength) return fileName;
-    return `${fileName.slice(0, maxLength)}...`;
-  };
+    const handleUnload = () => {
+      const url = `${baseUrl}/api/employee/grabage_collector`;
+      navigator.sendBeacon(url, JSON.stringify(tempFilesRef.current));
+    };
+
+    // Attach event listeners
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("unload", handleUnload);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("unload", handleUnload);
+    };
+  }, []);
 
   return (
     <Formik
@@ -141,10 +173,7 @@ function CreateEmployeeForm() {
         empCard: "",
         bankAccount: "",
         accountNo: "",
-        policeCertificateUpload: "",
-        degreesScanCopy: "",
         empId: "",
-        cnicScanCopy: "",
         designation: "",
         BasicPayInProbationPeriod: 0,
         BasicPayAfterProbationPeriod: 0,
@@ -153,13 +182,14 @@ function CreateEmployeeForm() {
         userName: "",
         password: "",
         role: "",
-        employeeProImage: "",
+        employeeProImage: {},
+        policeCertificateUpload: [],
+        cnicScanCopy: [],
+        degreesScanCopy: [],
       }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
-        console.log(values);
-        setLoading(true);
-        var formData = new FormData();
+        setLoading(false);
         const fieldMap = {
           employeeName: values.firstName,
           employeeFatherName: values.fatherName,
@@ -182,7 +212,7 @@ function CreateEmployeeForm() {
           appointmentLetterGiven: values.appointment,
           rulesAndRegulationsSigned: values.rules,
           annualLeavesSigned: values.annualLeave,
-          cnicScanCopy: values.cnicScanCopy,
+
           attendanceBiometric: values.attendence,
           localServerAccountCreated: values.localServerAccount,
           role: values.role,
@@ -191,8 +221,6 @@ function CreateEmployeeForm() {
           employeeCardGiven: values.empCard,
           bankAccount: values.bankAccount,
           bankAccountNumber: values.accountNo,
-          policeCertificateUpload: values.policeCertificateUpload,
-          degreesScanCopy: values.degreesScanCopy,
           employeeID: values.empId,
           employeeDesignation: values.designation,
           BasicPayInProbationPeriod: values.BasicPayInProbationPeriod || 0,
@@ -203,55 +231,41 @@ function CreateEmployeeForm() {
             values.AllowancesAfterProbationPeriod || 0,
           employeeUsername: values.userName,
           employeePassword: values.password,
-          employeeProImage: values.employeeProImage,
+
           superAdmin: values.superAdmin,
           whosMobile: values.whosMobile,
+
+          //Documents
+          employeeProImage: values.employeeProImage,
+          cnicScanCopy: values.cnicScanCopy,
+          policeCertificateUpload: values.policeCertificateUpload,
+          degreesScanCopy: values.degreesScanCopy,
         };
-        for (const [fieldName, value] of Object.entries(fieldMap)) {
-          formData.append(fieldName, value);
-        }
 
-        function formDataToJson(formData) {
-          const json = {};
-          formData.forEach((value, key) => {
-            // Check if the key already exists in the JSON object
-            if (Object.prototype.hasOwnProperty.call(json, key)) {
-              // If the key already exists, convert the value to an array
-              if (!Array.isArray(json[key])) {
-                json[key] = [json[key]];
-              }
-              // Push the new value to the array
-              json[key].push(value);
-            } else {
-              // If the key doesn't exist, set the value directly
-              json[key] = value;
-            }
-          });
-          return json;
-        }
-
-        const jsonData = formDataToJson(formData);
-        console.log(jsonData);
         await axios
-          .post("/api/employee/create_employee", jsonData, {
-            withCredentials:true,
-headers:{
-"Content-Type":"multipart/form-data"
-},
-          })
-          .then((data) => {
+          .post(
+            "/api/employee/create_employee",
+            {
+              updateData: fieldMap,
+              deletedFiles: deletedFilesRef.current,
+            },
+            {
+              withCredentials: true,
+            }
+          )
+          .then(() => {
             setLoading(false);
+            toast.success("Employee Added Successfully!");
             navigate("/manage-employees");
-            handleSuccess();
           })
           .catch((err) => {
             setLoading(false);
             console.log(err);
-            handleError();
+            toast.error("error", "Employee Creation failed!");
           });
       }}
     >
-      {({ isSubmitting, values, setFieldValue }) => (
+      {({ values, setFieldValue, handleSubmit, errors, setTouched }) => (
         <Box m={5}>
           <Form className="ml-5">
             <Grid
@@ -689,6 +703,7 @@ headers:{
                   className="w-full"
                   disabled={role === "manager"}
                 />
+                <ErrorMessage name="username" component="div" />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Field
@@ -1320,6 +1335,8 @@ headers:{
               </Grid>
             </Grid>
 
+            {/* ============================================  Documents   ============================================== */}
+
             <Grid
               container
               spacing={2}
@@ -1334,187 +1351,27 @@ headers:{
                     fontWeight: "600",
                     fontSize: "20px",
                     color: "#3b4056",
-                    mb: 1,
+                    mb: 5,
                   }}
                 >
-                  Documents
+                  Upload Documents
                 </Typography>
-                <hr style={{ marginBottom: "10px" }} />
-              </Grid>
 
-              <Grid item xs={12} sm={6} md={6}>
-                {" "}
-                <div>
-                  <label className="block font-semibold  mb-2">CNIC</label>
-                  <div className="flex items-center justify-start border border-dashed border-gray-400 rounded py-2 px-10  bg-gray-50 hover:bg-gray-100 transition duration-150">
-                    <input
-                      type="file"
-                      name="cnicScanCopy"
-                      onChange={(event) => {
-                        setFieldValue("cnicScanCopy", event.target.files[0]);
-                      }}
-                      className="hidden"
-                      id="cnicScanCopy"
-                    />
-                    <label
-                      htmlFor="cnicScanCopy"
-                      className="text-center cursor-pointer py-2 px-4 bg-[#1976D2] text-white rounded hover:bg-[#00AFEF] transition duration-150"
-                    >
-                      <UploadIcon /> Choose File
-                    </label>
-                    {values.cnicScanCopy ? (
-                      <span className="ml-2 text-gray-700 whitespace-normal break-words max-w-xs">
-                        Selected file:{" "}
-                        {values.cnicScanCopy.name ||
-                          truncateFileName(user.cnicScanCopy)}
-                      </span>
-                    ) : (
-                      <span className="ml-2 text-gray-700">No File Chosen</span>
-                    )}
-                    <ErrorMessage
-                      name="cnicScanCopy"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
-                  </div>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={6}>
-                <div>
-                  <label className="block font-semibold mb-2">
-                    Police Certificate
-                  </label>
-                  <div className="flex items-center justify-start break-words border border-dashed border-gray-400 rounded py-2 px-10  bg-gray-50 hover:bg-gray-100 transition duration-150">
-                    <input
-                      type="file"
-                      name="policeCertificateUpload"
-                      onChange={(event) => {
-                        setFieldValue(
-                          "policeCertificateUpload",
-                          event.target.files[0]
-                        );
-                      }}
-                      className="hidden"
-                      id="policeCertificateUpload"
-                    />
-                    <label
-                      htmlFor="policeCertificateUpload"
-                      className="text-center cursor-pointer py-2 px-4  bg-[#1976D2] text-white rounded hover:bg-[#00AFEF] transition duration-150"
-                    >
-                      <UploadIcon /> Choose File
-                    </label>
-                    {values.policeCertificateUpload ? (
-                      <div className="ml-2 text-gray-700 whitespace-normal break-words max-w-xs">
-                        Selected file:{" "}
-                        {values.policeCertificateUpload.name ||
-                          truncateFileName(user.policeCertificateUpload)}
-                      </div>
-                    ) : (
-                      <span className="ml-2 text-gray-700">No File Chosen</span>
-                    )}
-                    <ErrorMessage
-                      name="cnicScanCopy"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
-                  </div>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={6}>
-                {" "}
-                <div>
-                  <label className="block font-semibold  mb-2">
-                    Qualification
-                  </label>
-                  <div className="flex items-center justify-start border border-dashed border-gray-400 rounded py-2 px-10  bg-gray-50 hover:bg-gray-100 transition duration-150">
-                    <input
-                      type="file"
-                      name="degreesScanCopy"
-                      onChange={(event) => {
-                        setFieldValue("degreesScanCopy", event.target.files[0]);
-                      }}
-                      className="hidden"
-                      id="degreesScanCopy"
-                    />
-                    <label
-                      htmlFor="degreesScanCopy"
-                      className="text-center cursor-pointer py-2 px-4 bg-[#1976D2] text-white rounded hover:bg-[#00AFEF] transition duration-150"
-                    >
-                      <UploadIcon /> Choose File
-                    </label>
-                    {values.degreesScanCopy ? (
-                      <div className="ml-2 text-gray-700 whitespace-normal break-words max-w-xs">
-                        Selected file:{" "}
-                        {values.degreesScanCopy.name ||
-                          truncateFileName(user.degreesScanCopy)}
-                      </div>
-                    ) : (
-                      <span className="ml-2 text-gray-700">No File Chosen</span>
-                    )}
-                    <ErrorMessage
-                      name="degreesScanCopy"
-                      style={{ color: "red" }}
-                      component="div"
-                    />
-                  </div>
-                </div>
-              </Grid>
-              <Grid item xs={12} sm={6} md={6}>
-                <div>
-                  <div>
-                    <label className="block font-semibold mb-2">
-                      Profile image
-                    </label>
-                    <div className="flex items-center justify-start border border-dashed border-gray-400 rounded py-2 px-10  bg-gray-50 hover:bg-gray-100 transition duration-150">
-                      <input
-                        type="file"
-                        name="employeeProImage"
-                        onChange={(event) => {
-                          setFieldValue(
-                            "employeeProImage",
-                            event.target.files[0]
-                          );
-                        }}
-                        className="hidden"
-                        id="employeeProImage"
-                      />
-                      <label
-                        htmlFor="employeeProImage"
-                        className="text-center cursor-pointer py-2 px-4 bg-[#1976D2] text-white rounded hover:bg-[#00AFEF] transition duration-150"
-                      >
-                        <UploadIcon /> Choose File
-                      </label>
-                      {values.employeeProImage ? (
-                        <div className="ml-2 text-gray-700 whitespace-normal break-words max-w-xs">
-                          Selected file:{" "}
-                          {values.employeeProImage.name ||
-                            truncateFileName(user.employeeProImage)}
-                        </div>
-                      ) : (
-                        <span className="ml-2 text-gray-700">
-                          No File Chosen
-                        </span>
-                      )}{" "}
-                      <ErrorMessage
-                        name="employeeProImage"
-                        style={{ color: "red" }}
-                        component="div"
-                      />
-                    </div>
-                  </div>
-                </div>
+                <UploadFiles
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  tempFilesRef={tempFilesRef}
+                  deletedFilesRef={deletedFilesRef}
+                  parentFolder="Employee"
+                  folderName={`${values.userName}_${values.empId}`}
+                />
               </Grid>
             </Grid>
 
             <div className="flex justify-end">
               <Button
-                sx={{
-                  mt: 4,
-                }}
+                type="button"
                 variant="contained"
-                size="large"
-                type="submit"
-                disabled={isSubmitting}
                 endIcon={
                   <PersonAddAltIcon
                     sx={{
@@ -1522,8 +1379,14 @@ headers:{
                     }}
                   />
                 }
+                //ScrollToErrorField is a custom utlity function
+                onClick={() => {
+                  Object.keys(errors).length > 0
+                    ? ScrollToErrorField(errors, setTouched)
+                    : handleSubmit();
+                }}
               >
-                Submit
+                Create
               </Button>
             </div>
           </Form>

@@ -1,33 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "../../utils/axiosInterceptor";
-import { Howl } from "howler";
-import PropTypes from "prop-types";
 import CircleIcon from "@mui/icons-material/Circle";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import PersonIcon from "@mui/icons-material/Person";
+import { Howl } from "howler";
+import PropTypes from "prop-types";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "../../utils/axiosInterceptor";
 
 import InfoIcon from "@mui/icons-material/Info";
 import manAvatar from "/man-avatar.svg";
 
 // Redux
+import { clearSocket, initializeSocket } from "../../redux/socketSlice";
 import { signOut } from "../../redux/user/userSlice";
-import { initializeSocket, clearSocket } from "../../redux/socketSlice";
 
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setCelebrationData,
-  setShowCelebration,
-} from "../../redux/celebrationSlice";
+import { setCelebrationData, setShowCelebration } from "../../redux/celebrationSlice";
 
 //VBT FULL LOGO
-import fullLogo from "/vbt-logo.png";
 import halfLogo from "/logo.png";
+import fullLogo from "/vbt-logo.png";
 
-import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
+import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import { palette } from "../../theme/colors";
 
 import {
@@ -40,19 +37,15 @@ import {
   List,
   ListItem,
   ListItemText,
+  Menu,
+  MenuItem,
+  AppBar as MuiAppBar,
   Toolbar,
   Tooltip,
   Typography,
-  AppBar as MuiAppBar,
-  Menu,
-  MenuItem,
 } from "@mui/material";
 
-export default function Appbar({
-  mobileOpen,
-  greaterthanlg,
-  handleDrawerToggle,
-}) {
+export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const socket = useSelector((state) => state.socket.socket);
@@ -196,9 +189,7 @@ export default function Appbar({
   const deleteNotification = (notificationId) => {
     setTotalNotifications((prev) => (prev > 0 ? prev - 1 : 0));
     setNotifications((prevNotifications) =>
-      prevNotifications.filter(
-        (notification) => notification._id !== notificationId
-      )
+      prevNotifications.filter((notification) => notification._id !== notificationId)
     );
 
     axios
@@ -234,10 +225,7 @@ export default function Appbar({
   };
 
   return (
-    <MuiAppBar
-      elevation={0}
-      sx={{ backgroundColor: "white", paddingX: "10px" }}
-    >
+    <MuiAppBar elevation={0} sx={{ backgroundColor: "white", paddingX: "10px" }}>
       <Toolbar
         sx={{
           backgroundColor: "white",
@@ -287,11 +275,7 @@ export default function Appbar({
                 },
               }}
             >
-              {mobileOpen ? (
-                <KeyboardDoubleArrowLeftIcon />
-              ) : (
-                <KeyboardDoubleArrowRightIcon />
-              )}
+              {mobileOpen ? <KeyboardDoubleArrowLeftIcon /> : <KeyboardDoubleArrowRightIcon />}
             </IconButton>
           </Box>
 
@@ -311,11 +295,7 @@ export default function Appbar({
                   marginRight: "0.3rem",
                 }}
               />
-              <Typography
-                variant="h6"
-                color="text.primary"
-                sx={{ fontWeight: "600" }}
-              >
+              <Typography variant="h6" color="text.primary" sx={{ fontWeight: "600" }}>
                 {currentUser.employeeName}
               </Typography>
             </Box>
@@ -345,12 +325,7 @@ export default function Appbar({
                     {notifications.length > 0 ? (
                       notifications.map((notification, index) => (
                         <React.Fragment key={notification._id}>
-                          {index !== 0 && (
-                            <Divider
-                              component="li"
-                              sx={{ borderColor: "white" }}
-                            />
-                          )}
+                          {index !== 0 && <Divider component="li" sx={{ borderColor: "white" }} />}
                           <ListItem
                             sx={{
                               padding: 1,
@@ -371,9 +346,8 @@ export default function Appbar({
                                 let path = "/";
 
                                 const isAdmin = currentUser.role === "admin";
-                                const isManagerOrAdmin =
-                                  currentUser.role === "manager" ||
-                                  currentUser.role === "admin"; // Adjust role checks as needed
+
+                                // const isManagerOrAdmin = currentUser.role === "manager" || currentUser.role === "admin"; // Adjust role checks as needed
 
                                 switch (notification.NotificationName) {
                                   case "Leave_Notification":
@@ -394,11 +368,7 @@ export default function Appbar({
                               }}
                             >
                               <InfoIcon />
-                              <Typography
-                                sx={{ textAlign: "start" }}
-                                marginLeft={1}
-                                variant="caption"
-                              >
+                              <Typography sx={{ textAlign: "start" }} marginLeft={1} variant="caption">
                                 {notification.message}
                               </Typography>
                             </button>
@@ -492,12 +462,7 @@ export default function Appbar({
             />
           </Badge>
 
-          <Menu
-            sx={{ mt: 1.8, ml: "-25px" }}
-            anchorEl={anchorEl}
-            open={menuOpen}
-            onClose={handleClose}
-          >
+          <Menu sx={{ mt: 1.8, ml: "-25px" }} anchorEl={anchorEl} open={menuOpen} onClose={handleClose}>
             <MenuItem
               sx={{ ml: 1, mr: 1 }}
               component={Link}

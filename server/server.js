@@ -36,10 +36,7 @@ const EmployeeOfWeekModel = require("./models/emp_of_week.model");
 const app = express();
 
 const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "production"
-      ? process.env.FRONTEND_DOMAIN_NAME
-      : process.env.FRONTEND_LOCAL_ADDRESS,
+  origin: process.env.NODE_ENV === "production" ? process.env.FRONTEND_DOMAIN_NAME : process.env.FRONTEND_LOCAL_ADDRESS,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
   optionsSuccessStatus: 200,
@@ -48,6 +45,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json({ limit: "50mb" }));
+
+app.use(express.text());
 
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
@@ -86,10 +85,7 @@ app.use("/api/empOfWeek", employeeOfWeekRoutes);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.FRONTEND_DOMAIN_NAME
-        : process.env.FRONTEND_LOCAL_ADDRESS,
+    origin: process.env.NODE_ENV === "production" ? process.FRONTEND_DOMAIN_NAME : process.env.FRONTEND_LOCAL_ADDRESS,
   },
 });
 
@@ -100,8 +96,7 @@ setupEOPIoInstance(io);
 let users = [];
 
 const addUser = (userId, socketId) => {
-  !users.some((user) => user.userId === userId) &&
-    users.push({ userId, socketId });
+  !users.some((user) => user.userId === userId) && users.push({ userId, socketId });
 };
 
 const removeUser = (socketId) => {

@@ -1,36 +1,29 @@
-import React, { useState, useEffect } from "react";
-import axios from "../../utils/axiosInterceptor";
-import { useNavigate } from "react-router-dom";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import { Alert, Box, CircularProgress, MenuItem, Select, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import { CustomChip } from "../Styled/CustomChip";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import PropTypes from "prop-types";
+import React from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import axios from "../../utils/axiosInterceptor";
 import { WordCaptitalize } from "../../utils/common";
 import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
-import PropTypes from "prop-types";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
-import toast, { Toaster } from "react-hot-toast";
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Alert,
-  Button,
-  Select,
-  MenuItem,
-} from "@mui/material";
+import { CustomChip } from "../Styled/CustomChip";
 
 const EmployeesTable = ({ searchTerm }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { currentUser } = useSelector((state) => state.user);
+  const role = currentUser.role;
   const navigateTo = (employee) => {
     navigate(`/employee-profile/${employee.id}`);
   };
 
   const fetchEmployees = async ({ queryKey }) => {
     const [, searchTerm] = queryKey;
-    const response = await axios.get(
-      `/api/employee/get_managers_employees?search=${searchTerm || ""}`
-    );
+    const response = await axios.get(`/api/employee/get_managers_employees?search=${searchTerm || ""}`);
     return response.data;
   };
 
@@ -76,11 +69,7 @@ const EmployeesTable = ({ searchTerm }) => {
       headerName: "Employee",
       flex: 1,
       renderCell: ({ row }) => (
-        <EmployeeNameCell
-          src={row.employeeProImage}
-          userId={row.employeeID}
-          name={row.employeeName}
-        />
+        <EmployeeNameCell src={row.employeeProImage} userId={row.employeeID} name={row.employeeName} />
       ),
     },
     {
@@ -103,62 +92,59 @@ const EmployeesTable = ({ searchTerm }) => {
       field: "role",
       headerName: "Role",
       flex: 1,
-      renderCell: (params) => (
-        <CustomChip
-          label={WordCaptitalize(params.value)}
-          size="small"
-          status={params.value}
-        />
-      ),
-    },
-    {
-      field: "employeeStatus",
-      headerName: "Status",
-      flex: 1,
-      renderCell: (params) => {
-        const { id } = params.row;
-        console.log("idddd", id);
-        const [status, setStatus] = React.useState(params.value);
-        console.log(status);
-        const handleChange = (event) => {
-          const newStatus = event.target.value;
-          setStatus(newStatus);
-          // Trigger the mutation to update the status
-          const data = { id, newStatus };
-          mutation.mutate(data);
-        };
-
-        return (
-          <Select
-            value={status}
-            onChange={handleChange}
-            size="small"
-            variant="outlined"
-            sx={{
-              minWidth: 120,
-              backgroundColor: "white",
-              borderRadius: 1,
-            }}
-          >
-            <MenuItem value="active">
-              <Box display="flex" alignItems="center">
-                <RadioButtonCheckedIcon
-                  sx={{ color: "green", marginRight: 1 }}
-                />
-                Active
-              </Box>
-            </MenuItem>
-            <MenuItem value="inactive">
-              <Box display="flex" alignItems="center">
-                <RadioButtonCheckedIcon sx={{ color: "red", marginRight: 1 }} />
-                Inactive
-              </Box>
-            </MenuItem>
-          </Select>
-        );
-      },
+      renderCell: (params) => <CustomChip label={WordCaptitalize(params.value)} size="small" status={params.value} />,
     },
   ];
+
+  const employeeStatus = {
+    field: "employeeStatus",
+    headerName: "Status",
+    flex: 1,
+    renderCell: (params) => {
+      const { id } = params.row;
+      console.log("idddd", id);
+      const [status, setStatus] = React.useState(params.value);
+      console.log(status);
+      const handleChange = (event) => {
+        const newStatus = event.target.value;
+        setStatus(newStatus);
+        // Trigger the mutation to update the status
+        const data = { id, newStatus };
+        mutation.mutate(data);
+      };
+
+      return (
+        <Select
+          value={status}
+          onChange={handleChange}
+          size="small"
+          variant="outlined"
+          sx={{
+            minWidth: 120,
+            backgroundColor: "white",
+            borderRadius: 1,
+          }}
+        >
+          <MenuItem value="active">
+            <Box display="flex" alignItems="center">
+              <RadioButtonCheckedIcon sx={{ color: "green", marginRight: 1 }} />
+              Active
+            </Box>
+          </MenuItem>
+          <MenuItem value="inactive">
+            <Box display="flex" alignItems="center">
+              <RadioButtonCheckedIcon sx={{ color: "red", marginRight: 1 }} />
+              Inactive
+            </Box>
+          </MenuItem>
+        </Select>
+      );
+    },
+  };
+
+  if (role === "admin") {
+    employeeColumns.splice(3, 0, employeeStatus);
+  }
 
   if (isLoading) {
     return (

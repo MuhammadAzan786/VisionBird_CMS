@@ -1,28 +1,17 @@
-import React, { useState, useEffect } from "react";
+import { Alert, Box, CircularProgress, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import axios from "../../utils/axiosInterceptor";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Alert,
-  Box,
-  CircularProgress,
-  MenuItem,
-  Select,
-  Typography,
-} from "@mui/material";
+import { CustomChip } from "../../components/Styled/CustomChip";
+import { WordCaptitalize } from "../../utils/common";
+import EmployeeNameCell from "../../components/Grid Cells/EmployeeProfileCell";
 import dayjs from "dayjs";
-import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
-import PropTypes from "prop-types";
-import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import toast, { Toaster } from "react-hot-toast";
-import { useSelector } from "react-redux";
 
-const InterneeTable = ({ searchTerm }) => {
+const ActiveInterneesTable = ({ searchTerm }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { currentUser } = useSelector((state) => state.user);
-  const role = currentUser.role;
   const navigateTo = (internee) => {
     navigate(`/internee-profile/${internee.id}`);
   };
@@ -30,20 +19,9 @@ const InterneeTable = ({ searchTerm }) => {
   const fetchInternees = async ({ queryKey }) => {
     const [, searchTerm] = queryKey;
     const response = await axios.get(
-      `/api/internee/get_internees?search=${searchTerm || ""}`
+      `/api/internee/get_active_internees?search=${searchTerm || ""}`
     );
     return response.data;
-  };
-
-  const updateInterneeStatus = async (data) => {
-    try {
-      await axios.put(`/api/internee/update_internee_status/${data.id}`, {
-        interneeStatus: data.newStatus,
-      });
-      toast.success(`Status Updated to ${data.newStatus}`);
-    } catch (error) {
-      console.error("Error updating internee status:", error.message);
-    }
   };
 
   const {
@@ -52,25 +30,11 @@ const InterneeTable = ({ searchTerm }) => {
     isError,
     error,
   } = useQuery({
-    queryKey: ["internees", searchTerm],
+    queryKey: ["activeInternees", searchTerm],
     queryFn: fetchInternees,
     enabled: true,
   });
   const finalinternees = Array.isArray(internees) ? internees : [];
-  const mutation = useMutation({
-    mutationFn: updateInterneeStatus,
-    onSuccess: () => {
-      console.log("Internee status updated successfully!");
-      queryClient.invalidateQueries("activeInternees");
-      queryClient.invalidateQueries("inactiveInternees");
-      queryClient.refetchQueries("activeInternees");
-      queryClient.refetchQueries("inactiveInternees");
-    },
-    onError: (error) => {
-      console.error("Error updating internee status:", error.message);
-    },
-  });
-
   const interneeColumns = [
     {
       field: "firstName",
@@ -83,7 +47,6 @@ const InterneeTable = ({ searchTerm }) => {
     },
     { field: "designation", headerName: "Designation", width: 250 },
     { field: "email", headerName: "Email", width: 260 },
-
     {
       field: "internshipFrom",
       headerName: "Internship From",
@@ -117,53 +80,6 @@ const InterneeTable = ({ searchTerm }) => {
       ),
     },
   ];
-
-  const statusColumn = {
-    field: "interneeStatus",
-    headerName: "Status",
-    width: 250,
-    renderCell: (params) => {
-      const { id } = params.row;
-      const [status, setStatus] = React.useState(params.value);
-      const handleChange = (event) => {
-        const newStatus = event.target.value;
-        setStatus(newStatus);
-        const data = { id, newStatus };
-        mutation.mutate(data);
-      };
-
-      return (
-        <Select
-          value={status}
-          onChange={handleChange}
-          size="small"
-          variant="outlined"
-          sx={{
-            minWidth: 120,
-            backgroundColor: "white",
-            borderRadius: 1,
-          }}
-        >
-          <MenuItem value="active">
-            <Box display="flex" alignItems="center">
-              <RadioButtonCheckedIcon sx={{ color: "green", marginRight: 1 }} />
-              Active
-            </Box>
-          </MenuItem>
-          <MenuItem value="inactive">
-            <Box display="flex" alignItems="center">
-              <RadioButtonCheckedIcon sx={{ color: "red", marginRight: 1 }} />
-              Inactive
-            </Box>
-          </MenuItem>
-        </Select>
-      );
-    },
-  };
-
-  if (role === "admin") {
-    interneeColumns.splice(3, 0, statusColumn);
-  }
 
   if (isLoading) {
     return (
@@ -219,12 +135,8 @@ const InterneeTable = ({ searchTerm }) => {
         autoPageSize
         sx={{ cursor: "pointer" }}
       />
-      <Toaster position="top-center" reverseOrder={false} />
     </>
   );
 };
 
-InterneeTable.propTypes = {
-  searchTerm: PropTypes.any,
-};
-export default InterneeTable;
+export default ActiveInterneesTable;
