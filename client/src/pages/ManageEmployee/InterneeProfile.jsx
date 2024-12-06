@@ -36,6 +36,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
 import CurrencyExchangeOutlinedIcon from "@mui/icons-material/CurrencyExchangeOutlined";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
+import { useQueryClient } from "@tanstack/react-query";
 
 const InterneeProfile = () => {
   const { currentUser } = useSelector((state) => state.user);
@@ -112,13 +113,16 @@ const InterneeProfile = () => {
     navigate(`/update-internee/${id}`);
   };
 
+  const queryClient = useQueryClient();
+
   const handleDelete = async () => {
-    navigate("/manage-employees");
     try {
       const response = await axios.delete(
         `/api/internee/delete_internee/${id}`
       );
       handleSuccess();
+      navigate("/manage-internees");
+      queryClient.invalidateQueries("employees");
     } catch (error) {
       // Handle different types of errors
       console.log("Error:", error);

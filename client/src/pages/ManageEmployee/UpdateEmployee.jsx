@@ -14,6 +14,7 @@ import "../../index.css";
 import axios from "../../utils/axiosInterceptor";
 import Test from "../Test/Test";
 import { ScrollToErrorField } from "../../utils/common";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 const baseUrl =
   import.meta.env.NODE_ENV === "production"
     ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
@@ -81,6 +82,8 @@ function UpdateForm() {
   const closeUploadModal = () => {
     setUploadModalOpen(false);
   };
+  
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -230,6 +233,7 @@ function UpdateForm() {
           .then(() => {
             setLoading(false);
             toast.success("Employee Updated Successfully!");
+            queryClient.invalidateQueries('employees')
             navigate("/manage-employees");
           })
           .catch((err) => {

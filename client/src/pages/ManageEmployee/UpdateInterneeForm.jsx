@@ -94,7 +94,7 @@ const UpdateInterneeForm = () => {
   const truncateFileName = (fileName, maxLength = 15) => {
     if (!fileName) return "";
     if (fileName.length <= maxLength) return fileName;
-    return `${fileName.slice(0, maxLength)}...`;
+    return `${fileName?.slice(0, maxLength)}...`;
   };
 
   const handleSuccess = () => {
