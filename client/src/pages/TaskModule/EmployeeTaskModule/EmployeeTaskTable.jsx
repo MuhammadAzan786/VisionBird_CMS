@@ -1,7 +1,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
-import Toolbar from "@mui/material/Toolbar";
 import TextField from "@mui/material/TextField";
 import Chip from "@mui/material/Chip";
 import Menu from "@mui/material/Menu";
@@ -85,9 +84,7 @@ const columns = (handleStatusChange) => [
         const fetchManagerData = async () => {
           const managerId = params.row.manager_obj_id;
           try {
-            const response = await axios.get(
-              `/api/employee/get_employee/${managerId}`
-            );
+            const response = await axios.get(`/api/employee/get_employee/${managerId}`);
             const manager = response.data;
             setManagerName(manager.employeeName);
             setManagerEmail(manager.email);
@@ -111,20 +108,13 @@ const columns = (handleStatusChange) => [
           >
             <Box sx={{ marginRight: "10px" }}>
               {ManagerProfilePic ? (
-                <Avatar
-                  alt="Avatar"
-                  sx={{ width: 28, height: 28 }}
-                  src={ManagerProfilePic}
-                />
+                <Avatar alt="Avatar" sx={{ width: 28, height: 28 }} src={ManagerProfilePic} />
               ) : (
                 <Skeleton variant="circular" width={28} height={28} />
               )}
             </Box>
             <Box>
-              <Typography
-                variant="body2"
-                sx={{ fontWeight: "700", fontSize: "0.8rem" }}
-              >
+              <Typography variant="body2" sx={{ fontWeight: "700", fontSize: "0.8rem" }}>
                 {managerName}
               </Typography>
               <Typography variant="body2" sx={{ fontSize: "0.7rem" }}>
@@ -226,11 +216,7 @@ const columns = (handleStatusChange) => [
 
       const onChangeStatus = async (status) => {
         console.log(params.row.pauseRequestStatus);
-        handleStatusChange(
-          params.row._id,
-          status,
-          params.row.pauseRequestStatus
-        );
+        handleStatusChange(params.row._id, status, params.row.pauseRequestStatus);
         handleClose();
       };
 
@@ -296,36 +282,18 @@ const columns = (handleStatusChange) => [
                 width: "20%",
               }}
             >
-              <IconButton
-                aria-label="more"
-                aria-controls="long-menu"
-                aria-haspopup="true"
-                onClick={handleClick}
-              >
+              <IconButton aria-label="more" aria-controls="long-menu" aria-haspopup="true" onClick={handleClick}>
                 <MoreVertIcon />
               </IconButton>
 
-              <Menu
-                id="long-menu"
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={() => onChangeStatus("In Progress")}>
-                  In Progress
-                </MenuItem>
+              <Menu id="long-menu" anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem onClick={() => onChangeStatus("In Progress")}>In Progress</MenuItem>
 
-                <MenuItem onClick={() => onChangeStatus("PauseRequest")}>
-                  Pause Request
-                </MenuItem>
+                <MenuItem onClick={() => onChangeStatus("PauseRequest")}>Pause Request</MenuItem>
 
-                <MenuItem onClick={() => onChangeStatus("ResumeRequest")}>
-                  Resume Task
-                </MenuItem>
+                <MenuItem onClick={() => onChangeStatus("ResumeRequest")}>Resume Task</MenuItem>
 
-                <MenuItem onClick={() => onChangeStatus("Completed")}>
-                  Completed
-                </MenuItem>
+                <MenuItem onClick={() => onChangeStatus("Completed")}>Completed</MenuItem>
               </Menu>
             </Box>
           </Box>
@@ -438,14 +406,11 @@ export default function EmployeeTaskTable() {
       const date = new Date(); // Assuming you want tasks created on the current date
       const formattedDate = date.toISOString(); // Convert date to ISO string format
       console.log(formattedDate);
-      const response = await axios.get(
-        `/api/task/getAssignedTasksByEmployeeIdDate/${id}`,
-        {
-          params: {
-            date: formattedDate,
-          },
-        }
-      );
+      const response = await axios.get(`/api/task/getAssignedTasksByEmployeeIdDate/${id}`, {
+        params: {
+          date: formattedDate,
+        },
+      });
       const tasks = response.data.map((task) => ({
         id: task._id, // Ensure _id is used as the unique identifier
         ...task,
@@ -505,9 +470,7 @@ export default function EmployeeTaskTable() {
     if (value === "") {
       getTasks(); // Reload all     tasks if search text is cleared
     } else {
-      const filteredRows = rows.filter((row) =>
-        row.taskTicketNo.toLowerCase().includes(value.toLowerCase())
-      );
+      const filteredRows = rows.filter((row) => row.taskTicketNo.toLowerCase().includes(value.toLowerCase()));
       setRows(filteredRows);
     }
   };
@@ -519,28 +482,17 @@ export default function EmployeeTaskTable() {
       const pauseRequestStatus = currentTask.pauseRequestStatus;
       if (
         currentStatus === "Paused" &&
-        (status === "PauseRequest" ||
-          status === "Completed" ||
-          status === "In Progress")
+        (status === "PauseRequest" || status === "Completed" || status === "In Progress")
       ) {
         toast.error("Task is paused!!");
         return;
-      } else if (
-        currentStatus === "Not Started" &&
-        (status === "PauseRequest" || status === "ResumeRequest")
-      ) {
+      } else if (currentStatus === "Not Started" && (status === "PauseRequest" || status === "ResumeRequest")) {
         toast.error("Task is not Started Yet!");
         return;
-      } else if (
-        currentStatus === "In Progress" &&
-        (status === "In Progress" || status === "ResumeRequest")
-      ) {
+      } else if (currentStatus === "In Progress" && (status === "In Progress" || status === "ResumeRequest")) {
         toast.error("Task is already in Progress");
         return;
-      } else if (
-        pauseRequestStatus === "pending" &&
-        status === "PauseRequest"
-      ) {
+      } else if (pauseRequestStatus === "pending" && status === "PauseRequest") {
         toast.error("Pause Request already pending");
       } else if (currentStatus === "In Progress" && status === "PauseRequest") {
         const Task = rows.find((row) => row.id === id);
@@ -578,9 +530,7 @@ export default function EmployeeTaskTable() {
 
       // Conditions for status change
       if (currentStatus === "In Progress" && status === "Not Started") {
-        toast.error(
-          "Task status cannot be changed to Not Started once it is In Progress!"
-        );
+        toast.error("Task status cannot be changed to Not Started once it is In Progress!");
         return;
       } else if (currentStatus === "Completed" || status === "Not Started") {
         toast.error("Task status cannot be changed once it is Completed!");
@@ -598,10 +548,8 @@ export default function EmployeeTaskTable() {
         // Update task status via API
         const response = await axios.put(`/api/task/updateTaskStatus/${id}`, {
           taskStatus: status,
-          taskStartTime:
-            status === "In Progress" ? new Date().toISOString() : null,
-          taskcompleteTime:
-            status === "Completed" ? new Date().toISOString() : null,
+          taskStartTime: status === "In Progress" ? new Date().toISOString() : null,
+          taskcompleteTime: status === "Completed" ? new Date().toISOString() : null,
         });
         if (response.status === 200) {
           toast.success("successfully!");

@@ -1,6 +1,5 @@
 import { Field, Form, Formik } from "formik";
 import { useEffect, useState } from "react";
-
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -22,6 +21,8 @@ import { signOut } from "../redux/user/userSlice";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { fetchNotifications } from "../redux/notification/notificationSlice";
+import CustomOverlay from "../components/Styled/CustomOverlay";
 
 const validationSchema = object().shape({});
 const LOGIN_URL = "/api/auth/sign-in";
@@ -72,10 +73,12 @@ export default function Signin() {
               withCredentials: true,
             })
             .then((res) => {
+              const { _id } = res.data;
               setLoading(true);
               navigate("/");
               dispatch(loginSuccess(res.data));
               dispatch(initializeSocket(res.data));
+              dispatch(fetchNotifications(_id));
               setLoading(false);
             })
             .catch((error) => {
@@ -100,15 +103,7 @@ export default function Signin() {
                   backgroundPosition: "center",
                 }}
               />
-              <Grid
-                item
-                xs={12}
-                sm={8}
-                md={5}
-                component={Paper}
-                elevation={6}
-                square
-              >
+              <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
                 <Box
                   sx={{
                     mx: 4,
@@ -150,26 +145,14 @@ export default function Signin() {
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
-                            <IconButton
-                              onClick={togglePasswordVisibility}
-                              edge="end"
-                            >
-                              {showPassword ? (
-                                <VisibilityOff />
-                              ) : (
-                                <Visibility />
-                              )}
+                            <IconButton onClick={togglePasswordVisibility} edge="end">
+                              {showPassword ? <VisibilityOff /> : <Visibility />}
                             </IconButton>
                           </InputAdornment>
                         ),
                       }}
                     />
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      fullWidth
-                      sx={{ mt: 3, mb: 2 }}
-                    >
+                    <Button type="submit" variant="contained" fullWidth sx={{ mt: 3, mb: 2 }}>
                       Sign In
                     </Button>
                   </Box>

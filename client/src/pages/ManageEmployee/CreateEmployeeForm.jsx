@@ -84,6 +84,8 @@ function CreateEmployeeForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const userNameInputRef = useRef();
+
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
 
@@ -95,43 +97,52 @@ function CreateEmployeeForm() {
       initialValues={{
         firstName: "",
         fatherName: "",
-        cnic: "",
+        cnic: "34202-2866666-1",
         dob: "",
-        mailingAddress: "",
-        disability: "",
+        mailingAddress: "lalamusa",
+        disability: "no",
         kindofdisability: "",
-        mobile: "",
-        email: "",
-        gender: "",
-        maritalStatus: "",
-        otherMobile: "",
-        whosMobile: "",
-        qualification: "",
+        mobile: "0331-6281670",
+        email: "ali@gmail.com",
+        gender: "male",
+        maritalStatus: "single",
+        otherMobile: "0331-6281670",
+        whosMobile: "personal",
+        qualification: "matriculation",
         startDate: new Date().toISOString().substr(0, 10),
         dateconfirmed: new Date().toISOString().substr(0, 10),
-        probation: "",
-        probationMonths: "",
-        policyBook: "",
-        appointment: "",
-        rules: "",
-        annualLeave: "",
-        attendence: "",
-        localServerAccount: "",
-        superAdmin: "",
-        slack: "",
-        whatsApp: "",
-        empCard: "",
-        bankAccount: "",
-        accountNo: "",
+
         empId: "",
-        designation: "",
+        designation: "Graphic Designer",
+
+        userName: "",
+        password: "",
+        role: "employee",
+
+        probation: "no",
+        probationMonths: "",
+
         BasicPayInProbationPeriod: 0,
         BasicPayAfterProbationPeriod: 0,
         AllowancesInProbationPeriod: 0,
         AllowancesAfterProbationPeriod: 0,
-        userName: "",
-        password: "",
-        role: "",
+
+        bankAccount: "no",
+        accountNo: "",
+
+        // Onboarding Questionnaire
+        policyBook: "no",
+        appointment: "no",
+        annualLeave: "no",
+        attendence: "no",
+        localServerAccount: "no",
+        rules: "no",
+        slack: "no",
+        superAdmin: "no",
+        whatsApp: "no",
+        empCard: "no",
+
+        // Documents
         employeeProImage: {},
         policeCertificateUpload: [],
         cnicScanCopy: [],
@@ -596,6 +607,7 @@ function CreateEmployeeForm() {
                     }}
                     className="w-full"
                     disabled={role === "manager"}
+                    inputRef={userNameInputRef}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>

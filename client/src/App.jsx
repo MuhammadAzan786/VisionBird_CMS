@@ -59,6 +59,7 @@ import Test from "./pages/Test/Test";
 import Unauthorized from "./pages/Unauthorized";
 import { clearSocket } from "./redux/socketSlice";
 import { signOut } from "./redux/user/userSlice";
+import Notifications from "./pages/Notifications/Notifications";
 
 const App = () => {
   const socket = useSelector((state) => state.socket.socket);
@@ -222,6 +223,8 @@ const App = () => {
             {/* Role Routes */}
             <Route path="/role" element={<Role />} />
 
+            {/* Test ========================= ============================================================Routes */}
+            <Route path="/notifications" element={<Notifications />} />
             {/* Test ========================= ============================================================Routes */}
             <Route path="/test" element={<Test />} />
 

@@ -1,13 +1,6 @@
 const Employee = require("../models/employeemodel");
 const Post = require("../models/postmodel");
-const path = require("path");
-const fs = require("fs");
-const streamifier = require("streamifier");
-
 const cloudinary = require("../utils/cloudinaryConfig");
-
-const parentDir = path.dirname(__dirname);
-const mainDir = path.join(parentDir, "uploads", "employees");
 
 module.exports = {
   // ! Add Employee page
@@ -35,8 +28,8 @@ module.exports = {
       console.log("Employee Created Successfully");
       res.json({ message: "Employee data saved successfully!" });
     } catch (error) {
-      console.error("Error in create_employee:", error);
-      res.status(400).json({ error: error.message });
+      console.log("CREATE_EMPLOYEE_ERROR", error);
+      res.status(501).json({ message: "Employee creation unsuccessfull" });
     }
   },
   // ===============================================================
@@ -83,53 +76,36 @@ module.exports = {
     }
   },
 
-  // ! Delete the Employee
   delete_employee: async (req, res) => {
-    const userId = req.params.id;
     try {
-      // finding the document to delete
-      const document = await Employee.findOne({ _id: userId });
-      if (!document) {
-        res.status(400).json({ error: "Employee not found" });
-        return;
+      const userId = req.params.id;
+      console.log("Employee Delete Checking");
+
+      const deletedEmployee = await Employee.findByIdAndDelete(userId);
+
+      if (!deletedEmployee) {
+        return res.status(404).json({ message: "Employee not Deleted" });
       }
 
-      //deleting the document from mongo db
-      const deleteDone = await Employee.deleteOne({ _id: userId });
-      if (!deleteDone) {
-        return res.status(404).send({ error: "Employee not Deleted" });
-      }
+      // For Getting Folder Name Later On
+      const { employeeProImage } = deletedEmployee;
 
-      const deleteFromCloudinary = async (url) => {
-        if (url) {
-          const segments = url.split("/");
-          // Extract the public ID which includes folder and file name but excludes extension
-          const publicId = segments.slice(7, segments.length - 1).join("/") + "/" + segments.pop().split(".")[0];
+      const folderName = employeeProImage.public_id.split("/").slice(0, -1).join("/");
+      console.log("folderName", folderName);
 
-          console.log("Deleting", publicId);
-          try {
-            await cloudinary.uploader.destroy(publicId);
-            console.log(`Deleted Cloudinary file: ${publicId}`);
-          } catch (err) {
-            console.log(`Failed to delete Cloudinary file: ${publicId}`, err);
-          }
-        }
-      };
+      await cloudinary.api.delete_resources_by_prefix(folderName, { resource_type: "image" });
+      await cloudinary.api.delete_resources_by_prefix(folderName, { resource_type: "raw" });
+      await cloudinary.api.delete_folder(folderName);
 
-      // Delete files from Cloudinary
-      await deleteFromCloudinary(document.cnicScanCopy);
-      await deleteFromCloudinary(document.employeeProImage);
-      await deleteFromCloudinary(document.policeCertificateUpload);
-      await deleteFromCloudinary(document.degreesScanCopy);
+      console.log("Employee deleted Successfully");
 
-      res.status(200).send({ message: "Employee record Deleted !!!" });
+      res.status(200).json({ message: "Employee deleted Successfully" });
     } catch (error) {
-      console.log(error);
-      res.status(500).send({ error: error.message });
+      console.log("DELETE_EMPLOYEE_ERROR", error);
+      res.status(501).json({ message: "Employee deletetion Unsuccessfull" });
     }
   },
 
-  // ! Update Employee
   update_employee: async (req, res) => {
     const userId = req.params.id;
     try {
@@ -281,9 +257,6 @@ module.exports = {
         await cloudinary.api.delete_resources(rawFiles, { resource_type: "raw" });
         console.log("Emp Add, Raw Files Deleted");
       }
-
-      // await cloudinary.api.delete_resources(parsedData, { type: "upload" });
-      // console.log("Deleted files:");
 
       const folderName = parsedData[0].split("/").slice(0, -1).join("/");
       console.log("folder", folderName);

@@ -14,8 +14,7 @@ import {
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import { date, object, string } from "yup";
-
+import { object, string } from "yup";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import LoadingAnim from "../../components/LoadingAnim";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
@@ -61,7 +60,6 @@ const validationSchema = object().shape({
   internId: string().required("Required Field"),
   designation: string().required("Required Field"),
   offered_By: string().required("Required Field"),
-  givenOn: date().required("Date is required"),
 
   disability: string()
     .required("Disability is required")
@@ -87,35 +85,34 @@ const CreateInterneeForm = () => {
       initialValues={{
         firstName: "",
         fatherName: "",
-        cnic: "",
+        cnic: "34202-2866666-1",
         dob: dayjs().format("YYYY-MM-DD"),
-        mailingAddress: "",
-        mobile: "",
-        email: "",
-        gender: "",
-        maritalStatus: "",
-        otherMobile: "",
-        whosMobile: "",
-        qualification: "",
+        mailingAddress: "lalamusa",
+        mobile: "0331-6281670",
+        email: "alisahi@gmail.com",
+        gender: "male",
+        maritalStatus: "single",
+        otherMobile: "0331-6281670",
+        whosMobile: "personal",
+        qualification: "matriculation",
 
-        rules: "",
-        slack: "",
+        rules: "no",
+        slack: "no",
 
         internshipFrom: dayjs().format("YYYY-MM-DD"),
         internshipTo: "",
         internId: "",
-        designation: "",
+        designation: "MERN",
 
         offered_By: "",
 
-        givenOn: "",
         // Documents
         interneeProImage: {},
         cnicFile: [],
         appointmentFile: [],
         experienceLetter: [],
 
-        disability: "",
+        disability: "no",
         //Ye field formik me nhi hai
         disabilityType: "",
       }}
@@ -147,7 +144,6 @@ const CreateInterneeForm = () => {
 
           disability: values.disability,
           disabilityType: values.kindofdisability,
-          givenOn: values.givenOn,
 
           // Documents
           interneeProImage: values.interneeProImage,
@@ -779,39 +775,6 @@ const CreateInterneeForm = () => {
                     }}
                   />
                 </div>
-              </Grid>
-            </Grid>
-
-            <Grid container spacing={2} component={Paper} elevation={2} borderRadius={"5px"} mt={2} p={3}>
-              <Grid item xs={12} sm={6} md={6}>
-                <FormControl
-                  fullWidth
-                  variant="outlined"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                >
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Given on"
-                      format="DD/MM/YYYY"
-                      name="givenOn"
-                      value={dayjs(values.dob) || dayjs()}
-                      onChange={(newValue) => {
-                        const fromDate = dayjs(newValue);
-                        setFieldValue("givenOn", fromDate.format("YYYY-MM-DD"));
-                      }}
-                      slotProps={{
-                        textField: {
-                          helperText: "DD/MM/YYYY",
-                        },
-                      }}
-                    />
-                  </LocalizationProvider>
-                  <ErrorMessage name="givenOn" style={{ color: "red" }} component="div" />
-                </FormControl>
               </Grid>
             </Grid>
 

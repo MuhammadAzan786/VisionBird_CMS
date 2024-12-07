@@ -20,6 +20,8 @@ module.exports.signin = async (req, res, next) => {
     });
     const { employeePassword: Password, ...rest } = validUser._doc;
 
+    console.log("signin", rest);
+
     res
       .cookie("access_token", token, {
         httpOnly: true,

@@ -121,7 +121,6 @@ const UpdateInterneeForm = () => {
         internId: user.internId || "",
         designation: user.designation || "",
         experienceLetter: user.experienceLetter || "",
-        givenOn: user.givenOn ? user.givenOn.split("T")[0] : "",
         offered_By: user.offered_By || "",
         interneeProImage: user.interneeProImage || "",
         disability: user.disability || "no",
@@ -155,7 +154,7 @@ const UpdateInterneeForm = () => {
           appointmentFile: values.appointmentFile,
           cnicFile: values.cnicFile,
           experienceLetter: values.experienceLetter,
-          givenOn: values.givenOn,
+
           interneeProImage: values.interneeProImage,
           disability: values.disability,
           disabilityType: values.kindofdisability,
@@ -731,38 +730,6 @@ const UpdateInterneeForm = () => {
                     }}
                   />
                 </div>
-              </Grid>
-            </Grid>
-
-            <Grid container spacing={2} component={Paper} elevation={2} borderRadius={"5px"} mt={2} p={3}>
-              <Grid item xs={12} sm={6} md={6}>
-                <FormControl
-                  fullWidth
-                  variant="outlined"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                >
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Given on"
-                      format="DD/MM/YYYY"
-                      name="givenOn"
-                      value={dayjs(values.dob) || dayjs()}
-                      onChange={(newValue) => {
-                        const fromDate = dayjs(newValue);
-                        setFieldValue("givenOn", fromDate.format("YYYY-MM-DD"));
-                      }}
-                      slotProps={{
-                        textField: {
-                          helperText: "DD/MM/YYYY",
-                        },
-                      }}
-                    />
-                  </LocalizationProvider>
-                </FormControl>
               </Grid>
             </Grid>
 
