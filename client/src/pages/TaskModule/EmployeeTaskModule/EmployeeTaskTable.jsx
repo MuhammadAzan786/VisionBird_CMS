@@ -42,11 +42,6 @@ const updateTaskCompleteStatus = async (taskId, TaskStatus) => {
       taskCompleteStatus: TaskStatus,
     }
   );
-  // if (response) {
-  //   toast.success("Task Complete Status Updated Successfully");
-  // } else {
-  //   toast.error("Task Complete Status Updation Failed");
-  // }
 };
 
 const columns = (handleStatusChange) => [
@@ -88,7 +83,7 @@ const columns = (handleStatusChange) => [
             const manager = response.data;
             setManagerName(manager.employeeName);
             setManagerEmail(manager.email);
-            setManagerProfilePic(manager.employeeProImage);
+            setManagerProfilePic(manager.employeeProImage.secure_url);
           } catch (error) {
             console.error("Error fetching manager data", error);
           }

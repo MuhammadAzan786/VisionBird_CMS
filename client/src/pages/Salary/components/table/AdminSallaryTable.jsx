@@ -28,12 +28,9 @@ const AdminSalaryTable = () => {
 
   const fetchAllRequests = async () => {
     try {
-      const result = await axios.post(
-        "/api/advance_payments/admin/advance/salary/list",
-        {
-          currentUser,
-        }
-      );
+      const result = await axios.post("/api/advance_payments/admin/advance/salary/list", {
+        currentUser,
+      });
 
       return result.data;
     } catch (error) {
@@ -47,7 +44,7 @@ const AdminSalaryTable = () => {
           ...item,
           id: item._id,
           employee_name: item.employee_obj_id.employeeName,
-          employee_img: item.employee_obj_id.employeeProImage,
+          employee_img: item.employee_obj_id.employeeProImage.secure_url,
           employee_id: item.employee_obj_id.employeeID,
           current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
           request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
@@ -64,11 +61,7 @@ const AdminSalaryTable = () => {
       headerName: "Employee",
       width: 150,
       renderCell: ({ row }) => (
-        <EmployeeNameCell
-          userId={row.employee_id}
-          name={row.employee_name}
-          src={row.employee_img}
-        />
+        <EmployeeNameCell userId={row.employee_id} name={row.employee_name} src={row.employee_img} />
       ),
     },
     {
@@ -139,8 +132,7 @@ const AdminSalaryTable = () => {
         } else if (params.value === "approved") {
           icon = <CheckCircle />;
         }
-        const label =
-          params.value.charAt(0).toUpperCase() + params.value.slice(1);
+        const label = params.value.charAt(0).toUpperCase() + params.value.slice(1);
         return <CustomChip label={label} status={params.value} icon={icon} />;
       },
     },
@@ -184,10 +176,7 @@ const AdminSalaryTable = () => {
             onClick={handleEditClick(id)}
             size="medium"
             sx={iconStyles.edit}
-            disabled={
-              row.approval_status === "rejected" ||
-              row.approval_status === "approved"
-            }
+            disabled={row.approval_status === "rejected" || row.approval_status === "approved"}
           />,
         ];
       },
@@ -215,16 +204,13 @@ const AdminSalaryTable = () => {
       return { ...newRow, isNew: false };
     }
     try {
-      const res = await axios.post(
-        `/api/advance_payments/admin/advance-applications/?type=advanceSalary`,
-        {
-          currentUser,
-          _id: id,
-          approval_status,
-          activity_status,
-          employee_obj_id,
-        }
-      );
+      const res = await axios.post(`/api/advance_payments/admin/advance-applications/?type=advanceSalary`, {
+        currentUser,
+        _id: id,
+        approval_status,
+        activity_status,
+        employee_obj_id,
+      });
 
       const newObj = { ...res.data, id: res.data._id };
       toast.success("Loan status updated successfully!");
@@ -262,9 +248,7 @@ const AdminSalaryTable = () => {
   );
 };
 
-const monthCell = (params) => (
-  <>{params.value > 1 ? `${params.value} Months` : `${params.value} Month`}</>
-);
+const monthCell = (params) => <>{params.value > 1 ? `${params.value} Months` : `${params.value} Month`}</>;
 
 const iconStyles = {
   edit: {

@@ -75,56 +75,6 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
     return successfulUploads;
   };
 
-  // const sendtoCloudinary = async (file) => {
-  //   const isImage = /image\/(jpeg|png|gif|bmp|svg|webp|tiff)/i.test(file.type);
-  //   const resourceType = isImage ? "image" : "raw";
-
-  //   const formData = new FormData();
-  //   formData.append("file", file);
-  //   formData.append("context", `original_filename=${file.name}`);
-  //   formData.append("folder", `${parentFolder}/${folderName}`);
-  //   formData.append("upload_preset", cloudinaryConfig.upload_preset);
-
-  //   try {
-  //     const response = await fetch(cloudinaryConfig.getApiUrl(resourceType), {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-
-  //     // Handle the response
-  //     if (!response.ok) {
-  //       throw new Error("Upload failed");
-  //     }
-
-  //     const CloudinaryData = await response.json();
-
-  //     const { secure_url, resource_type, public_id, context } = CloudinaryData;
-
-  //     const original_file_name = context?.custom?.original_filename;
-
-  //     const baseFileMetadata = { public_id, secure_url, original_file_name, resource_type };
-
-  //     console.log("Cloudinary Returned", baseFileMetadata);
-
-  //     // For all new uploads Garbage Files collector
-  //     tempFilesRef.current.push(public_id);
-
-  //     if (tabValue === "employeeProImage") {
-  //       // checking if its not null for. bcz it will push a null
-  //       if (values.employeeProImage.public_id !== undefined) {
-  //         deletedFilesRef.current.push(values.employeeProImage.public_id);
-  //       }
-
-  //       setFieldValue("employeeProImage", baseFileMetadata);
-  //       return;
-  //     } else {
-  //       setFieldValue(tabValue, [...(values[tabValue] || []), baseFileMetadata]);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error uploading image:", error);
-  //   }
-  // };
-
   const handleDelete = async (public_id) => {
     // =================== TODO
     deletedFilesRef.current.push(public_id);

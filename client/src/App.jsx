@@ -80,7 +80,6 @@ const App = () => {
   useEffect(() => {
     if (socket) {
       socket.on("celebration", (data) => {
-        //console.log("data",data)
         dispatch(setCelebrationData(data));
         dispatch(setShowCelebration(true));
       });

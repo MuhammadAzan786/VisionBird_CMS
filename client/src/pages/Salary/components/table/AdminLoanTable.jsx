@@ -30,9 +30,7 @@ const AdminLoanTable = () => {
       field: "employee_name",
       headerName: "Employee",
       width: 150,
-      renderCell: ({ row }) => (
-        <EmployeeNameCell userId={row.employee_id} name={row.employee_name} />
-      ),
+      renderCell: ({ row }) => <EmployeeNameCell userId={row.employee_id} name={row.employee_name} />,
     },
     {
       field: "loan_reason",
@@ -65,11 +63,7 @@ const AdminLoanTable = () => {
             {params.value === "full" ? (
               <CustomChip label={WordCaptitalize(params.value)} />
             ) : (
-              <CustomChip
-                label={`${WordCaptitalize(params.value)} (${
-                  params.row.installment_duration_months
-                })`}
-              />
+              <CustomChip label={`${WordCaptitalize(params.value)} (${params.row.installment_duration_months})`} />
             )}
           </>
         );
@@ -124,8 +118,7 @@ const AdminLoanTable = () => {
         } else if (params.value === "approved") {
           icon = <CheckCircle />;
         }
-        const label =
-          params.value.charAt(0).toUpperCase() + params.value.slice(1);
+        const label = params.value.charAt(0).toUpperCase() + params.value.slice(1);
         return <CustomChip label={label} status={params.value} icon={icon} />;
       },
     },
@@ -167,10 +160,7 @@ const AdminLoanTable = () => {
             label="Edit"
             onClick={handleEditClick(id)}
             sx={iconStyles.edit}
-            disabled={
-              row.approval_status === "rejected" ||
-              row.approval_status === "approved"
-            }
+            disabled={row.approval_status === "rejected" || row.approval_status === "approved"}
           />,
         ];
       },
@@ -200,15 +190,12 @@ const AdminLoanTable = () => {
     }
 
     try {
-      const res = await axios.post(
-        `/api/advance_payments/admin/advance-applications/?type=loan`,
-        {
-          currentUser,
-          _id: id,
-          approval_status,
-          activity_status,
-        }
-      );
+      const res = await axios.post(`/api/advance_payments/admin/advance-applications/?type=loan`, {
+        currentUser,
+        _id: id,
+        approval_status,
+        activity_status,
+      });
 
       const newObj = { ...res.data, id: res.data._id };
       toast.success("Loan status updated successfully!");
@@ -248,7 +235,7 @@ const AdminLoanTable = () => {
           ...item,
           id: item._id,
           employee_name: item.employee_obj_id.employeeName,
-          employee_img: item.employee_obj_id.employeeProImage,
+          employee_img: item.employee_obj_id.employeeProImage.secure_url,
           employee_id: item.employee_obj_id.employeeID,
           current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
           request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),

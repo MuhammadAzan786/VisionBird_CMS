@@ -14,11 +14,7 @@ const columns = [
     headerAlign: "center",
     align: "center",
     renderCell: ({ row }) => (
-      <EmployeeNameCell
-        src={row.employeeProImage}
-        userId={row.userId}
-        name={row.name}
-      />
+      <EmployeeNameCell src={row.employeeProImage?.secure_url} userId={row.userId} name={row.name} />
     ),
   },
 
@@ -35,9 +31,7 @@ const columns = [
     flex: 1,
     headerAlign: "center",
     align: "center",
-    renderCell: (params) => (
-      <CustomChip label={params.value} status={params.value} />
-    ),
+    renderCell: (params) => <CustomChip label={params.value} status={params.value} />,
   },
 
   {
@@ -66,15 +60,13 @@ export default function EowHistory() {
   const fetchData = async () => {
     try {
       const weekQueryParam = weekNo ? `?weekNo=${weekNo}` : ""; // If weekNo is provided, append it to the query, else leave it empty for recent data
-      const response = await axios.get(
-        `http://localhost:4000/api/empOfWeek/allevaluations${weekQueryParam}`
-      );
+      const response = await axios.get(`http://localhost:4000/api/empOfWeek/allevaluations${weekQueryParam}`);
 
       // Flatten employeeTotals into separate rows
       const formattedRows = response.data.data.flatMap((item) =>
         Object.entries(item.employeeTotals).map(([key, employee]) => ({
           id: key, // Use a unique ID (e.g., employee's key)
-          employeeProImage: employee.employeeProImage,
+          employeeProImage: employee.employeeProImage?.secure_url,
           name: employee.name,
           email: employee.email,
           totalPoints: employee.totalPoints,
@@ -84,9 +76,7 @@ export default function EowHistory() {
       );
 
       // Find the max points and sort the rows by totalPoints in descending order
-      const highestPoints = Math.max(
-        ...formattedRows.map((row) => row.totalPoints)
-      );
+      const highestPoints = Math.max(...formattedRows.map((row) => row.totalPoints));
       setMaxPoints(highestPoints);
 
       formattedRows.sort((a, b) => b.totalPoints - a.totalPoints); // b - a for descending order

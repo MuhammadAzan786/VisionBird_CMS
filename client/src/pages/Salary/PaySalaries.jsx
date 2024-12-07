@@ -55,10 +55,7 @@ const PaySalaries = () => {
   });
   const [paidDate, setPaidDate] = React.useState(dayjs());
   const [totalWorkingDays, setTotalWorkingDays] = React.useState(
-    getWorkingDays(
-      Number(selectedDate.year),
-      Number(selectedDate.month) - 1
-    ).toString()
+    getWorkingDays(Number(selectedDate.year), Number(selectedDate.month) - 1).toString()
   );
 
   const handlePaymentMethodChange = (event) => {
@@ -77,10 +74,7 @@ const PaySalaries = () => {
     setSelectedDate({ month: selectedMonthName, year: selectedYear });
 
     // Set working days for the selected year/month
-    const workingDays = getWorkingDays(
-      Number(selectedYear),
-      Number(selectedMonthName) - 1
-    );
+    const workingDays = getWorkingDays(Number(selectedYear), Number(selectedMonthName) - 1);
     setTotalWorkingDays(workingDays);
 
     //If year/month changes set paid date to 1 of that year/month
@@ -155,16 +149,12 @@ const PaySalaries = () => {
             }}
           >
             <Avatar
-              src={params.row.employeeProImage}
+              src={params.row.employeeProImage.secure_url}
               alt="avatar"
               sx={{ border: "5px solid #F5F5F5", width: 50, height: 50 }}
             />
             <Stack sx={{ alignItems: "start", gap: "0" }}>
-              <Typography
-                fontWeight={500}
-                fontSize={15}
-                sx={{ fontFamily: "Poppins, sans-serif" }}
-              >
+              <Typography fontWeight={500} fontSize={15} sx={{ fontFamily: "Poppins, sans-serif" }}>
                 {params.row.employeeName}
               </Typography>
               <Typography color="#a0a0a0" fontSize={12}>
@@ -180,9 +170,7 @@ const PaySalaries = () => {
       headerName: "Designation",
       width: 200,
       ...colStyle,
-      renderCell: (params) => (
-        <CustomChip label={params.value} status={params.value} />
-      ),
+      renderCell: (params) => <CustomChip label={params.value} status={params.value} />,
     },
     {
       field: "email",
@@ -209,12 +197,7 @@ const PaySalaries = () => {
       width: 150,
       ...colStyle,
       renderCell: (params) => {
-        return (
-          <CustomChip
-            label={WordCaptitalize(params.value)}
-            status={params.value}
-          />
-        );
+        return <CustomChip label={WordCaptitalize(params.value)} status={params.value} />;
       },
     },
     {
@@ -302,9 +285,9 @@ const PaySalaries = () => {
               <Tab label="Unpaid" value="unpaid" sx={{ letterSpacing: 1 }} />
               <Tab label="Paid" value="paid" sx={{ letterSpacing: 1 }} />
             </TabList>
-            <Typography>{` ${dayjs(
-              new Date(selectedDate.year, selectedDate.month - 1)
-            ).format("MMMM, YYYY")}`}</Typography>
+            <Typography>{` ${dayjs(new Date(selectedDate.year, selectedDate.month - 1)).format(
+              "MMMM, YYYY"
+            )}`}</Typography>
           </Box>
 
           <TabPanel value="all" sx={{ padding: "0" }}>
@@ -426,9 +409,7 @@ const PaySalaries = () => {
         <DialogTitle>Please fillout all the fields correctly.</DialogTitle>
 
         <DialogContent>
-          <DialogContentText
-            sx={{ color: "red", display: "flex", justifyContent: "center" }}
-          >
+          <DialogContentText sx={{ color: "red", display: "flex", justifyContent: "center" }}>
             {errorText}
           </DialogContentText>
           <TextField
