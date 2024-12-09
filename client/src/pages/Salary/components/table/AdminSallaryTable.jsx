@@ -15,6 +15,7 @@ import { GridActionsCellItem, GridRowModes } from "@mui/x-data-grid";
 import { CustomChip } from "../../../../components/Styled/CustomChip";
 import EmployeeNameCell from "../../../../components/Grid Cells/EmployeeProfileCell";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import CustomOverlay from "../../../../components/Styled/CustomOverlay";
 
 const status = ["pending", "approved", "rejected"];
 const colStyle = {
@@ -52,21 +53,23 @@ const AdminSalaryTable = () => {
     // refetchInterval:5000
   });
 
+  if (isLoading) {
+    return <CustomOverlay open={true} />;
+  }
+  if (error) {
+    toast.error(error.message);
+  }
   if (fetchAllRequests && fetchAllRequests.length > 0 && rows.length === 0) {
     const newData = fetchAllRequests.map((item) => ({
       ...item,
       id: item._id,
-      employee_name: item.employee_obj_id.employeeName,
-      employee_img: item.employee_obj_id.employeeProImage,
-      employee_id: item.employee_obj_id.employeeID,
-      current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
+      employee_name: item?.employee_obj_id?.employeeName,
+      employee_img: item?.employee_obj_id?.employeeProImage,
+      employee_id: item?.employee_obj_id?.employeeID,
+      current_salary: item?.employee_obj_id?.BasicPayAfterProbationPeriod,
       request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
     }));
     setRows(newData); // Only set rows if they haven't been set already
-  }
-
-  if (error) {
-    toast.error(error.message);
   }
 
   // const fetchAllRequests = async () => {
