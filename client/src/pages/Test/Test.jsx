@@ -1,13 +1,23 @@
 import { Button, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from "@mui/material";
 import { Field, Form, Formik } from "formik";
 import { TextField } from "formik-material-ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { object } from "yup";
 
 const validationSchema = object().shape({});
 
 const Test = () => {
   const [data, setData] = useState("");
+
+  localStorage.setItem("session", "ended");
+  const item = localStorage.getItem("session");
+
+  useEffect(() => {
+    if (item) {
+      toast.error("Your session has ended. Please log in again.");
+    }
+  }, [item]);
 
   return (
     <>
