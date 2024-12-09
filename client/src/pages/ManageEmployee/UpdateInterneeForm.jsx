@@ -27,6 +27,7 @@ import { ScrollToErrorField } from "../../utils/common";
 import UploadFilesInternee from "../../components/upload/UploadFilesInternee";
 
 import axios from "../../utils/axiosInterceptor";
+import { useQueryClient } from "@tanstack/react-query";
 
 // import axios from "axios";
 
@@ -77,6 +78,8 @@ const UpdateInterneeForm = () => {
   const [user, setUser] = useState({});
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
@@ -170,8 +173,9 @@ const UpdateInterneeForm = () => {
           })
           .then(() => {
             setLoading(false);
-            navigate("/manage-internees");
             toast.success("Internee Updated Successfully!");
+            navigate("/manage-internees");
+            queryClient.invalidateQueries("internees");
           })
           .catch((err) => {
             setLoading(false);

@@ -24,7 +24,6 @@ import LoadingAnim from "../../components/LoadingAnim";
 import UploadFiles from "../../components/upload/UploadFiles";
 import "../../index.css";
 import axios from "../../utils/axiosInterceptor";
-import Test from "../Test/Test";
 import { ScrollToErrorField } from "../../utils/common";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
@@ -81,6 +80,8 @@ const validationSchema = object().shape({
 function UpdateForm() {
   const { currentUser } = useSelector((state) => state.user);
   const role = currentUser.role;
+
+  const queryClient = useQueryClient();
 
   const { id } = useParams();
 
