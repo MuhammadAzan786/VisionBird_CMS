@@ -15,11 +15,7 @@ import axios from "../../utils/axiosInterceptor";
 import Test from "../Test/Test";
 import { ScrollToErrorField } from "../../utils/common";
 import { QueryClient, useQueryClient } from "@tanstack/react-query";
-const baseUrl =
-  import.meta.env.NODE_ENV === "production"
-    ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
-    : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
-
+import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
 const validationSchema = object().shape({
   firstName: string()
     .required("Required Name")
@@ -34,8 +30,7 @@ const validationSchema = object().shape({
 
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
-  disability: string().required("Required Field"),
-  kindofdisability: string().matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
+
   mobile: string()
     .required("Required Field")
     .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
@@ -58,6 +53,15 @@ const validationSchema = object().shape({
   userName: string().required("Required Field"),
   password: string().required("Required Field"),
   role: string().required("Required Field"),
+
+  disability: string()
+    .required("Disability is required")
+    .oneOf(["yes", "no"], "Disability must be either 'yes' or 'no'"),
+  kindofdisability: string().when("disability", {
+    is: "yes",
+    then: (schema) => schema.required("Required Field"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 function UpdateForm() {
@@ -82,30 +86,9 @@ function UpdateForm() {
   const closeUploadModal = () => {
     setUploadModalOpen(false);
   };
-  
-  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const handleBeforeUnload = (event) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-
-    const handleUnload = () => {
-      const url = `${baseUrl}/api/employee/grabage_collector`;
-      navigator.sendBeacon(url, JSON.stringify(tempFilesRef.current));
-    };
-
-    // Attach event listeners
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("unload", handleUnload);
-
-    // Cleanup event listeners
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("unload", handleUnload);
-    };
-  }, []);
+  // Custom Hook to prevent WindowClose
+  useWindowCloseHandler(tempFilesRef);
 
   useEffect(() => {
     axios
@@ -432,7 +415,19 @@ function UpdateForm() {
                           }}
                         >
                           <InputLabel id="disability-label">Disability</InputLabel>
-                          <Field name="disability" as={Select} labelId="disability-label" label="Disability">
+                          <Field
+                            name="disability"
+                            as={Select}
+                            labelId="disability-label"
+                            label="Disability"
+                            onChange={(event) => {
+                              const { value } = event.target;
+                              setFieldValue("disability", value);
+                              if (value === "no") {
+                                setFieldValue("kindofdisability", "");
+                              }
+                            }}
+                          >
                             <MenuItem value="yes">Yes</MenuItem>
                             <MenuItem value="no">No</MenuItem>
                           </Field>
@@ -453,10 +448,8 @@ function UpdateForm() {
                           },
                         }}
                         onKeyPress={(event) => {
-                          const keyCode = event.keyCode;
-                          const keyValue = String.fromCharCode(keyCode);
                           const regex = /^[a-zA-Z\s]+$/;
-                          if (!regex.test(keyValue)) {
+                          if (!regex.test(event.key)) {
                             event.preventDefault();
                           }
                         }}

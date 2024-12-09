@@ -107,11 +107,7 @@ const AdminSalaryTable = () => {
       headerName: "Employee",
       width: 150,
       renderCell: ({ row }) => (
-        <EmployeeNameCell
-          userId={row.employee_id}
-          name={row.employee_name}
-          src={row.employee_img}
-        />
+        <EmployeeNameCell userId={row.employee_id} name={row.employee_name} src={row.employee_img} />
       ),
     },
     {
@@ -182,8 +178,7 @@ const AdminSalaryTable = () => {
         } else if (params.value === "approved") {
           icon = <CheckCircle />;
         }
-        const label =
-          params.value.charAt(0).toUpperCase() + params.value.slice(1);
+        const label = params.value.charAt(0).toUpperCase() + params.value.slice(1);
         return <CustomChip label={label} status={params.value} icon={icon} />;
       },
     },
@@ -227,10 +222,7 @@ const AdminSalaryTable = () => {
             onClick={handleEditClick(id)}
             size="medium"
             sx={iconStyles.edit}
-            disabled={
-              row.approval_status === "rejected" ||
-              row.approval_status === "approved"
-            }
+            disabled={row.approval_status === "rejected" || row.approval_status === "approved"}
           />,
         ];
       },
@@ -258,16 +250,13 @@ const AdminSalaryTable = () => {
       return { ...newRow, isNew: false };
     }
     try {
-      const res = await axios.post(
-        `/api/advance_payments/admin/advance-applications/?type=advanceSalary`,
-        {
-          currentUser,
-          _id: id,
-          approval_status,
-          activity_status,
-          employee_obj_id,
-        }
-      );
+      const res = await axios.post(`/api/advance_payments/admin/advance-applications/?type=advanceSalary`, {
+        currentUser,
+        _id: id,
+        approval_status,
+        activity_status,
+        employee_obj_id,
+      });
 
       const newObj = { ...res.data, id: res.data._id };
       toast.success("Loan status updated successfully!");
@@ -330,9 +319,7 @@ const AdminSalaryTable = () => {
   );
 };
 
-const monthCell = (params) => (
-  <>{params.value > 1 ? `${params.value} Months` : `${params.value} Month`}</>
-);
+const monthCell = (params) => <>{params.value > 1 ? `${params.value} Months` : `${params.value} Month`}</>;
 
 const iconStyles = {
   edit: {

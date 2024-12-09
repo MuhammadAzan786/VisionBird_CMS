@@ -4,17 +4,72 @@ const cloudinary = require("../utils/cloudinaryConfig");
 
 module.exports = {
   Add_internee: async (req, res) => {
-    console.log("req ae hai", req.body);
-
     try {
-      const internee = new Internee({
-        ...req.body,
-      });
-      await internee.save().then(() => {
-        return res.json({ message: "Internee Data Saved" });
-      });
+      console.log("Add_Internee Request Recieved");
+      const { updateData, deletedFiles } = req.body;
+      console.log("Deleted Files List: ", deletedFiles);
+
+      // for deleting files on cloudinary
+      if (deletedFiles.length > 0) {
+        const images = deletedFiles.filter((file) => !file.includes("."));
+        const rawFiles = deletedFiles.filter((file) => file.includes("."));
+
+        if (images.length > 0) {
+          await cloudinary.api.delete_resources(images, { resource_type: "image" });
+          console.log("Emp Add, Images Deleted");
+        }
+
+        if (rawFiles.length > 0) {
+          await cloudinary.api.delete_resources(rawFiles, { resource_type: "raw" });
+          console.log("Emp Add, Raw Files Deleted");
+        }
+      }
+
+      const internee = new Internee(updateData);
+      await internee.save();
+
+      res.json({ message: "Internee Data Saved" });
     } catch (error) {
       res.status(400).json({ error: error.message });
+    }
+  },
+
+  Update_internee: async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const { updateData, deletedFiles } = req.body;
+      console.log("Deleted Files List: ", deletedFiles);
+
+      const document = await Internee.findById(userId);
+
+      if (!document) {
+        return res.status(404).json({ error: "Internee not found" });
+      }
+
+      // for deleting files on cloudinary
+      if (deletedFiles.length > 0) {
+        const images = deletedFiles.filter((file) => !file.includes("."));
+        const rawFiles = deletedFiles.filter((file) => file.includes("."));
+
+        if (images.length > 0) {
+          await cloudinary.api.delete_resources(images, { resource_type: "image" });
+          console.log("Emp Add, Images Deleted");
+        }
+
+        if (rawFiles.length > 0) {
+          await cloudinary.api.delete_resources(rawFiles, { resource_type: "raw" });
+          console.log("Emp Add, Raw Files Deleted");
+        }
+      }
+
+      const updatedInternee = await Internee.findByIdAndUpdate(userId, updateData, {
+        new: true, // Return the updated document
+      });
+
+      res.status(200).json(updatedInternee);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ error: error.message });
     }
   },
 
@@ -215,113 +270,32 @@ module.exports = {
       res.status(500).send({ error: error.message });
     }
   },
+
   Delete_internee: async (req, res) => {
-    const userId = req.params.id;
     try {
-      // Find the document
-      const document = await Internee.findOne({ _id: userId });
-      if (!document) {
-        return res.status(400).json({ error: "Internee not found" });
+      const userId = req.params.id;
+
+      const deletedInternee = await Internee.findByIdAndDelete(userId);
+
+      if (!deletedInternee) {
+        return res.status(404).json({ message: "Internee not Deleted" });
       }
 
-      // Collect public IDs
-      const publicIds = [];
+      const { interneeProImage } = deletedInternee;
 
-      if (document.interneeProImage?.public_id) {
-        publicIds.push(document.interneeProImage.public_id);
-      }
+      const folderName = interneeProImage.public_id.split("/").slice(0, -1).join("/");
+      console.log("folderName", folderName);
 
-      if (Array.isArray(document.cnicFile)) {
-        document.cnicFile.forEach((element) => {
-          if (element?.public_id) publicIds.push(element.public_id);
-        });
-      }
+      await cloudinary.api.delete_resources_by_prefix(folderName, { resource_type: "image" });
+      await cloudinary.api.delete_resources_by_prefix(folderName, { resource_type: "raw" });
+      await cloudinary.api.delete_folder(folderName);
 
-      if (Array.isArray(document.experienceLetter)) {
-        document.experienceLetter.forEach((element) => {
-          if (element?.public_id) publicIds.push(element.public_id);
-        });
-      }
+      console.log("Internee deleted Successfully");
 
-      if (Array.isArray(document.appointmentFile)) {
-        document.appointmentFile.forEach((element) => {
-          if (element?.public_id) publicIds.push(element.public_id);
-        });
-      }
-
-      // Filter for images and raw files
-      const images = publicIds.filter(
-        (file) => typeof file === "string" && !file.includes(".")
-      );
-      const rawFiles = publicIds.filter(
-        (file) => typeof file === "string" && file.includes(".")
-      );
-
-      // Delete resources from Cloudinary
-      if (images.length > 0) {
-        await cloudinary.api.delete_resources(images, {
-          resource_type: "image",
-        });
-        console.log("Images Deleted");
-      }
-
-      if (rawFiles.length > 0) {
-        await cloudinary.api.delete_resources(rawFiles, {
-          resource_type: "raw",
-        });
-        console.log("Raw Files Deleted");
-      }
-
-      // Handle empty folder deletion
-      const id = document.interneeProImage?.public_id;
-
-      if (id) {
-        const folderName = id.split("/").slice(0, -1).join("/");
-        const filesInFolder = await cloudinary.api.resources({
-          type: "upload",
-          prefix: folderName + "/",
-          max_results: 1,
-        });
-
-        if (filesInFolder.resources.length > 0) {
-          const remainingPublicIds = filesInFolder.resources.map(
-            (file) => file.public_id
-          );
-
-          // Delete all remaining resources
-          await cloudinary.api.delete_resources(remainingPublicIds, {
-            resource_type: "raw",
-          });
-          console.log("Remaining files deleted:", remainingPublicIds);
-        } else {
-          console.log("Folder is not empty, cannot delete.");
-        }
-        const filesAfterDeletion = await cloudinary.api.resources({
-          type: "upload",
-          prefix: folderName + "/",
-        });
-
-        if (filesAfterDeletion.resources.length === 0) {
-          await cloudinary.api.delete_folder(folderName);
-          console.log("Folder successfully deleted:", folderName);
-        } else {
-          console.log(
-            "Folder still not empty; remaining files:",
-            filesAfterDeletion.resources
-          );
-        }
-      } else {
-        console.log("Public ID is missing; skipping folder deletion.");
-      }
-      // Delete the document from MongoDB
-      const deleteDone = await Internee.deleteOne({ _id: userId });
-      if (!deleteDone) {
-        return res.status(400).json({ error: "Internee not deleted" });
-      }
-      res.status(200).json({ message: "Internee Deleted" });
+      res.status(200).json({ message: "Internee deleted Successfully" });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: error.message });
+      console.log("DELETE_INTERNEE_ERROR", error);
+      res.status(501).json({ message: "Internee deletetion Unsuccessfull" });
     }
   },
 };

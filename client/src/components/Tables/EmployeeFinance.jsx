@@ -31,7 +31,7 @@ export default function EmployeeFinance() {
       .then((response) => {
         console.log(response.data);
         const filteredEmployees = response.data.map((employee) => ({
-          employeeProImage: employee.employeeProImage,
+          employeeProImage: employee.employeeProImage.secure_url,
           employeeID: employee.employeeID,
           employeeName: employee.employeeName,
           employeeFatherName: employee.employeeFatherName,
@@ -53,9 +53,7 @@ export default function EmployeeFinance() {
       field: "employeeProImage",
       headerName: "Profile Pic",
       width: 100,
-      renderCell: (params) => (
-        <Avatar alt="Avatar" src={params.row.employeeProImage} />
-      ),
+      renderCell: (params) => <Avatar alt="Avatar" src={params.row.employeeProImage.secure_url} />,
     },
     {
       field: "employeeID",
@@ -76,18 +74,9 @@ export default function EmployeeFinance() {
 
   return (
     <Box>
-      <Box
-        display={"flex"}
-        alignItems={"center"}
-        justifyContent={"space-between"}
-      >
+      <Box display={"flex"} alignItems={"center"} justifyContent={"space-between"}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label="Select Year"
-            views={["year"]}
-            openTo="year"
-            onChange={handleDateChange}
-          />
+          <DatePicker label="Select Year" views={["year"]} openTo="year" onChange={handleDateChange} />
         </LocalizationProvider>
         {/* <Typography>{selectedYear}</Typography> */}
       </Box>

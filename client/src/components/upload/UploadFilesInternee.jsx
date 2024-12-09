@@ -17,8 +17,6 @@ import { useState } from "react";
 import { customColors } from "../../theme/colors";
 import { cloudinaryConfig } from "../../utils/cloudinaryConfig";
 
-// import placeholder from "../../assets/images/placeholder.jpeg";
-
 const UploadFilesInternee = ({
   values,
   setFieldValue,
@@ -32,62 +30,66 @@ const UploadFilesInternee = ({
     setTabValue(newValue);
   };
 
-  console.log("ye valuees hain", values);
+  const sendtoCloudinary = async (filesList) => {
+    const filesArray = Array.from(filesList);
 
-  const sendtoCloudinary = async (file) => {
-    const isImage = /image\/(jpeg|png|gif|bmp|svg|webp|tiff)/i.test(file.type);
-    const resourceType = isImage ? "image" : "raw";
+    // Use `map` to return an array of promises
+    const cloudinaryResponses = await Promise.all(
+      filesArray.map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("context", `original_filename=${file.name}`);
+        formData.append("folder", `${parentFolder}/${folderName}`);
+        formData.append("upload_preset", cloudinaryConfig.upload_preset);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("context", `original_filename=${file.name}`);
-    formData.append("folder", `${parentFolder}/${folderName}`);
-    formData.append("upload_preset", cloudinaryConfig.upload_preset);
+        try {
+          const response = await fetch(cloudinaryConfig.getApiUrl("auto"), {
+            method: "POST",
+            body: formData,
+          });
 
-    try {
-      const response = await fetch(cloudinaryConfig.getApiUrl(resourceType), {
-        method: "POST",
-        body: formData,
-      });
+          // Handle the response
+          if (!response.ok) {
+            throw new Error("Upload failed");
+          }
 
-      // Handle the response
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
+          const CloudinaryData = await response.json();
+          const { secure_url, resource_type, public_id, context } = CloudinaryData;
+          tempFilesRef.current.push(public_id);
 
-      const CloudinaryData = await response.json();
-
-      const { secure_url, resource_type, public_id, context } = CloudinaryData;
-
-      const original_file_name = context?.custom?.original_filename;
-
-      const baseFileMetadata = { public_id, secure_url, original_file_name, resource_type };
-
-      console.log("Cloudinary Returned", baseFileMetadata);
-
-      // For all new uploads Garbage Files collector
-      tempFilesRef.current.push(public_id);
-
-      if (tabValue === "interneeProImage") {
-        // checking if its not null for. bcz it will push a null
-        if (values.interneeProImage.public_id !== undefined) {
-          deletedFilesRef.current.push(values.interneeProImage.public_id);
+          return { secure_url, resource_type, public_id, original_file_name: context?.custom?.original_filename };
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          return null; // Return `null` if the upload fails, or you can handle the error differently
         }
+      })
+    );
 
-        setFieldValue("interneeProImage", baseFileMetadata);
-        return;
-      } else {
-        setFieldValue(tabValue, [...(values[tabValue] || []), baseFileMetadata]);
+    // Filter out any failed uploads (if any)
+    const successfulUploads = cloudinaryResponses.filter((response) => response !== null);
+
+    console.log("Succesfull uplaods", successfulUploads);
+
+    if (tabValue === "interneeProImage") {
+      // checking if its not null for. bcz it will push a null
+      if (values.interneeProImage.public_id !== undefined) {
+        deletedFilesRef.current.push(values.interneeProImage.public_id);
       }
-    } catch (error) {
-      console.error("Error uploading image:", error);
+      setFieldValue("interneeProImage", successfulUploads[0]);
+      return;
+    } else {
+      setFieldValue(tabValue, [...values[tabValue], ...successfulUploads]);
     }
+
+    console.log("Cloudinary Upload Results:", successfulUploads);
+    return successfulUploads;
   };
 
   const handleDelete = async (public_id) => {
     // =================== TODO
     deletedFilesRef.current.push(public_id);
-    console.log("Files to be Deleted: ", deletedFilesRef);
+
+    console.log("Handle Delete! Files to be Deleted: ", deletedFilesRef);
 
     const currentData = values[tabValue];
     if (Array.isArray(currentData)) {
@@ -119,8 +121,9 @@ const UploadFilesInternee = ({
           <input
             type="file"
             name="file"
+            multiple={tabValue !== "interneeProImage"}
             onChange={(event) => {
-              Array.from(event.target.files).forEach((file) => sendtoCloudinary(file));
+              sendtoCloudinary(event.target.files);
             }}
             style={{
               position: "absolute",

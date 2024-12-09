@@ -14,22 +14,19 @@ import {
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import { date, object, string } from "yup";
-
+import { object, string } from "yup";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import LoadingAnim from "../../components/LoadingAnim";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import { TextField } from "formik-material-ui";
-import UploadIcon from "@mui/icons-material/Upload";
 import axios from "../../utils/axiosInterceptor";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { ScrollToErrorField } from "../../utils/common";
-import UploadFiles from "../../components/upload/UploadFiles";
 import UploadFilesInternee from "../../components/upload/UploadFilesInternee";
-import { useQueryClient } from "@tanstack/react-query";
+import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
 
 const validationSchema = object().shape({
   firstName: string()
@@ -75,7 +72,15 @@ const validationSchema = object().shape({
   internId: string().required("Required Field"),
   designation: string().required("Required Field"),
   offered_By: string().required("Required Field"),
-  givenOn: date().required("Date is required"),
+
+  disability: string()
+    .required("Disability is required")
+    .oneOf(["yes", "no"], "Disability must be either 'yes' or 'no'"),
+  kindofdisability: string().when("disability", {
+    is: "yes",
+    then: (schema) => schema.required("Required Field"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 });
 
 const CreateInterneeForm = () => {
@@ -85,45 +90,47 @@ const CreateInterneeForm = () => {
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
 
-  const queryClient = useQueryClient();
+  useWindowCloseHandler(tempFilesRef);
+
   return (
     <Formik
       initialValues={{
         firstName: "",
         fatherName: "",
-        cnic: "",
+        cnic: "34202-2866666-1",
         dob: dayjs().format("YYYY-MM-DD"),
-        mailingAddress: "",
-        mobile: "",
-        email: "",
-        gender: "",
-        maritalStatus: "",
-        otherMobile: "",
-        whosMobile: "",
-        qualification: "",
+        mailingAddress: "lalamusa",
+        mobile: "0331-6281670",
+        email: "alisahi@gmail.com",
+        gender: "male",
+        maritalStatus: "single",
+        otherMobile: "0331-6281670",
+        whosMobile: "personal",
+        qualification: "matriculation",
 
-        rules: "",
-        slack: "",
+        rules: "no",
+        slack: "no",
 
         internshipFrom: dayjs().format("YYYY-MM-DD"),
         internshipTo: "",
         internId: "",
-        designation: "",
+        designation: "MERN",
 
         offered_By: "",
-        disability: "",
-        disabilityType: "",
 
-        givenOn: "",
         // Documents
         interneeProImage: {},
         cnicFile: [],
         appointmentFile: [],
         experienceLetter: [],
+
+        disability: "no",
+        //Ye field formik me nhi hai
+        disabilityType: "",
       }}
       validationSchema={validationSchema}
       onSubmit={async (values, { setSubmitting }) => {
-        setLoading(true);
+        // setLoading(true);
         setSubmitting(false);
 
         const fieldMap = {
@@ -149,7 +156,6 @@ const CreateInterneeForm = () => {
 
           disability: values.disability,
           disabilityType: values.kindofdisability,
-          givenOn: values.givenOn,
 
           // Documents
           interneeProImage: values.interneeProImage,
@@ -157,32 +163,27 @@ const CreateInterneeForm = () => {
           appointmentFile: values.appointmentFile,
           experienceLetter: values.experienceLetter,
         };
-        console.log("filedddddddd", fieldMap);
+        console.log("Internee Form Data", fieldMap);
+        console.log("Deleted Files List", deletedFilesRef.current);
 
         await axios
-          .post("/api/internee/create_internee", fieldMap)
+          .post("/api/internee/create_internee", {
+            updateData: fieldMap,
+            deletedFiles: deletedFilesRef.current,
+          })
           .then(() => {
             setLoading(false);
             navigate("/manage-internees");
-
-            queryClient.invalidateQueries("employees");
             toast.success("Internee Added Successfully!");
           })
           .catch((err) => {
             setLoading(false);
             console.log(err);
-            toast.error("error", "Internee Creation failed!");
+            toast.error("Internee Creation failed!");
           });
       }}
     >
-      {({
-        values,
-        setFieldValue,
-        isSubmitting,
-        errors,
-        setTouched,
-        handleSubmit,
-      }) => (
+      {({ values, setFieldValue, errors, setTouched, handleSubmit }) => (
         <Box m={5}>
           <Form>
             <Grid
@@ -421,6 +422,13 @@ const CreateInterneeForm = () => {
                           as={Select}
                           labelId="disability-label"
                           label="Disability"
+                          onChange={(event) => {
+                            const { value } = event.target;
+                            setFieldValue("disability", value);
+                            if (value === "no") {
+                              setFieldValue("kindofdisability", "");
+                            }
+                          }}
                         >
                           <MenuItem value="yes">Yes</MenuItem>
                           <MenuItem value="no">No</MenuItem>
@@ -893,51 +901,6 @@ const CreateInterneeForm = () => {
                     }}
                   />
                 </div>
-              </Grid>
-            </Grid>
-
-            <Grid
-              container
-              spacing={2}
-              component={Paper}
-              elevation={2}
-              borderRadius={"5px"}
-              mt={2}
-              p={3}
-            >
-              <Grid item xs={12} sm={6} md={6}>
-                <FormControl
-                  fullWidth
-                  variant="outlined"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                >
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Given on"
-                      format="DD/MM/YYYY"
-                      name="givenOn"
-                      value={dayjs(values.dob) || dayjs()}
-                      onChange={(newValue) => {
-                        const fromDate = dayjs(newValue);
-                        setFieldValue("givenOn", fromDate.format("YYYY-MM-DD"));
-                      }}
-                      slotProps={{
-                        textField: {
-                          helperText: "DD/MM/YYYY",
-                        },
-                      }}
-                    />
-                  </LocalizationProvider>
-                  <ErrorMessage
-                    name="givenOn"
-                    style={{ color: "red" }}
-                    component="div"
-                  />
-                </FormControl>
               </Grid>
             </Grid>
 

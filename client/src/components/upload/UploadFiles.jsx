@@ -17,64 +17,62 @@ import { useState } from "react";
 import { customColors } from "../../theme/colors";
 import { cloudinaryConfig } from "../../utils/cloudinaryConfig";
 
-// import placeholder from "../../assets/images/placeholder.jpeg";
-
 const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName, tempFilesRef, deletedFilesRef }) => {
   const [tabValue, setTabValue] = useState("employeeProImage");
   const handleTabValue = (event, newValue) => {
     setTabValue(newValue);
   };
 
-  console.log("ye valuees hain", values);
+  const sendtoCloudinary = async (filesList) => {
+    const filesArray = Array.from(filesList);
+    const cloudinaryResponses = await Promise.all(
+      filesArray.map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("context", `original_filename=${file.name}`);
+        formData.append("folder", `${parentFolder}/${folderName}`);
+        formData.append("upload_preset", cloudinaryConfig.upload_preset);
 
-  const sendtoCloudinary = async (file) => {
-    const isImage = /image\/(jpeg|png|gif|bmp|svg|webp|tiff)/i.test(file.type);
-    const resourceType = isImage ? "image" : "raw";
+        try {
+          const response = await fetch(cloudinaryConfig.getApiUrl("auto"), {
+            method: "POST",
+            body: formData,
+          });
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("context", `original_filename=${file.name}`);
-    formData.append("folder", `${parentFolder}/${folderName}`);
-    formData.append("upload_preset", cloudinaryConfig.upload_preset);
+          // Handle the response
+          if (!response.ok) {
+            throw new Error("Upload failed");
+          }
 
-    try {
-      const response = await fetch(cloudinaryConfig.getApiUrl(resourceType), {
-        method: "POST",
-        body: formData,
-      });
+          const CloudinaryData = await response.json();
+          const { secure_url, resource_type, public_id, context } = CloudinaryData;
+          tempFilesRef.current.push(public_id);
 
-      // Handle the response
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
-
-      const CloudinaryData = await response.json();
-
-      const { secure_url, resource_type, public_id, context } = CloudinaryData;
-
-      const original_file_name = context?.custom?.original_filename;
-
-      const baseFileMetadata = { public_id, secure_url, original_file_name, resource_type };
-
-      console.log("Cloudinary Returned", baseFileMetadata);
-
-      // For all new uploads Garbage Files collector
-      tempFilesRef.current.push(public_id);
-
-      if (tabValue === "employeeProImage") {
-        // checking if its not null for. bcz it will push a null
-        if (values.employeeProImage.public_id !== undefined) {
-          deletedFilesRef.current.push(values.employeeProImage.public_id);
+          return { secure_url, resource_type, public_id, original_file_name: context?.custom?.original_filename };
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          return null;
         }
+      })
+    );
 
-        setFieldValue("employeeProImage", baseFileMetadata);
-        return;
-      } else {
-        setFieldValue(tabValue, [...(values[tabValue] || []), baseFileMetadata]);
+    const successfulUploads = cloudinaryResponses.filter((response) => response !== null);
+
+    console.log("Succesfull uplaods", successfulUploads);
+
+    if (tabValue === "employeeProImage") {
+      // checking if its not null for. bcz it will push a null
+      if (values.employeeProImage.public_id !== undefined) {
+        deletedFilesRef.current.push(values.employeeProImage.public_id);
       }
-    } catch (error) {
-      console.error("Error uploading image:", error);
+      setFieldValue("employeeProImage", successfulUploads[0]);
+      return;
+    } else {
+      setFieldValue(tabValue, [...values[tabValue], ...successfulUploads]);
     }
+
+    console.log("Cloudinary Upload Results:", successfulUploads);
+    return successfulUploads;
   };
 
   const handleDelete = async (public_id) => {
@@ -112,8 +110,9 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
           <input
             type="file"
             name="file"
+            multiple={tabValue !== "employeeProImage"}
             onChange={(event) => {
-              Array.from(event.target.files).forEach((file) => sendtoCloudinary(file));
+              sendtoCloudinary(event.target.files);
             }}
             style={{
               position: "absolute",

@@ -1,13 +1,4 @@
-import {
-  Box,
-  Collapse,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  styled,
-} from "@mui/material";
+import { Box, Collapse, IconButton, List, ListItemButton, ListItemIcon, ListItemText, styled } from "@mui/material";
 import CircleIcon from "@mui/icons-material/Circle";
 import { ExpandMore } from "@mui/icons-material";
 import React, { useState } from "react";
@@ -18,13 +9,7 @@ import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArro
 import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import vbtLogo from "/vbt-logo.png";
 
-const DynamicMenu = ({
-  menuList,
-  greaterthanlg,
-  mobileOpen,
-  hoverIndex,
-  handleDrawerToggle,
-}) => {
+const DynamicMenu = ({ menuList, greaterthanlg, mobileOpen, hoverIndex, handleDrawerToggle }) => {
   const [openStates, setOpenStates] = useState({});
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -32,9 +17,7 @@ const DynamicMenu = ({
   // Function for making menu links active
   const isActive = (menuItemPath) => {
     return (
-      (pathname === "/" && menuItemPath === "/") ||
-      pathname === menuItemPath ||
-      pathname.startsWith(`${menuItemPath}/`)
+      (pathname === "/" && menuItemPath === "/") || pathname === menuItemPath || pathname.startsWith(`${menuItemPath}/`)
     );
   };
 
@@ -56,15 +39,7 @@ const DynamicMenu = ({
         scrollbarWidth: "none",
         display: "flex",
         flexDirection: "column",
-        width: !greaterthanlg
-          ? 290
-          : greaterthanlg
-          ? mobileOpen || hoverIndex
-            ? 290
-            : 68
-          : mobileOpen
-          ? 290
-          : 0,
+        width: !greaterthanlg ? 290 : greaterthanlg ? (mobileOpen || hoverIndex ? 290 : 68) : mobileOpen ? 290 : 0,
         transition: "0.4s ease-in-out !important",
       }}
     >
@@ -104,11 +79,7 @@ const DynamicMenu = ({
               },
             }}
           >
-            {mobileOpen ? (
-              <KeyboardDoubleArrowLeftIcon />
-            ) : (
-              <KeyboardDoubleArrowRightIcon />
-            )}
+            {mobileOpen ? <KeyboardDoubleArrowLeftIcon /> : <KeyboardDoubleArrowRightIcon />}
           </IconButton>
         </Box>
       </Box>
@@ -142,10 +113,7 @@ const DynamicMenu = ({
                 <>
                   <CustomListItemButton
                     onClick={() => handleToggle(menuItem.label)}
-                    selected={
-                      isActive(menuItem.path) ||
-                      menuItem.children.some((child) => isActive(child.path))
-                    }
+                    selected={isActive(menuItem.path) || menuItem.children.some((child) => isActive(child.path))}
                   >
                     <CustomListItemIcon>{menuItem.icon}</CustomListItemIcon>
                     <ListItemText
@@ -184,8 +152,7 @@ const DynamicMenu = ({
                             "&.Mui-selected": {
                               background: palette.primary.light,
                               borderRadius: ".5rem",
-                              boxShadow:
-                                "0 .125rem .375rem 0 rgba(38,43,67,.14)",
+                              boxShadow: "0 .125rem .375rem 0 rgba(38,43,67,.14)",
                               "& .MuiListItemIcon-root": {
                                 color: palette.primary.main,
                               },
@@ -196,18 +163,11 @@ const DynamicMenu = ({
                                 color: palette.primary.main,
                               },
                             },
-                            display:
-                              (greaterthanlg && hoverIndex) ||
-                              (!mobileOpen && "none"),
+                            display: (greaterthanlg && hoverIndex) || (!mobileOpen && "none"),
                           }}
                           key={index}
                           onClick={() => navigate(menuChild.path)}
-                          selected={
-                            isActive(menuItem.path) ||
-                            menuItem.children.some((child) =>
-                              isActive(child.path)
-                            )
-                          }
+                          selected={isActive(menuChild.path)}
                         >
                           <CustomListItemIcon>
                             <CircleIcon sx={{ fontSize: ".6rem" }} />

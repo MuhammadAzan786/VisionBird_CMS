@@ -30,14 +30,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import {
-  Box,
-  IconButton,
-  Rating,
-  TextField,
-  MenuItem,
-  Button,
-} from "@mui/material";
+import { Box, IconButton, Rating, TextField, MenuItem, Button } from "@mui/material";
 import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
 import { useQuery } from "@tanstack/react-query";
 
@@ -97,11 +90,7 @@ const InterneeEvaluationTable = () => {
         const [isHovered, setIsHovered] = useState(false);
 
         return (
-          <a
-            onClick={() => downloadImage(params.row.CvUpload)}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a onClick={() => downloadImage(params.row.CvUpload)} target="_blank" rel="noopener noreferrer">
             <IconButton
               aria-label="open CV"
               color="primary"
@@ -125,9 +114,7 @@ const InterneeEvaluationTable = () => {
       headerName: "Name",
       width: 250,
       //email is provided instead
-      renderCell: (params) => (
-        <EmployeeNameCell userId={params.row.email} name={params.value} />
-      ),
+      renderCell: (params) => <EmployeeNameCell userId={params.row.email} name={params.value} />,
     },
 
     {
@@ -136,11 +123,7 @@ const InterneeEvaluationTable = () => {
       width: 200,
       renderCell: (params) => {
         return (
-          <Typography
-            sx={{ fontSize: "0.95rem", fontWeight: "500", color: "#4d4d4d" }}
-          >
-            {params.value}
-          </Typography>
+          <Typography sx={{ fontSize: "0.95rem", fontWeight: "500", color: "#4d4d4d" }}>{params.value}</Typography>
         );
       },
     },
@@ -151,11 +134,7 @@ const InterneeEvaluationTable = () => {
       width: 200,
       renderCell: (params) => {
         return (
-          <Typography
-            sx={{ fontSize: "0.95rem", fontWeight: "500", color: "#4d4d4d" }}
-          >
-            {params.value}
-          </Typography>
+          <Typography sx={{ fontSize: "0.95rem", fontWeight: "500", color: "#4d4d4d" }}>{params.value}</Typography>
         );
       },
     },
@@ -165,23 +144,9 @@ const InterneeEvaluationTable = () => {
       width: 200,
       renderCell: (params) => {
         if (params.value === "yes") {
-          return (
-            <Chip
-              label="Experienced"
-              color="success"
-              variant="outlined"
-              sx={{ backgroundColor: "#f0f6f0" }}
-            />
-          );
+          return <Chip label="Experienced" color="success" variant="outlined" sx={{ backgroundColor: "#f0f6f0" }} />;
         } else {
-          return (
-            <Chip
-              label="Fresher"
-              color="error"
-              variant="outlined"
-              sx={{ backgroundColor: "#f5e0df" }}
-            />
-          );
+          return <Chip label="Fresher" color="error" variant="outlined" sx={{ backgroundColor: "#f5e0df" }} />;
         }
       },
     },
@@ -192,18 +157,13 @@ const InterneeEvaluationTable = () => {
       renderCell: (params) => {
         if (params.value === "Internship") {
           return (
-            <Typography
-              sx={{ fontSize: "0.95rem", fontWeight: "600", color: "#5a5a5a" }}
-            >
-              <SchoolIcon style={{ marginRight: 6, color: "#257180" }} />{" "}
-              Internship
+            <Typography sx={{ fontSize: "0.95rem", fontWeight: "600", color: "#5a5a5a" }}>
+              <SchoolIcon style={{ marginRight: 6, color: "#257180" }} /> Internship
             </Typography>
           );
         } else {
           return (
-            <Typography
-              sx={{ fontSize: "0.95rem", fontWeight: "600", color: "#5a5a5a" }}
-            >
+            <Typography sx={{ fontSize: "0.95rem", fontWeight: "600", color: "#5a5a5a" }}>
               {" "}
               <WorkIcon style={{ marginRight: 6, color: "#B17457" }} />
               Permanent
@@ -219,18 +179,10 @@ const InterneeEvaluationTable = () => {
       renderCell: (params) => {
         if (params.value !== "") {
           return (
-            <Typography
-              sx={{ fontSize: "0.95rem", fontWeight: "500", color: "#4d4d4d" }}
-            >
-              {params.value}
-            </Typography>
+            <Typography sx={{ fontSize: "0.95rem", fontWeight: "500", color: "#4d4d4d" }}>{params.value}</Typography>
           );
         } else {
-          return (
-            <Typography sx={{ fontWeight: "800", color: "#4d4d4d" }}>
-              ---------
-            </Typography>
-          );
+          return <Typography sx={{ fontWeight: "800", color: "#4d4d4d" }}>---------</Typography>;
         }
       },
     },
@@ -246,11 +198,7 @@ const InterneeEvaluationTable = () => {
           day: "2-digit",
         });
         return (
-          <Typography
-            sx={{ fontSize: "0.95rem", fontWeight: "500", color: "#4d4d4d" }}
-          >
-            {formatedDate}
-          </Typography>
+          <Typography sx={{ fontSize: "0.95rem", fontWeight: "500", color: "#4d4d4d" }}>{formatedDate}</Typography>
         );
       },
     },
@@ -266,11 +214,7 @@ const InterneeEvaluationTable = () => {
           day: "2-digit",
         });
         return (
-          <Typography
-            sx={{ fontSize: "0.95rem", fontWeight: "500", color: "#4d4d4d" }}
-          >
-            {interviewDate}
-          </Typography>
+          <Typography sx={{ fontSize: "0.95rem", fontWeight: "500", color: "#4d4d4d" }}>{interviewDate}</Typography>
         );
       },
     },
@@ -287,8 +231,7 @@ const InterneeEvaluationTable = () => {
         // Optional: Add a decorative element or icon
         return (
           <div style={{ display: "flex", alignItems: "center", color: "#333" }}>
-            <span style={{ marginRight: "4px", fontSize: "1.3rem" }}>🕒</span>{" "}
-            {/* Clock icon */}
+            <span style={{ marginRight: "4px", fontSize: "1.3rem" }}>🕒</span> {/* Clock icon */}
             <span>
               <Typography
                 sx={{
@@ -297,9 +240,7 @@ const InterneeEvaluationTable = () => {
                   color: "#4d4d4d",
                 }}
               >
-                {`${formattedHour}:${minute
-                  .toString()
-                  .padStart(2, "0")} ${suffix}`}
+                {`${formattedHour}:${minute.toString().padStart(2, "0")} ${suffix}`}
               </Typography>
             </span>
           </div>
@@ -319,16 +260,8 @@ const InterneeEvaluationTable = () => {
       width: 200,
       renderCell: (params) => (
         <Box>
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
+          <Rating name={`rating-${params.row.id}`} value={params.value} readOnly />
+          <Rating name={`rating-${params.row.id}`} value={params.value} readOnly />
         </Box>
       ),
     },
@@ -338,16 +271,8 @@ const InterneeEvaluationTable = () => {
       width: 200,
       renderCell: (params) => (
         <Box>
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
+          <Rating name={`rating-${params.row.id}`} value={params.value} readOnly />
+          <Rating name={`rating-${params.row.id}`} value={params.value} readOnly />
         </Box>
       ),
     },
@@ -357,16 +282,8 @@ const InterneeEvaluationTable = () => {
       width: 200,
       renderCell: (params) => (
         <Box>
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
+          <Rating name={`rating-${params.row.id}`} value={params.value} readOnly />
+          <Rating name={`rating-${params.row.id}`} value={params.value} readOnly />
         </Box>
       ),
     },
@@ -437,10 +354,7 @@ const InterneeEvaluationTable = () => {
       renderCell: (params) => {
         if (!params.value) {
           return (
-            <Button
-              variant="contained"
-              onClick={() => handleModalChange(params.row)}
-            >
+            <Button variant="contained" onClick={() => handleModalChange(params.row)}>
               Add Remarks
             </Button>
           );
@@ -474,12 +388,7 @@ const InterneeEvaluationTable = () => {
     <>
       {/* Remarks Model */}
       {isModalOpen && (
-        <RemarksModal
-          row={singleRow}
-          isModalOpen={isModalOpen}
-          setIsModalOpen={setIsModalOpen}
-          setData={setData}
-        />
+        <RemarksModal row={singleRow} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} setData={setData} />
       )}
 
       {/* Filtered Modal */}
@@ -499,26 +408,16 @@ const InterneeEvaluationTable = () => {
               sx={{ borderRadius: "5px" }} // Rounded corners for the input
             />
             <FormHelperText sx={{ marginTop: 1, color: "text.secondary" }}>
-              Search by name, contact number (e.g., 0310-7747768), or CNIC
-              (e.g., 34201-8603239-7).
+              Search by name, contact number (e.g., 0310-7747768), or CNIC (e.g., 34201-8603239-7).
             </FormHelperText>
           </Grid>
           <Grid item md={6}>
             <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-              <Button
-                component={Link}
-                to={"/evaluation-form"}
-                variant="outlined"
-                size="large"
-              >
+              <Button component={Link} to={"/evaluation-form"} variant="outlined" size="large">
                 <AddIcon sx={{ mr: 1 }} /> Evaluation Form
               </Button>
 
-              <Button
-                onClick={toggleTalentAquistion}
-                variant="contained"
-                size="large"
-              >
+              <Button onClick={toggleTalentAquistion} variant="contained" size="large">
                 <PersonSearchIcon sx={{ mr: 1 }} /> Talent Acquisition
               </Button>
             </Box>
@@ -555,20 +454,13 @@ const RemarksModal = ({ row, isModalOpen, setIsModalOpen, setData }) => {
     const formData = new FormData(event.currentTarget);
     const remarks = formData.get("remarks");
     try {
-      const res = await axios.post(
-        `/api/interview/update_interview_record/${row._id}`,
-        {
-          remarks,
-        }
-      );
+      const res = await axios.post(`/api/interview/update_interview_record/${row._id}`, {
+        remarks,
+      });
       setIsModalOpen(false);
       toast.success(res.data.msg);
 
-      setData((prevData) =>
-        prevData.map((item) =>
-          item._id === res.data._id ? { ...item, ...res.data } : item
-        )
-      );
+      setData((prevData) => prevData.map((item) => (item._id === res.data._id ? { ...item, ...res.data } : item)));
     } catch (error) {
       setIsModalOpen(true);
       console.log("modal error", error);
@@ -647,12 +539,9 @@ const ResponseCell = (props) => {
     setOpen(false);
     const rowId = apiRef.current.getCellParams(id, field).id;
     try {
-      const res = await axios.post(
-        `/api/interview/update_interview_record/${rowId}`,
-        {
-          response,
-        }
-      );
+      const res = await axios.post(`/api/interview/update_interview_record/${rowId}`, {
+        response,
+      });
       setOption(res.data.response);
       toast.success(res.data.msg);
     } catch (error) {

@@ -87,26 +87,18 @@ function Role() {
   };
 
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this profile?"
-    );
+    const confirmDelete = window.confirm("Are you sure you want to delete this profile?");
     if (confirmDelete) {
       try {
-        const response = await axios.delete(
-          `/api/employee/delete_employee/${id}`
-        );
+        const response = await axios.delete(`/api/employee/delete_employee/${id}`);
         if (response.status === 200) {
           alert("Profile deleted successfully.");
-          setEmployees((prevEmployees) =>
-            prevEmployees.filter((employee) => employee._id !== id)
-          );
+          setEmployees((prevEmployees) => prevEmployees.filter((employee) => employee._id !== id));
           handleCloseDialog();
         }
       } catch (error) {
         console.error("Error deleting profile:", error);
-        alert(
-          "There was an error deleting the profile. Please try again later."
-        );
+        alert("There was an error deleting the profile. Please try again later.");
       }
     }
   };
@@ -142,16 +134,12 @@ function Role() {
     formData.append("role", updatedEmployee.role);
 
     try {
-      const response = await axios.patch(
-        `/api/employee/update_employee/${_id}`,
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.patch(`/api/employee/update_employee/${_id}`, formData, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       console.log(response.data);
       Swal.fire(
         "Updated!",
@@ -169,14 +157,9 @@ function Role() {
   useEffect(() => {
     const filtered = employees.filter((employee) => {
       const matchesSearch =
-        (filterField.employeeName &&
-          employee.employeeName
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())) ||
-        (filterField.email &&
-          employee.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (filterField.role &&
-          employee.role.toLowerCase().includes(searchTerm.toLowerCase()));
+        (filterField.employeeName && employee.employeeName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (filterField.email && employee.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (filterField.role && employee.role.toLowerCase().includes(searchTerm.toLowerCase()));
       return matchesSearch;
     });
     setFilteredEmployees(filtered);
@@ -188,10 +171,7 @@ function Role() {
 
   const indexOfLastEmployee = (currentPage + 1) * employeesPerPage;
   const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-  const currentEmployees = filteredEmployees.slice(
-    indexOfFirstEmployee,
-    indexOfLastEmployee
-  );
+  const currentEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
 
   const handlePageChange = (data) => {
     setCurrentPage(data.selected);
@@ -240,41 +220,24 @@ function Role() {
       </Paper>
 
       {/* Filter Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={closeFilterMenu}
-      >
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeFilterMenu}>
         <MenuItem>
           <FormControlLabel
             control={
-              <Checkbox
-                checked={filterField.employeeName}
-                onChange={() => handleFieldFilterChange("employeeName")}
-              />
+              <Checkbox checked={filterField.employeeName} onChange={() => handleFieldFilterChange("employeeName")} />
             }
             label="Employee Name"
           />
         </MenuItem>
         <MenuItem>
           <FormControlLabel
-            control={
-              <Checkbox
-                checked={filterField.email}
-                onChange={() => handleFieldFilterChange("email")}
-              />
-            }
+            control={<Checkbox checked={filterField.email} onChange={() => handleFieldFilterChange("email")} />}
             label="Email"
           />
         </MenuItem>
         <MenuItem>
           <FormControlLabel
-            control={
-              <Checkbox
-                checked={filterField.role}
-                onChange={() => handleFieldFilterChange("role")}
-              />
-            }
+            control={<Checkbox checked={filterField.role} onChange={() => handleFieldFilterChange("role")} />}
             label="Role"
           />
         </MenuItem>
@@ -290,9 +253,7 @@ function Role() {
           }}
         >
           <Table>
-            <TableHead
-              sx={{ backgroundColor: (theme) => theme.palette.primary.main }}
-            >
+            <TableHead sx={{ backgroundColor: (theme) => theme.palette.primary.main }}>
               <TableRow>
                 {["User", "Email", "Role", "Action"].map((header) => (
                   <TableCell
@@ -328,30 +289,17 @@ function Role() {
                           gap: "0.8rem",
                         }}
                       >
-                        <Avatar
-                          alt={employee.employeeName}
-                          src={employee.employeeProImage}
-                        />
-                        <Typography
-                          sx={{ fontSize: { xs: 13, sm: 16 }, fontWeight: 600 }}
-                        >
+                        <Avatar alt={employee.employeeName} src={employee.employeeProImage?.secure_url} />
+                        <Typography sx={{ fontSize: { xs: 13, sm: 16 }, fontWeight: 600 }}>
                           {employee.employeeName}
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Typography
-                        sx={{ fontSize: { xs: 13, sm: 16 }, fontWeight: 400 }}
-                      >
-                        {employee.email}
-                      </Typography>
+                      <Typography sx={{ fontSize: { xs: 13, sm: 16 }, fontWeight: 400 }}>{employee.email}</Typography>
                     </TableCell>
                     <TableCell>
-                      <CustomChip
-                        label={WordCaptitalize(employee.role)}
-                        size="small"
-                        status={employee.role}
-                      />
+                      <CustomChip label={WordCaptitalize(employee.role)} size="small" status={employee.role} />
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: "flex", gap: "12px" }}>
@@ -363,8 +311,7 @@ function Role() {
                           sx={{
                             backgroundColor: (theme) => customColors.greenAlpha,
                             padding: "8px",
-                            transition:
-                              "background-color 0.3s ease, transform 0.3s ease",
+                            transition: "background-color 0.3s ease, transform 0.3s ease",
                             "&:hover": {
                               backgroundColor: "#FFE3E2", // Subtle change on hover
                               transform: "scale(1.06)",
@@ -386,8 +333,7 @@ function Role() {
                           sx={{
                             backgroundColor: (theme) => customColors.redAlpha,
                             padding: "8px",
-                            transition:
-                              "background-color 0.3s ease, transform 0.3s ease",
+                            transition: "background-color 0.3s ease, transform 0.3s ease",
                             "&:hover": {
                               backgroundColor: "#E8FADD", // Subtle change on hover
                               transform: "scale(1.06)",
@@ -418,9 +364,7 @@ function Role() {
       </Paper>
 
       {/* Pagination */}
-      <Box
-        sx={{ marginTop: "20px", display: "flex", justifyContent: "center" }}
-      >
+      <Box sx={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
         <ReactPaginate
           previousLabel={<ArrowBackIcon />}
           nextLabel={<ArrowForwardIcon />}
@@ -443,12 +387,7 @@ function Role() {
       </Box>
 
       {/* Edit Employee Dialog */}
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogContent
           sx={{
             padding: "0",
@@ -484,7 +423,7 @@ function Role() {
           >
             <Avatar
               alt={dialogContent.employeeName}
-              src={dialogContent.employeeProImage}
+              src={dialogContent.employeeProImage?.secure_url}
               sx={{
                 width: { xs: 72, sm: 100 },
                 height: { xs: 72, sm: 100 },
@@ -606,11 +545,7 @@ function Role() {
                   <Typography variant="body1" sx={{ fontWeight: 500 }}>
                     Role
                   </Typography>
-                  <Select
-                    value={dialogContent.role || ""}
-                    onChange={handleChangeRole}
-                    sx={{ minWidth: 150 }}
-                  >
+                  <Select value={dialogContent.role || ""} onChange={handleChangeRole} sx={{ minWidth: 150 }}>
                     <MenuItem value="admin">Admin</MenuItem>
                     <MenuItem value="manager">Manager</MenuItem>
                     <MenuItem value="employee">Employee</MenuItem>
@@ -632,9 +567,7 @@ function Role() {
                 <Typography variant="body1" sx={{ fontWeight: 500 }}>
                   Profile Picture
                 </Typography>
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: "20px" }}
-                >
+                <Box sx={{ display: "flex", alignItems: "center", gap: "20px" }}>
                   <Avatar
                     src={dialogContent.profileImage}
                     alt="Profile"
@@ -653,12 +586,7 @@ function Role() {
                     }}
                   >
                     Replace
-                    <input
-                      type="file"
-                      hidden
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
+                    <input type="file" hidden accept="image/*" onChange={handleImageChange} />
                   </Button>
                 </Box>
               </Box>
@@ -693,11 +621,7 @@ function Role() {
           </Button>
 
           <Box sx={{ display: "flex", gap: "20px" }}>
-            <Button
-              variant="outlined"
-              onClick={handleCloseDialog}
-              sx={{ fontWeight: "500", padding: "8px" }}
-            >
+            <Button variant="outlined" onClick={handleCloseDialog} sx={{ fontWeight: "500", padding: "8px" }}>
               Cancel
             </Button>
 

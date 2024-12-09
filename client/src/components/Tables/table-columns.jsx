@@ -124,7 +124,7 @@ export const employeeColumns = [
     field: "employeeProImage",
     headerName: "Profile Pic",
 
-    renderCell: (params) => <Avatar alt="Avatar" src={employeeProImage} />,
+    renderCell: (params) => <Avatar alt="Avatar" src={params.employeeProImage.secure_url} />,
   },
   { field: "employeeID", headerName: "Employee ID", width: 200 },
   {

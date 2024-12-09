@@ -31,9 +31,7 @@ const AdminLoanTable = () => {
       field: "employee_name",
       headerName: "Employee",
       width: 150,
-      renderCell: ({ row }) => (
-        <EmployeeNameCell userId={row.employee_id} name={row.employee_name} />
-      ),
+      renderCell: ({ row }) => <EmployeeNameCell userId={row.employee_id} name={row.employee_name} />,
     },
     {
       field: "loan_reason",
@@ -168,10 +166,7 @@ const AdminLoanTable = () => {
             label="Edit"
             onClick={handleEditClick(id)}
             sx={iconStyles.edit}
-            disabled={
-              row.approval_status === "rejected" ||
-              row.approval_status === "approved"
-            }
+            disabled={row.approval_status === "rejected" || row.approval_status === "approved"}
           />,
         ];
       },
@@ -201,15 +196,12 @@ const AdminLoanTable = () => {
     }
 
     try {
-      const res = await axios.post(
-        `/api/advance_payments/admin/advance-applications/?type=loan`,
-        {
-          currentUser,
-          _id: id,
-          approval_status,
-          activity_status,
-        }
-      );
+      const res = await axios.post(`/api/advance_payments/admin/advance-applications/?type=loan`, {
+        currentUser,
+        _id: id,
+        approval_status,
+        activity_status,
+      });
 
       const newObj = { ...res.data, id: res.data._id };
       toast.success("Loan status updated successfully!");

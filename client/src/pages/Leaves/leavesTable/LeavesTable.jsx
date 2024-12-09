@@ -29,12 +29,7 @@ export default function LeavesTable({ allLeaves }) {
       headerName: "Employee",
       width: 200,
       renderCell: ({ row }) => {
-        return (
-          <EmployeeNameCell
-            src={row?.from?.employeeProImage}
-            name={row?.from?.employeeName}
-          />
-        );
+        return <EmployeeNameCell src={row?.from?.employeeProImage.secure_url} name={row?.from?.employeeName} />;
       },
     },
     { field: "leaveCategory", headerName: "Category", width: 150 },
@@ -49,12 +44,10 @@ export default function LeavesTable({ allLeaves }) {
             {params.row.leaveType === "Long Leaves" ? (
               <>
                 <Typography variant="caption" display="block">
-                  Start:{" "}
-                  {dayjs(params.row.leavesStart).format("dddd, MMMM D, YYYY")}
+                  Start: {dayjs(params.row.leavesStart).format("dddd, MMMM D, YYYY")}
                 </Typography>
                 <Typography variant="caption" display="block">
-                  End:{" "}
-                  {dayjs(params.row.leavesEnd).format("dddd, MMMM D, YYYY")}
+                  End: {dayjs(params.row.leavesEnd).format("dddd, MMMM D, YYYY")}
                 </Typography>
               </>
             ) : (
@@ -96,8 +89,7 @@ export default function LeavesTable({ allLeaves }) {
       field: "createdAt",
       headerName: "Requested On",
       width: 250,
-      valueGetter: (params) =>
-        dayjs(params.row.createdAt).format("dddd, MMMM D, YYYY"),
+      valueGetter: (params) => dayjs(params.row.createdAt).format("dddd, MMMM D, YYYY"),
     },
   ];
 
