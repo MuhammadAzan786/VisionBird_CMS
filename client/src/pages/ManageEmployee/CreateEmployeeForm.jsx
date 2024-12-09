@@ -1143,6 +1143,7 @@ function CreateEmployeeForm() {
                 <Button
                   type="button"
                   variant="contained"
+                  sx={{ marginTop: "20px" }}
                   endIcon={
                     <PersonAddAltIcon
                       sx={{

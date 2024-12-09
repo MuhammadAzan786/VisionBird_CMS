@@ -166,6 +166,7 @@ const EmployeeProfile = () => {
                         fontSize: 15,
                         bgcolor: "white",
                       }}
+                      disableRipple
                       color="success"
                       variant="outlined"
                       onClick={() => toPDF()}

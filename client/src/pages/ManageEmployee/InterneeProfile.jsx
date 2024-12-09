@@ -141,6 +141,7 @@ const InterneeProfile = () => {
                   }}
                   color="success"
                   variant="outlined"
+                  disableRipple
                   onClick={() => toPDF()}
                 >
                   Download Profile

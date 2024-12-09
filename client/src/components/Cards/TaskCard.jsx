@@ -9,12 +9,7 @@ function TaskCard() {
 
   const getTasks = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:4000/api/task/getTask",
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axios.get("/api/task/getTask");
       setTasks(response.data);
       console.log(response.data);
     } catch (error) {
@@ -93,19 +88,10 @@ function TaskCard() {
                 justifyContent: "space-between",
               }}
             >
-              <Typography
-                sx={{ fontSize: 13, fontWeight: 500 }}
-                variant="h5"
-                component="h2"
-                textAlign={"center"}
-              >
+              <Typography sx={{ fontSize: 13, fontWeight: 500 }} variant="h5" component="h2" textAlign={"center"}>
                 NO. of Tasks
               </Typography>
-              <Typography
-                sx={{ fontWeight: 600, color: "#666666" }}
-                variant="h3"
-                component="p"
-              >
+              <Typography sx={{ fontWeight: 600, color: "#666666" }} variant="h3" component="p">
                 {tasks.length}
               </Typography>
             </Box>

@@ -9,12 +9,7 @@ function EmployeeCard() {
 
   const getEmp = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:4000/api/employee/all_employees",
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axios.get("/api/employee/all_employees");
       setEmployees(response.data);
     } catch (error) {
       console.log(error);
@@ -71,8 +66,7 @@ function EmployeeCard() {
                 style={{
                   width: "35px",
                   height: "35px",
-                  filter:
-                    "invert(42%) sepia(97%) saturate(2761%) hue-rotate(230deg) brightness(104%) contrast(96%)",
+                  filter: "invert(42%) sepia(97%) saturate(2761%) hue-rotate(230deg) brightness(104%) contrast(96%)",
                 }}
               />
             </Box>
@@ -92,19 +86,10 @@ function EmployeeCard() {
                 justifyContent: "space-between",
               }}
             >
-              <Typography
-                sx={{ fontSize: 13, fontWeight: 500 }}
-                variant="h5"
-                component="h2"
-                textAlign={"center"}
-              >
+              <Typography sx={{ fontSize: 13, fontWeight: 500 }} variant="h5" component="h2" textAlign={"center"}>
                 NO. of Employees
               </Typography>
-              <Typography
-                sx={{ fontWeight: 600, color: "#666666" }}
-                variant="h3"
-                component="p"
-              >
+              <Typography sx={{ fontWeight: 600, color: "#666666" }} variant="h3" component="p">
                 {employees.length}
               </Typography>
             </Box>

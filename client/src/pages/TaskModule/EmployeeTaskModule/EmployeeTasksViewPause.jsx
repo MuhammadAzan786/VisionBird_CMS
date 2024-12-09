@@ -325,18 +325,6 @@ export default function EmployeeTasksViewPause() {
 
   const currentUser = employee;
   const id = currentUser?._id;
-  // const getEmployee = async (empid) => {
-  //   const response = await axios.get(
-  //     `http://localhost:4000/api/employee/get_employee/${empid}`,
-  //     { withCredentials: true }
-  //   );
-  //   if (!response) {
-  //     console.error("Error fetching employee data");
-  //     return;
-  //   }
-
-  //   setEmployee(response.data);
-  // };
 
   const getTasks = async (id) => {
     try {

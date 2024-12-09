@@ -1,5 +1,17 @@
 import PermIdentityIcon from "@mui/icons-material/PermIdentity";
-import { Backdrop, Box, Button, Grid, InputLabel, MenuItem, Modal, Paper, Select, Typography } from "@mui/material";
+import {
+  Backdrop,
+  Box,
+  Button,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Modal,
+  Paper,
+  Select,
+  Typography,
+} from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import { ErrorMessage, Field, Form, Formik } from "formik";
 import { TextField } from "formik-material-ui";
@@ -15,6 +27,8 @@ import axios from "../../utils/axiosInterceptor";
 import Test from "../Test/Test";
 import { ScrollToErrorField } from "../../utils/common";
 import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
+import { IconButton } from "rsuite";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 const validationSchema = object().shape({
   firstName: string()
     .required("Required Name")
@@ -71,20 +85,12 @@ function UpdateForm() {
 
   const navigate = useNavigate();
   const [user, setUser] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
-
-  const [uploadModalOpen, setUploadModalOpen] = useState(false);
-
-  const toggleUploadModal = () => {
-    setUploadModalOpen(!uploadModalOpen);
-  };
-  const closeUploadModal = () => {
-    setUploadModalOpen(false);
-  };
 
   // Custom Hook to prevent WindowClose
   useWindowCloseHandler(tempFilesRef);
@@ -641,10 +647,19 @@ function UpdateForm() {
                       },
                     }}
                     label="Password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     name="password"
                     className="w-full"
                     disabled={role === "manager"}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                            {showPassword ? <Visibility /> : <VisibilityOff />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -1154,36 +1169,16 @@ function UpdateForm() {
                   />
                 </Grid>
               </Grid>
-              <Button variant="contained" onClick={toggleUploadModal} disabled={!values.userName && !values.empId}>
-                Upload Document
-              </Button>
-              <Modal
-                open={uploadModalOpen}
-                onClose={closeUploadModal}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Test
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  folderName={`${user.employeeUsername}_${user.employeeID}`}
-                  tempFilesRef={tempFilesRef}
-                  deletedFilesRef={deletedFilesRef}
-                  parentFolder="Employee"
-                />
-              </Modal>
 
               <div className="flex justify-end">
                 <Button
                   type="button"
                   variant="contained"
+                  sx={{ marginTop: "20px" }}
                   endIcon={
                     <PermIdentityIcon
                       sx={{
-                        transition: "transform 0.3s", // Transition for icon
+                        transition: "transform 0.3s",
                       }}
                     />
                   }

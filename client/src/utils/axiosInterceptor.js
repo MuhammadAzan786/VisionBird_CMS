@@ -7,8 +7,6 @@ axios.defaults.baseURL =
     : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
 axios.defaults.withCredentials = true;
 
-axios.create();
-
 // Adding the response interceptor globally to check for token expiration
 axios.interceptors.response.use(
   (response) => {
