@@ -33,15 +33,17 @@ import {
   Stack,
   Paper,
 } from "@mui/material";
-
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 const PaySalaries = () => {
   const navigate = useNavigate();
 
   const [tabValue, setTabValue] = useState("all");
-
-  const [paidEmp, setPaidEmp] = React.useState([]);
-  const [unpaidEmp, setUnpaidEmp] = React.useState([]);
-  const [allEmp, setallEmp] = React.useState([]);
 
   const [selectedEmployeeId, setSelectedEmployeeId] = React.useState(null);
   const [paymentMethod, setPaymentMethod] = React.useState("Cash");
@@ -92,30 +94,54 @@ const PaySalaries = () => {
   };
 
   //Get Paid & Unpaid empolyee details
-  const fetchEmployees = async () => {
-    await axios
-      .post("/api/pay/paid_unpaid_salary_report", {
+  // const fetchEmployees = async () => {
+  //   await axios
+  //     .post("/api/pay/paid_unpaid_salary_report", {
+  //       month: selectedDate.month,
+  //       year: selectedDate.year,
+  //     })
+  //     .then((response) => {
+  //       const { paidEmployees, unpaidEmployees, allEmployees } = response.data;
+
+  //       // Save the arrays separately
+  //       setPaidEmp(paidEmployees);
+  //       setUnpaidEmp(unpaidEmployees);
+  //       setallEmp(allEmployees);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching employee data:", error);
+  //     });
+  // };
+  // //Fetch Paid & Unpaid Employee if selectedDate Change
+  // useEffect(() => {
+  //   fetchEmployees();
+  // }, [selectedDate]);
+
+  const queryClient = useQueryClient();
+  const {
+    data: { paidEmployees = [], unpaidEmployees = [], allEmployees = [] } = {},
+    isError,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["salaries", selectedDate.month, selectedDate.year],
+    queryFn: async () => {
+      if (!selectedDate.month || !selectedDate.year) {
+        throw new Error("Invalid date selected");
+      }
+
+      const response = await axios.post("/api/pay/paid_unpaid_salary_report", {
         month: selectedDate.month,
         year: selectedDate.year,
-      })
-      .then((response) => {
-        const { paidEmployees, unpaidEmployees, allEmployees } = response.data;
-
-        // Save the arrays separately
-        setPaidEmp(paidEmployees);
-        setUnpaidEmp(unpaidEmployees);
-        setallEmp(allEmployees);
-      })
-      .catch((error) => {
-        console.error("Error fetching employee data:", error);
       });
-  };
 
-  //Fetch Paid & Unpaid Employee if selectedDate Change
-  useEffect(() => {
-    fetchEmployees();
-  }, [selectedDate]);
+      console.log("API Response:", response.data);
+      return response.data;
+    },
+    enabled: !!selectedDate.month && !!selectedDate.year, // Prevent unnecessary queries
+  });
 
+ 
   //Show employee details when double clicked
   const navigateTo = (employee) => {
     navigate(`/employee-profile/${employee.id}`);
@@ -294,9 +320,9 @@ const PaySalaries = () => {
             <DataGrid
               columns={columns}
               rows={
-                allEmp.length < 0
+                allEmployees.length < 0
                   ? []
-                  : allEmp.map((employee) => {
+                  : allEmployees.map((employee) => {
                       return { ...employee, id: employee._id };
                     })
               }
@@ -308,9 +334,9 @@ const PaySalaries = () => {
             <DataGrid
               columns={columns}
               rows={
-                unpaidEmp.length < 0
+                unpaidEmployees.length < 0
                   ? []
-                  : unpaidEmp.map((employee) => {
+                  : unpaidEmployees.map((employee) => {
                       return { ...employee, id: employee._id };
                     })
               }
@@ -323,9 +349,9 @@ const PaySalaries = () => {
             <DataGrid
               columns={columns}
               rows={
-                paidEmp.length < 0
+                paidEmployees.length < 0
                   ? []
-                  : paidEmp.map((employee) => {
+                  : paidEmployees.map((employee) => {
                       return { ...employee, id: employee._id };
                     })
               }

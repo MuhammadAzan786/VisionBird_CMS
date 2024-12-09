@@ -57,4 +57,6 @@ router.get("/get_inactive_employees", auth, authorizeRoles("admin", "manager"), 
 
 router.put("/update_employee_status/:id", auth, authorizeRoles("admin"), Employee_controller.update_employee_status);
 
+router.get("/check_username", Employee_controller.check_username);
+
 module.exports = router;

@@ -32,28 +32,40 @@ import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
 const validationSchema = object().shape({
   firstName: string()
     .required("Required Name")
-    .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
+    .matches(
+      /^[a-zA-Z\s]+$/,
+      "Only alphabetic characters and spaces are allowed"
+    ),
   fatherName: string()
     .required("Required Name")
     .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters are allowed"),
   cnic: string()
     .required("Required CNIC")
-    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) => /^\d{5}-\d{7}-\d$/.test(value || "")),
+    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) =>
+      /^\d{5}-\d{7}-\d$/.test(value || "")
+    ),
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
 
   mobile: string()
     .required("Required Field")
-    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
+    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) =>
+      /^03\d{2}-\d{7}$/.test(value || "")
+    ),
   email: string().email().required("Required Email"),
   gender: string().required("Required Field"),
   maritalStatus: string().required("Required Field"),
   otherMobile: string()
     .required("Required Field")
-    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
+    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) =>
+      /^03\d{2}-\d{7}$/.test(value || "")
+    ),
   whosMobile: string()
     .required("Required Name")
-    .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
+    .matches(
+      /^[a-zA-Z\s]+$/,
+      "Only alphabetic characters and spaces are allowed"
+    ),
   qualification: string().required("Required Field"),
   startDate: string().required("Date Required"),
   probation: string().required("Please select "),
@@ -185,9 +197,11 @@ function CreateEmployeeForm() {
           employeeID: values.empId,
           employeeDesignation: values.designation,
           BasicPayInProbationPeriod: values.BasicPayInProbationPeriod || 0,
-          BasicPayAfterProbationPeriod: values.BasicPayAfterProbationPeriod || 0,
+          BasicPayAfterProbationPeriod:
+            values.BasicPayAfterProbationPeriod || 0,
           AllowancesInProbationPeriod: values.AllowancesInProbationPeriod || 0,
-          AllowancesAfterProbationPeriod: values.AllowancesAfterProbationPeriod || 0,
+          AllowancesAfterProbationPeriod:
+            values.AllowancesAfterProbationPeriod || 0,
           employeeUsername: values.userName,
           employeePassword: values.password,
 
@@ -228,7 +242,13 @@ function CreateEmployeeForm() {
         return (
           <Box m={5}>
             <Form className="ml-5">
-              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} p={3}>
+              <Grid
+                container
+                spacing={2}
+                component={Paper}
+                sx={{ borderRadius: "5px" }}
+                p={3}
+              >
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -334,11 +354,20 @@ function CreateEmployeeForm() {
                       }}
                     >
                       <InputLabel id="gender-label">Gender</InputLabel>
-                      <FastField name="gender" as={Select} labelId="gender-label" label="Gender">
+                      <FastField
+                        name="gender"
+                        as={Select}
+                        labelId="gender-label"
+                        label="Gender"
+                      >
                         <MenuItem value="male">Male</MenuItem>
                         <MenuItem value="female">Female</MenuItem>
                       </FastField>
-                      <ErrorMessage name="gender" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="gender"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -353,14 +382,25 @@ function CreateEmployeeForm() {
                         },
                       }}
                     >
-                      <InputLabel id="maritalStatus-label">Marital Status</InputLabel>
-                      <FastField name="maritalStatus" as={Select} labelId="maritalStatus-label" label="Marital Status">
+                      <InputLabel id="maritalStatus-label">
+                        Marital Status
+                      </InputLabel>
+                      <FastField
+                        name="maritalStatus"
+                        as={Select}
+                        labelId="maritalStatus-label"
+                        label="Marital Status"
+                      >
                         <MenuItem value="single">Single</MenuItem>
                         <MenuItem value="married">Married</MenuItem>
                         <MenuItem value="divorced">Divorced</MenuItem>
                         <MenuItem value="widowed">Widowed</MenuItem>
                       </FastField>
-                      <ErrorMessage name="maritalStatus" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="maritalStatus"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -375,14 +415,25 @@ function CreateEmployeeForm() {
                         },
                       }}
                     >
-                      <InputLabel id="qualification-label">Qualification</InputLabel>
-                      <FastField name="qualification" as={Select} labelId="qualification-label" label="Qualification">
+                      <InputLabel id="qualification-label">
+                        Qualification
+                      </InputLabel>
+                      <FastField
+                        name="qualification"
+                        as={Select}
+                        labelId="qualification-label"
+                        label="Qualification"
+                      >
                         <MenuItem value="matriculation">Matriculation</MenuItem>
                         <MenuItem value="intermediate">Intermediate</MenuItem>
                         <MenuItem value="graduation">Bachelors</MenuItem>
                         <MenuItem value="masters">Masters</MenuItem>
                       </FastField>
-                      <ErrorMessage name="qualification" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="qualification"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -399,7 +450,9 @@ function CreateEmployeeForm() {
                             },
                           }}
                         >
-                          <InputLabel id="disability-label">Disability</InputLabel>
+                          <InputLabel id="disability-label">
+                            Disability
+                          </InputLabel>
                           <FastField
                             name="disability"
                             as={Select}
@@ -420,7 +473,11 @@ function CreateEmployeeForm() {
                             <MenuItem value="yes">Yes</MenuItem>
                             <MenuItem value="no">No</MenuItem>
                           </FastField>
-                          <ErrorMessage name="disability" style={{ color: "red" }} component="div" />
+                          <ErrorMessage
+                            name="disability"
+                            style={{ color: "red" }}
+                            component="div"
+                          />
                         </FormControl>
                       </div>
                     </Grid>
@@ -448,7 +505,14 @@ function CreateEmployeeForm() {
                 </Grid>
               </Grid>
 
-              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+              <Grid
+                container
+                spacing={2}
+                component={Paper}
+                sx={{ borderRadius: "5px" }}
+                mt={2}
+                p={3}
+              >
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -490,7 +554,10 @@ function CreateEmployeeForm() {
                     onInput={(event) => {
                       const input = event.target.value;
                       const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                      const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
+                      const formattedmob = formattedInput.replace(
+                        /(.{4})(.?)/,
+                        "$1-$2"
+                      ); // Add dash after the fifth character
                       event.target.value = formattedmob;
                     }}
                   />
@@ -511,7 +578,10 @@ function CreateEmployeeForm() {
                     onInput={(event) => {
                       const input = event.target.value;
                       const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                      const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
+                      const formattedmob = formattedInput.replace(
+                        /(.{4})(.?)/,
+                        "$1-$2"
+                      ); // Add dash after the fifth character
                       event.target.value = formattedmob;
                     }}
                   />
@@ -552,7 +622,14 @@ function CreateEmployeeForm() {
                   />
                 </Grid>
               </Grid>
-              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+              <Grid
+                container
+                spacing={2}
+                component={Paper}
+                sx={{ borderRadius: "5px" }}
+                mt={2}
+                p={3}
+              >
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -626,7 +703,10 @@ function CreateEmployeeForm() {
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                          >
                             {showPassword ? <Visibility /> : <VisibilityOff />}
                           </IconButton>
                         </InputAdornment>
@@ -647,13 +727,24 @@ function CreateEmployeeForm() {
                             },
                           }}
                         >
-                          <InputLabel id="bankAccount-label">Bank Account</InputLabel>
-                          <Field name="bankAccount" as={Select} labelId="bankAccount-label" label="BankAccount">
+                          <InputLabel id="bankAccount-label">
+                            Bank Account
+                          </InputLabel>
+                          <Field
+                            name="bankAccount"
+                            as={Select}
+                            labelId="bankAccount-label"
+                            label="BankAccount"
+                          >
                             <MenuItem value="yes">Yes</MenuItem>
                             <MenuItem value="no">No</MenuItem>
                           </Field>
 
-                          <ErrorMessage name="bankAccount" style={{ color: "red" }} component="div" />
+                          <ErrorMessage
+                            name="bankAccount"
+                            style={{ color: "red" }}
+                            component="div"
+                          />
                         </FormControl>
                       </div>
                     </Grid>
@@ -687,12 +778,23 @@ function CreateEmployeeForm() {
                             },
                           }}
                         >
-                          <InputLabel id="probation-label">Probation</InputLabel>
-                          <Field name="probation" as={Select} labelId="probation-label" label="Probation">
+                          <InputLabel id="probation-label">
+                            Probation
+                          </InputLabel>
+                          <Field
+                            name="probation"
+                            as={Select}
+                            labelId="probation-label"
+                            label="Probation"
+                          >
                             <MenuItem value="yes">Yes</MenuItem>
                             <MenuItem value="no">No</MenuItem>
                           </Field>
-                          <ErrorMessage name="probation" style={{ color: "red" }} component="div" />
+                          <ErrorMessage
+                            name="probation"
+                            style={{ color: "red" }}
+                            component="div"
+                          />
                         </FormControl>
                       </div>
                     </Grid>
@@ -724,7 +826,11 @@ function CreateEmployeeForm() {
                         <option value="5">5 Months</option>
                         <option value="6">6 Months</option>
                       </Field>
-                      <ErrorMessage name="probationMonths" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="probationMonths"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </Grid>
                   </Grid>
                 </Grid>
@@ -878,11 +984,22 @@ function CreateEmployeeForm() {
                     <option value="manager">Manager</option>
                     <option value="employee">Employee</option>
                   </FastField>
-                  <ErrorMessage name="maritalStatus" style={{ color: "red" }} component="div" />
+                  <ErrorMessage
+                    name="maritalStatus"
+                    style={{ color: "red" }}
+                    component="div"
+                  />
                 </Grid>
               </Grid>
 
-              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+              <Grid
+                container
+                spacing={2}
+                component={Paper}
+                sx={{ borderRadius: "5px" }}
+                mt={2}
+                p={3}
+              >
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -907,12 +1024,23 @@ function CreateEmployeeForm() {
                         },
                       }}
                     >
-                      <InputLabel id="policyBook-label">Policy Book Signed</InputLabel>
-                      <FastField name="policyBook" as={Select} labelId="policyBook-label" label="Policy Book Signed">
+                      <InputLabel id="policyBook-label">
+                        Policy Book Signed
+                      </InputLabel>
+                      <FastField
+                        name="policyBook"
+                        as={Select}
+                        labelId="policyBook-label"
+                        label="Policy Book Signed"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </FastField>
-                      <ErrorMessage name="policyBook" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="policyBook"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -927,7 +1055,9 @@ function CreateEmployeeForm() {
                         },
                       }}
                     >
-                      <InputLabel id="appointment-label">Appointment Letter Given</InputLabel>
+                      <InputLabel id="appointment-label">
+                        Appointment Letter Given
+                      </InputLabel>
                       <FastField
                         name="appointment"
                         as={Select}
@@ -937,7 +1067,11 @@ function CreateEmployeeForm() {
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </FastField>
-                      <ErrorMessage name="appointment" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="appointment"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -952,7 +1086,9 @@ function CreateEmployeeForm() {
                         },
                       }}
                     >
-                      <InputLabel id="annualLeave-label">Annual Leaves Signed</InputLabel>
+                      <InputLabel id="annualLeave-label">
+                        Annual Leaves Signed
+                      </InputLabel>
                       <FastField
                         name="annualLeave"
                         as={Select}
@@ -962,7 +1098,11 @@ function CreateEmployeeForm() {
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </FastField>
-                      <ErrorMessage name="annualLeave" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="annualLeave"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -977,12 +1117,23 @@ function CreateEmployeeForm() {
                         },
                       }}
                     >
-                      <InputLabel id="rules-label">Rules and Regulation Signed</InputLabel>
-                      <FastField name="rules" as={Select} labelId="rules-label" label="Rules and Regulation Signed">
+                      <InputLabel id="rules-label">
+                        Rules and Regulation Signed
+                      </InputLabel>
+                      <FastField
+                        name="rules"
+                        as={Select}
+                        labelId="rules-label"
+                        label="Rules and Regulation Signed"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </FastField>
-                      <ErrorMessage name="rules" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="rules"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -997,12 +1148,23 @@ function CreateEmployeeForm() {
                         },
                       }}
                     >
-                      <InputLabel id="attendence-label">Attendance Biometric</InputLabel>
-                      <FastField name="attendence" as={Select} labelId="attendence-label" label="Attendance Biometric">
+                      <InputLabel id="attendence-label">
+                        Attendance Biometric
+                      </InputLabel>
+                      <FastField
+                        name="attendence"
+                        as={Select}
+                        labelId="attendence-label"
+                        label="Attendance Biometric"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </FastField>
-                      <ErrorMessage name="attendence" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="attendence"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1017,7 +1179,9 @@ function CreateEmployeeForm() {
                         },
                       }}
                     >
-                      <InputLabel id="localServerAccount-label">Local Server Account Created</InputLabel>
+                      <InputLabel id="localServerAccount-label">
+                        Local Server Account Created
+                      </InputLabel>
                       <FastField
                         name="localServerAccount"
                         as={Select}
@@ -1027,7 +1191,11 @@ function CreateEmployeeForm() {
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </FastField>
-                      <ErrorMessage name="localServerAccount" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="localServerAccount"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1043,11 +1211,20 @@ function CreateEmployeeForm() {
                       }}
                     >
                       <InputLabel id="slack-label">Added in Slack</InputLabel>
-                      <FastField name="slack" as={Select} labelId="slack-label" label="Added in Slack">
+                      <FastField
+                        name="slack"
+                        as={Select}
+                        labelId="slack-label"
+                        label="Added in Slack"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </FastField>
-                      <ErrorMessage name="slack" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="slack"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1063,11 +1240,20 @@ function CreateEmployeeForm() {
                       }}
                     >
                       <InputLabel id="superAdmin-label">Super Admin</InputLabel>
-                      <FastField name="superAdmin" as={Select} labelId="superAdmin-label" label="Super Admin">
+                      <FastField
+                        name="superAdmin"
+                        as={Select}
+                        labelId="superAdmin-label"
+                        label="Super Admin"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </FastField>
-                      <ErrorMessage name="superAdmin" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="superAdmin"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1082,12 +1268,23 @@ function CreateEmployeeForm() {
                         },
                       }}
                     >
-                      <InputLabel id="whatsApp-label">Added in Whatsapp</InputLabel>
-                      <FastField name="whatsApp" as={Select} labelId="whatsApp-label" label="Added in Whatsapp">
+                      <InputLabel id="whatsApp-label">
+                        Added in Whatsapp
+                      </InputLabel>
+                      <FastField
+                        name="whatsApp"
+                        as={Select}
+                        labelId="whatsApp-label"
+                        label="Added in Whatsapp"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </FastField>
-                      <ErrorMessage name="whatsApp" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="whatsApp"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1103,11 +1300,20 @@ function CreateEmployeeForm() {
                       }}
                     >
                       <InputLabel id="empCard-label">Employee Card</InputLabel>
-                      <FastField name="empCard" as={Select} labelId="empCard-label" label="Employee Card">
+                      <FastField
+                        name="empCard"
+                        as={Select}
+                        labelId="empCard-label"
+                        label="Employee Card"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </FastField>
-                      <ErrorMessage name="empCard" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="empCard"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1115,7 +1321,14 @@ function CreateEmployeeForm() {
 
               {/* ============================================  Documents   ============================================== */}
 
-              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+              <Grid
+                container
+                spacing={2}
+                component={Paper}
+                sx={{ borderRadius: "5px" }}
+                mt={2}
+                p={3}
+              >
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -1153,7 +1366,9 @@ function CreateEmployeeForm() {
                   }
                   //ScrollToErrorField is a custom utlity function
                   onClick={() => {
-                    Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
+                    Object.keys(errors).length > 0
+                      ? ScrollToErrorField(errors, setTouched)
+                      : handleSubmit();
                   }}
                 >
                   Create
@@ -1161,7 +1376,13 @@ function CreateEmployeeForm() {
               </div>
             </Form>
             {loading && (
-              <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+              <Backdrop
+                sx={{
+                  color: "#fff",
+                  zIndex: (theme) => theme.zIndex.drawer + 1,
+                }}
+                open={loading}
+              >
                 <LoadingAnim />
               </Backdrop>
             )}

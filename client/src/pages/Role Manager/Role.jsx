@@ -69,7 +69,9 @@ function Role() {
   };
 
   const handleChangeRole = (event) => {
+    console.log('roleeeeeeeeee')
     setDialogContent((prev) => ({ ...prev, role: event.target.value }));
+    
   };
 
   const getEmployees = async () => {
@@ -139,7 +141,12 @@ function Role() {
         },
       });
       console.log(response.data);
-      Swal.fire("Updated!", `${employee.employeeName}'s role updated.`, "success");
+      Swal.fire(
+        "Updated!",
+        `${employee.employeeName}'s role updated.`,
+        "success"
+      );
+      getEmployees()
       handleCloseDialog();
     } catch (error) {
       console.error(error);

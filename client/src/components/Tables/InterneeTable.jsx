@@ -51,6 +51,7 @@ const InterneeTable = ({ searchTerm }) => {
   const mutation = useMutation({
     mutationFn: updateInterneeStatus,
     onSuccess: () => {
+      queryClient.invalidateQueries("employees");
       console.log("Internee status updated successfully!");
       queryClient.invalidateQueries("activeInternees");
       queryClient.invalidateQueries("inactiveInternees");
@@ -69,7 +70,11 @@ const InterneeTable = ({ searchTerm }) => {
       width: 300,
       // src={row.interneeProImage} fix internee image issue, image is not uploading
       renderCell: ({ row }) => (
-        <EmployeeNameCell userId={row.internId} name={row.firstName} src={row.interneeProImage.secure_url} />
+        <EmployeeNameCell
+          userId={row.internId}
+          name={row.firstName}
+          src={row?.interneeProImage?.secure_url}
+        />
       ),
     },
     { field: "designation", headerName: "Designation", width: 250 },

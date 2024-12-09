@@ -1,48 +1,14 @@
-// import { useEffect, useState } from "react";
-// import axios from "../../utils/axiosInterceptor";
-// import LeavesTable from "./leavesTable/LeavesTable";
-
-// export default function AllLeaves() {
-//   const [allLeaves, setAllLeave] = useState([]);
-
-//   useEffect(() => {
-//     axios
-//       .get(`/api/leave/all-leaves`, {
-//         withCredentials: true,
-//       })
-//       .then((response) => {
-//         setAllLeave(response.data);
-//       })
-//       .catch((error) => {
-//         console.error("Error fetching leave history:", error);
-//       });
-//   }, []);
-
-//   return (
-//     <>
-//       <LeavesTable allLeaves={allLeaves} />
-//     </>
-//   );
-// }
-
-
-
-
 import { useEffect, useState } from "react";
 import axios from "../../utils/axiosInterceptor";
 import LeavesTable from "./leavesTable/LeavesTable";
 import {
   useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
 } from "@tanstack/react-query";
+import CustomOverlay from "../../components/Styled/CustomOverlay";
+import toast from "react-hot-toast";
 export default function AllLeaves() {
   const [allLeaves, setAllLeave] = useState([]);
 
-  // Access the client
-  const queryClient = useQueryClient();
 
   // Fetch All Leaves
   const query = useQuery({
@@ -54,19 +20,18 @@ export default function AllLeaves() {
       return response.data;
     },
   });
-  console.log(query);
+  // console.log(query);
 
   // Handle Loading and Error States
   if (query.isLoading) {
-    return <div>Loading...</div>;
+    return <CustomOverlay open={ true} />;
   }
 
   if (query.isError) {
-    return <div>Error: {query.error.message}</div>;
+    toast.error(query.error.message);
+    return
   }
-  // useEffect(() => {
 
-  // }, []);
   console.log(query);
   return (
     <>

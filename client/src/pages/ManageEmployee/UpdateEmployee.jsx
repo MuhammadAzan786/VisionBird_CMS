@@ -26,6 +26,7 @@ import "../../index.css";
 import axios from "../../utils/axiosInterceptor";
 import Test from "../Test/Test";
 import { ScrollToErrorField } from "../../utils/common";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
 import { IconButton } from "rsuite";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -221,6 +222,7 @@ function UpdateForm() {
           .then(() => {
             setLoading(false);
             toast.success("Employee Updated Successfully!");
+            queryClient.invalidateQueries("employees");
             navigate("/manage-employees");
           })
           .catch((err) => {

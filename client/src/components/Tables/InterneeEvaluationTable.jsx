@@ -32,6 +32,7 @@ import {
 
 import { Box, IconButton, Rating, TextField, MenuItem, Button } from "@mui/material";
 import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
+import { useQuery } from "@tanstack/react-query";
 
 const InterneeEvaluationTable = () => {
   const navigate = useNavigate();
@@ -73,6 +74,7 @@ const InterneeEvaluationTable = () => {
         console.log("error fetching evaluations :", error);
       });
   };
+  // cont query=useQuery()
   const downloadImage = (url) => {
     saveAs(url, url.split("/").pop());
   };

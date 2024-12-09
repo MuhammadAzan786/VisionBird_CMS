@@ -1,7 +1,10 @@
 import { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./index.css";
-import { setCelebrationData, setShowCelebration } from "./redux/celebrationSlice";
+import {
+  setCelebrationData,
+  setShowCelebration,
+} from "./redux/celebrationSlice";
 
 import { Toaster } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -65,8 +68,12 @@ const App = () => {
   const socket = useSelector((state) => state.socket.socket);
   const { currentUser } = useSelector((state) => state.user);
   const { message, hideMessage } = useMessage();
-  const celebrationData = useSelector((state) => state.celebration.celebrationData);
-  const showCelebration = useSelector((state) => state.celebration.showCelebration);
+  const celebrationData = useSelector(
+    (state) => state.celebration.celebrationData
+  );
+  const showCelebration = useSelector(
+    (state) => state.celebration.showCelebration
+  );
 
   const dispatch = useDispatch();
 
@@ -120,7 +127,9 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<Signin />} />
 
-          <Route element={<PrivateRoutes allowedRoles={["manager", "employee"]} />}>
+          <Route
+            element={<PrivateRoutes allowedRoles={["manager", "employee"]} />}
+          >
             {/* Leave Routes */}
             <Route path="/my-leaves" element={<MyLeaves />} />
             <Route path="/create-project" element={<CreateProject />} />
@@ -129,26 +138,44 @@ const App = () => {
             <Route path="/performance" element={<ViewPerformance />} />
           </Route>
 
-          <Route element={<PrivateRoutes allowemployee-leavesedRoles={["employee"]} />}>
+          <Route
+            element={
+              <PrivateRoutes allowemployee-leavesedRoles={["employee"]} />
+            }
+          >
             <Route path="/all-portfolio" element={<AllPortfolio />} />
           </Route>
 
-          <Route element={<PrivateRoutes allowedRoles={["admin", "manager"]} />}>
+          <Route
+            element={<PrivateRoutes allowedRoles={["admin", "manager"]} />}
+          >
             <Route path="/manage-employees" element={<ManageEmployees />} />
             <Route path="/manage-internees" element={<ManageInternees />} />
             <Route path="/create-employee" element={<CreateEmployeeForm />} />
             <Route path="/create-internee" element={<CreateInterneeForm />} />
-            <Route path="/update-employee-profile/:id" element={<UpdateEmployee />} />
+            <Route
+              path="/update-employee-profile/:id"
+              element={<UpdateEmployee />}
+            />
             {/* Interview Routes */}
-            <Route path="/interview-evaluation" element={<InterneeEvaluation />} />
+            <Route
+              path="/interview-evaluation"
+              element={<InterneeEvaluation />}
+            />
 
             <Route path="/evaluation-form" element={<InterviewEvalForm />} />
             <Route path="/evaluation-page/:id" element={<EvaluationPage />} />
             <Route path="/internee-profile/:id" element={<InterneeProfile />} />
-            <Route path="/update-internee/:id" element={<UpdateInterneeForm />} />
+            <Route
+              path="/update-internee/:id"
+              element={<UpdateInterneeForm />}
+            />
 
             {/* Portfolio Routes */}
-            <Route path="/all-portfolio-employees" element={<AllPortfolioEmployees />} />
+            <Route
+              path="/all-portfolio-employees"
+              element={<AllPortfolioEmployees />}
+            />
             <Route path="/all-portfolio-page" element={<AllPortfolioPage />} />
 
             {/* Task Routes */}
@@ -156,7 +183,10 @@ const App = () => {
             <Route path="/all-tasks" element={<EmployeeTask />} />
 
             {/* Task Routes */}
-            <Route path="/employeetaskviewPause/:empid" element={<EmployeeTasksViewPause />} />
+            <Route
+              path="/employeetaskviewPause/:empid"
+              element={<EmployeeTasksViewPause />}
+            />
 
             {/* ========================= testing prupose */}
 
@@ -164,21 +194,34 @@ const App = () => {
             {/* ===================== */}
 
             {/* employee of the week Routes */}
-            <Route path="/employeedailyreportform" element={<EmployeeDailyReportForm />} />
+            <Route
+              path="/employeedailyreportform"
+              element={<EmployeeDailyReportForm />}
+            />
 
             <Route path="/eowhistory" element={<History />} />
           </Route>
 
-          <Route element={<PrivateRoutes allowedRoles={["admin", "manager", "employee"]} />}>
+          <Route
+            element={
+              <PrivateRoutes allowedRoles={["admin", "manager", "employee"]} />
+            }
+          >
             <Route path="/" element={<Dashboard />} />
 
             {/* Employee Routes */}
 
             <Route path="/employee-profile/:id" element={<EmployeeProfile />} />
 
-            <Route path="/employeetaskboard/:id" element={<EmployeeTaskBoard />} />
+            <Route
+              path="/employeetaskboard/:id"
+              element={<EmployeeTaskBoard />}
+            />
 
-            <Route path="/performanceAnalytics" element={<EmployeePerformance />} />
+            <Route
+              path="/performanceAnalytics"
+              element={<EmployeePerformance />}
+            />
 
             {/* Portfolio Routes */}
             <Route path="/project/:id" element={<Project />} />
@@ -198,16 +241,25 @@ const App = () => {
 
             {/* Task Routes */}
             <Route path="/assignTask" element={<EmployeeTaskForm />} />
-            <Route path="/employeetaskboard/:id" element={<EmployeeTaskBoard />} />
+            <Route
+              path="/employeetaskboard/:id"
+              element={<EmployeeTaskBoard />}
+            />
             <Route path="/all-tasks" element={<EmployeeTask />} />
-            <Route path="/employeetaskviewPause/:empid" element={<EmployeeTasksViewPause />} />
+            <Route
+              path="/employeetaskviewPause/:empid"
+              element={<EmployeeTasksViewPause />}
+            />
 
             {/* Salary Routes */}
             <Route path="/pay-salaries" element={<PaySalaries />} />
             <Route path="/salary/:id" element={<Salary />} />
             <Route path="/manage-salaries" element={<ManageSalary />} />
             <Route path="/advance-payments" element={<AdvancePayment />} />
-            <Route path="/advance-applications" element={<AdvanceApplications />} />
+            <Route
+              path="/advance-applications"
+              element={<AdvanceApplications />}
+            />
 
             {/* Leave Routes */}
             <Route path="/leave-form" element={<LeaveForm />} />
@@ -217,8 +269,14 @@ const App = () => {
             <Route path="/view-leave/:id" element={<ViewLeave />} />
 
             {/* employee of the week Routes */}
-            <Route path="/employeedailyreportform" element={<EmployeeDailyReportForm />} />
-            <Route path="/performanceAnalytics" element={<EmployeePerformance />} />
+            <Route
+              path="/employeedailyreportform"
+              element={<EmployeeDailyReportForm />}
+            />
+            <Route
+              path="/performanceAnalytics"
+              element={<EmployeePerformance />}
+            />
             {/* Role Routes */}
             <Route path="/role" element={<Role />} />
 

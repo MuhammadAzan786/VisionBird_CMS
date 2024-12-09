@@ -18,7 +18,7 @@ module.exports = {
         message,
         leave_id: leave._id,
       });
-      // ioInstance.to(req.body.for.toString()).emit("notification", notification);
+       ioInstance.to(req.body.for.toString()).emit("notification", notification);
       res.status(201).json("Leave request saved.");
     } catch (error) {
       console.error("Error saving leave: ", error);
@@ -101,6 +101,7 @@ module.exports = {
         message,
         leave_id: _id,
       }); //For has user ID that has requested leave.
+      console.log("notification", notification);
       ioInstance.to(req.body.for.toString()).emit("notification", notification);
       res.status(200).json({ message: "Leave status changed successfully." });
     } catch (error) {

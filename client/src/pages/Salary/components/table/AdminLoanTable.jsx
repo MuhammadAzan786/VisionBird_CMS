@@ -13,7 +13,8 @@ import { Cancel, CheckCircle, Circle, Pending } from "@mui/icons-material";
 import { WordCaptitalize } from "../../../../utils/common";
 import { CustomChip } from "../../../../components/Styled/CustomChip";
 import EmployeeNameCell from "../../../../components/Grid Cells/EmployeeProfileCell";
-
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import CustomOverlay from '../../../../components/Styled/CustomOverlay'
 const status = ["pending", "approved", "rejected"];
 const colStyle = {
   headerAlign: "center",
@@ -61,9 +62,13 @@ const AdminLoanTable = () => {
         return (
           <>
             {params.value === "full" ? (
-              <CustomChip label={WordCaptitalize(params.value)} />
+              <CustomChip label={params.value} />
             ) : (
-              <CustomChip label={`${WordCaptitalize(params.value)} (${params.row.installment_duration_months})`} />
+              <CustomChip
+                label={`${params.value} (${
+                  params.row.installment_duration_months
+                })`}
+              />
             )}
           </>
         );
@@ -89,7 +94,7 @@ const AdminLoanTable = () => {
 
         return (
           <CustomChip
-            label={WordCaptitalize(params.value)}
+            label={params.value}
             status={params.value}
             icon={<Circle />}
             sx={{
@@ -118,8 +123,9 @@ const AdminLoanTable = () => {
         } else if (params.value === "approved") {
           icon = <CheckCircle />;
         }
-        const label = params.value.charAt(0).toUpperCase() + params.value.slice(1);
-        return <CustomChip label={label} status={params.value} icon={icon} />;
+       // const label =
+         // params.value.charAt(0).toUpperCase() + params.value.slice(1);
+        return <CustomChip label={params.value} status={params.value} icon={icon} />;
       },
     },
     {
@@ -216,38 +222,79 @@ const AdminLoanTable = () => {
     toast.error("An error occurred while updating the row.");
   };
 
-  const fetchAllRequests = async () => {
-    try {
+  // const fetchAllRequests = async () => {
+  //   try {
+  //     const result = await axios.post("/api/advance_payments/admin/loan/list", {
+  //       currentUser,
+  //     });
+
+  //     return result.data;
+  //   } catch (error) {
+  //     toast.error("Error retreiving list of loan applications.");
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchAllRequests().then((res) => {
+  //     const newData = res.map((item) => {
+  //       return {
+  //         ...item,
+  //         id: item._id,
+  //         employee_name: item.employee_obj_id.employeeName,
+  //         employee_img: item.employee_obj_id.employeeProImage,
+  //         employee_id: item.employee_obj_id.employeeID,
+  //         current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
+  //         request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
+  //       };
+  //     });
+  //     setRows(newData);
+  //   });
+  // }, []);
+
+    const queryClient = useQueryClient();
+
+  const {
+    data: fetchAllRequests = [],
+    isError,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["ali"],
+    queryFn: async () => {
+      if (!currentUser) return [];
       const result = await axios.post("/api/advance_payments/admin/loan/list", {
         currentUser,
       });
+      console.log("resultttttttttt", result.data);
+      return result.data || [];
+    },
+    enabled: !!currentUser,
+    // staleTime: 1000,
+    // refetchInterval:5000
+  });
+  if (isLoading) {
+    return <CustomOverlay open={true} />
+}
+  if (error) {
+    toast.error(error.message);
+  }
+  if (fetchAllRequests && fetchAllRequests.length > 0 && rows.length === 0) {
+    const newData = fetchAllRequests.map((item) => ({
+      ...item,
+      id: item._id,
+      employee_name: item?.employee_obj_id?.employeeName,
+      employee_img: item?.employee_obj_id?.employeeProImage,
+      employee_id: item?.employee_obj_id?.employeeID,
+      current_salary: item?.employee_obj_id?.BasicPayAfterProbationPeriod,
+      request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
+    }));
+    setRows(newData); // Only set rows if they haven't been set already
+  }
 
-      return result.data;
-    } catch (error) {
-      toast.error("Error retreiving list of loan applications.");
-    }
-  };
-
-  useEffect(() => {
-    fetchAllRequests().then((res) => {
-      const newData = res.map((item) => {
-        return {
-          ...item,
-          id: item._id,
-          employee_name: item.employee_obj_id.employeeName,
-          employee_img: item.employee_obj_id.employeeProImage.secure_url,
-          employee_id: item.employee_obj_id.employeeID,
-          current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
-          request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
-        };
-      });
-      setRows(newData);
-    });
-  }, []);
 
   return (
     <DataGrid
-      rows={rows}
+      rows={rows??[]}
       columns={columns}
       editMode="row"
       rowModesModel={rowModesModel} // for checking which row is in edit mode
