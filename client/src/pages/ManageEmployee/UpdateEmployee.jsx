@@ -75,6 +75,14 @@ const validationSchema = object().shape({
     then: (schema) => schema.required("Required Field"),
     otherwise: (schema) => schema.notRequired(),
   }),
+
+  employeeProImage: object()
+    .required("Required Field")
+    .test(
+      "is-not-empty", // Test name
+      "The object must not be empty",
+      (value) => value && Object.keys(value).length > 0
+    ),
 });
 
 function UpdateForm() {
@@ -1186,8 +1194,14 @@ function UpdateForm() {
                     />
                   }
                   onClick={() => {
-                    //ScrollToErrorField is a custom utlity function
-                    Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
+                    if (Object.keys(errors).length > 0) {
+                      if (errors.employeeProImage) {
+                        alert("Employee Image is required.");
+                      }
+                      ScrollToErrorField(errors, setTouched);
+                    } else {
+                      handleSubmit();
+                    }
                   }}
                 >
                   UPDATE
