@@ -10,10 +10,7 @@ function PortfolioCard() {
   const getPortfolio = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/api/posts/get_all_emp_posts",
-        {
-          withCredentials: true,
-        }
+        "/api/posts/get_all_emp_posts"
       );
       setPortfolios(response.data);
       console.log(response.data);

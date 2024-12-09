@@ -60,7 +60,7 @@ export default function EowHistory() {
   const fetchData = async () => {
     try {
       const weekQueryParam = weekNo ? `?weekNo=${weekNo}` : ""; // If weekNo is provided, append it to the query, else leave it empty for recent data
-      const response = await axios.get(`http://localhost:4000/api/empOfWeek/allevaluations${weekQueryParam}`);
+      const response = await axios.get(`/api/empOfWeek/allevaluations${weekQueryParam}`);
 
       // Flatten employeeTotals into separate rows
       const formattedRows = response.data.data.flatMap((item) =>

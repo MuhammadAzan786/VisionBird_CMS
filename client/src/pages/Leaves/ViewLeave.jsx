@@ -36,9 +36,7 @@ export default function ViewLeave() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:4000/api/leave/get-leave/${id}`, {
-        withCredentials: true,
-      })
+      .get(`/api/leave/get-leave/${id}`)
       .then((response) => {
         setLeaveFrom(response.data.from);
         setLeave(response.data);

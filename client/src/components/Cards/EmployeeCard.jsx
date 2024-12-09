@@ -10,10 +10,7 @@ function EmployeeCard() {
   const getEmp = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/api/employee/all_employees",
-        {
-          withCredentials: true,
-        }
+        "/api/employee/all_employees"
       );
       setEmployees(response.data);
     } catch (error) {

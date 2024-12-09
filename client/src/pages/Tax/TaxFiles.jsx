@@ -206,22 +206,6 @@ function TaxFiles() {
       console.log(error);
     }
   };
-
-  // const delete_temp_folder = async () => {
-  //   const deleted = await axios.delete(
-  //     "http://localhost:4000/api/tax_File/delete_temp_folder"
-  //   );
-  //   if (deleted) {
-  //     Swal.fire(
-  //       "Deleted!",
-  //       "Your temporary folder has been deleted.",
-  //       "success"
-  //     );
-  //   } else {
-  //     Swal.fire("Failed!", "Temporary folder deletion failed.", "error");
-  //   }
-  // };
-
   useEffect(() => {
     getFiles();
     getCategory();
