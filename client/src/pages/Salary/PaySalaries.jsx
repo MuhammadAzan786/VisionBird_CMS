@@ -1,7 +1,6 @@
 import axios from "../../utils/axiosInterceptor";
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -9,7 +8,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import "react-datepicker/dist/react-datepicker.css";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { ReceiptLongOutlined } from "@mui/icons-material";
+import { ReceiptLongOutlined, RemoveRedEye } from "@mui/icons-material";
 import { getWorkingDays, WordCaptitalize } from "../../utils/common";
 import { CustomChip } from "../../components/Styled/CustomChip";
 import { DataGrid } from "@mui/x-data-grid";
@@ -32,14 +31,11 @@ import {
   Tab,
   Stack,
   Paper,
+  Modal,
 } from "@mui/material";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import ViewSalary from "./ViewSalary";
+
 const PaySalaries = () => {
   const navigate = useNavigate();
 
@@ -48,12 +44,24 @@ const PaySalaries = () => {
   const [selectedEmployeeId, setSelectedEmployeeId] = React.useState(null);
   const [paymentMethod, setPaymentMethod] = React.useState("Cash");
 
+  const [salaryId, setSalaryId] = useState();
+  const [viewModel, setViewModal] = useState(false);
+
+  const toggleViewModal = async (id) => {
+    setSalaryId(id);
+    setViewModal(!viewModel);
+  };
+
+  const handleViewModalClose = () => {
+    setViewModal(false);
+  };
+
   const [errorText, setErrorText] = React.useState();
   const [open, setOpen] = React.useState(false);
 
   const [selectedDate, setSelectedDate] = React.useState({
-    month: dayjs().format("MM"), // Initialize with current month as a single-digit string
-    year: dayjs().format("YYYY"), // Initialize with current year as a string
+    month: dayjs().format("MM"),
+    year: dayjs().format("YYYY"),
   });
   const [paidDate, setPaidDate] = React.useState(dayjs());
   const [totalWorkingDays, setTotalWorkingDays] = React.useState(
@@ -93,38 +101,8 @@ const PaySalaries = () => {
     setTotalWorkingDays(event.target.value);
   };
 
-  //Get Paid & Unpaid empolyee details
-  // const fetchEmployees = async () => {
-  //   await axios
-  //     .post("/api/pay/paid_unpaid_salary_report", {
-  //       month: selectedDate.month,
-  //       year: selectedDate.year,
-  //     })
-  //     .then((response) => {
-  //       const { paidEmployees, unpaidEmployees, allEmployees } = response.data;
-
-  //       // Save the arrays separately
-  //       setPaidEmp(paidEmployees);
-  //       setUnpaidEmp(unpaidEmployees);
-  //       setallEmp(allEmployees);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching employee data:", error);
-  //     });
-  // };
-  // //Fetch Paid & Unpaid Employee if selectedDate Change
-  // useEffect(() => {
-  //   fetchEmployees();
-  // }, [selectedDate]);
-
-  const queryClient = useQueryClient();
-  const {
-    data: { paidEmployees = [], unpaidEmployees = [], allEmployees = [] } = {},
-    isError,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["salaries", selectedDate.month, selectedDate.year],
+  const { data: { paidEmployees = [], unpaidEmployees = [], allEmployees = [] } = {} } = useQuery({
+    queryKey: ["paysalary", selectedDate.month, selectedDate.year],
     queryFn: async () => {
       if (!selectedDate.month || !selectedDate.year) {
         throw new Error("Invalid date selected");
@@ -141,7 +119,6 @@ const PaySalaries = () => {
     enabled: !!selectedDate.month && !!selectedDate.year, // Prevent unnecessary queries
   });
 
- 
   //Show employee details when double clicked
   const navigateTo = (employee) => {
     navigate(`/employee-profile/${employee.id}`);
@@ -153,6 +130,7 @@ const PaySalaries = () => {
     setSelectedEmployeeId(employeeId);
     setOpen(true);
   };
+
   const handleClose = () => {
     setOpen(false);
   };
@@ -232,23 +210,39 @@ const PaySalaries = () => {
       headerName: "Action",
       width: 150,
       ...colStyle,
-      renderCell: (params) => (
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<ReceiptLongOutlined />}
-          disabled={params.row.salary_status === "paid"}
-          sx={{ borderRadius: "100px", fontFamily: "Poppins, sans-serif" }}
-          onClick={() => handleOpen(params.id)}
-        >
-          Generate
-        </Button>
-      ),
+      renderCell: (params) => {
+        return params.row.salary_status === "unpaid" ? (
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<ReceiptLongOutlined />}
+            // disabled={params.row.salary_status === "paid"}
+            sx={{ borderRadius: "100px", fontFamily: "Poppins, sans-serif" }}
+            onClick={() => handleOpen(params.id)}
+          >
+            Generate
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<RemoveRedEye />}
+            sx={{ borderRadius: "100px", fontFamily: "Poppins, sans-serif" }}
+            onClick={() => toggleViewModal(params.row.salary_id)}
+          >
+            View
+          </Button>
+        );
+      },
     },
   ];
 
   return (
     <>
+      {/* <Paper>{JSON.stringify(paidEmployees)}</Paper> */}
+      <Modal open={viewModel} onClose={handleViewModalClose} sx={{ overflowY: "scroll", scrollbarWidth: "none" }}>
+        <ViewSalary salary_id={salaryId} />
+      </Modal>
       <Paper>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={4}>

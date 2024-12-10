@@ -48,6 +48,7 @@ export default function AllLeaves() {
   }
 
   console.log(query);
+
   return (
     <>
       <LeavesTable allLeaves={query.data || []} />

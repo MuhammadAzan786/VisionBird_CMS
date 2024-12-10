@@ -10,21 +10,16 @@ module.exports = {
     try {
       const { button } = req.body;
 
-      let basicpay,
-        allowances,
-        grossSalary,
-        per_day_wage,
-        per_hour_wage,
-        num_of_month_salary_paid;
+      console.log("ye req ki body hai", req.body);
+
+      let basicpay, allowances, grossSalary, per_day_wage, per_hour_wage, num_of_month_salary_paid;
 
       const cheque_number = req.body.cheque_number;
       const employee_id = req.params.id;
       const salary_month = req.body.salary_month;
       const salary_year = req.body.salary_year;
       const incentive = Number(+req.body.incentive) || 0;
-      // const advanceSalary = Number(+req.body.advance_salary) || 0;
-      const daysInMonth = (salary_year, salary_month) =>
-        new Date(salary_year, salary_month, 0).getDate();
+      const daysInMonth = (salary_year, salary_month) => new Date(salary_year, salary_month, 0).getDate();
       const employee = await employeeModel.findOne({ _id: employee_id });
       const paidLeaves = Number(+req.body.paid_leaves) || 0;
       const halfLeaves = Number(+req.body.Half_leaves) || 0;
@@ -38,17 +33,9 @@ module.exports = {
       const bonus = Number(+req.body.extra_bonus) || 0;
 
       const leaves = total_unpaid_leaves + paidLeaves;
-      const num_sundays_saturdays = functions.countSundaysAndSaturdays(
-        salary_year,
-        salary_month
-      );
-      const total_days_worked =
-        days -
-        (num_sundays_saturdays.saturdays + num_sundays_saturdays.sundays) -
-        leaves;
-      const working_days_without_weekends =
-        days -
-        (num_sundays_saturdays.saturdays + num_sundays_saturdays.sundays);
+      const num_sundays_saturdays = functions.countSundaysAndSaturdays(salary_year, salary_month);
+      const total_days_worked = days - (num_sundays_saturdays.saturdays + num_sundays_saturdays.sundays) - leaves;
+      const working_days_without_weekends = days - (num_sundays_saturdays.saturdays + num_sundays_saturdays.sundays);
 
       if (employee.probationPeriod == "yes") {
         num_of_month_salary_paid = await salaryModel.countDocuments({
@@ -72,10 +59,10 @@ module.exports = {
       per_day_wage = grossSalary / days;
       per_hour_wage = per_day_wage / 8;
       const amountDeducted = total_unpaid_leaves * per_day_wage;
-      // const net_salary = grossSalary + bonus - amountDeducted;
-      // const total_salary = grossSalary + bonus - amountDeducted;
-
+      console.log("Amount Deducted", amountDeducted);
       let net_salary = grossSalary + bonus - amountDeducted;
+
+      console.log("Advance Payment se phly net ki value", net_salary);
 
       // ================= Advance Payment ===================== //
 
@@ -89,25 +76,28 @@ module.exports = {
       });
 
       if (loan) {
-        loan.loan_deducted = Math.round(
-          loan.loan_left / loan.installment_duration_months
-        );
+        loan.loan_deducted = Math.round(loan.loan_left / loan.installment_duration_months);
         net_salary -= loan.loan_deducted;
         loan.loan_left -= loan.loan_deducted;
         loan.installment_duration_months = loan.installment_duration_months - 1;
+        console.log("if loan Salar", net_salary);
       }
 
       if (advanceSalary) {
         advanceSalary.advance_salary_deducted = 1;
         advanceSalary.advance_salary_left -= 1;
+
         net_salary -= basicpay;
+        console.log("if Advance Salar", net_salary);
       }
 
       // ================= Advance Payment ===================== //
 
       //button logic
       if (button === "Show_Salary_Details") {
-        console.log("Salary Details Button Clicked !!!");
+        // console.group();
+        console.log("Generate Button Clicked !!!");
+        console.log("net_salary", net_salary);
 
         return res.json({
           basicPay: basicpay,
@@ -134,6 +124,7 @@ module.exports = {
         });
       } else if (button === "Post_Salary") {
         // Stored salary data in a object for later modification.
+        console.log("Save Details Button Clicked !!!");
         const salaryData = {
           employee_obj_id: employee_id,
           salary_month: salary_month,
@@ -204,6 +195,33 @@ module.exports = {
       res.send(error);
     }
   },
+
+  getSingleSalary: async (req, res) => {
+    try {
+      const { id } = req.params;
+      console.log("id aa gyi", id);
+
+      const salary = await salaryModel
+        .findById(id)
+        .populate(
+          "employee_obj_id",
+          "employeeName gender employeeCNIC employeeID employeeDesignation mailingAddress BasicPayAfterProbationPeriod AllowancesAfterProbationPeriod bankAccountNumber dateOfBirth dateOfJoining"
+        );
+
+      const { employee_obj_id, ...salaryData } = salary.toObject(); // Convert to a plain JavaScript object
+      const result = {
+        ...salaryData, // Spread salary data
+        ...employee_obj_id, // Spread employee object fields
+      };
+
+      console.log("slaart mil gyi", result);
+      res.status(200).json({ result });
+    } catch (error) {
+      console.log("Get Single Salary Error", error);
+      res.status(501).json({ message: "No Record Found" });
+    }
+  },
+
   monthly_salary_report: async (req, res) => {
     try {
       const month = req.body.month;
@@ -218,11 +236,10 @@ module.exports = {
       res.status(200).json(data);
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({ error: "An error occurred while fetching salary records" });
+      res.status(500).json({ error: "An error occurred while fetching salary records" });
     }
   },
+
   yearly_salary_report_all_employees: async (req, res) => {
     const year = req.body.year;
     try {
@@ -295,8 +312,7 @@ module.exports = {
     } catch (error) {
       console.error(error);
       res.status(500).json({
-        error:
-          "An error occurred while fetching salary records for all employees",
+        error: "An error occurred while fetching salary records for all employees",
       });
     }
   },
@@ -308,12 +324,14 @@ module.exports = {
         return res.status(400).send({ error: "Month and Year are required" });
       }
       // Fetch all employees
-      const employees = await employeeModel.find();
+      // const employees = await employeeModel.find();
+      const employees = await employeeModel.find({ role: { $ne: "admin" } });
 
       const salaries = await salaryModel.find({
         salary_month: month,
         salary_year: year,
       });
+
       // Separate paid and unpaid employees based on salary records
       const paidEmployees = [];
       const unpaidEmployees = [];
@@ -321,12 +339,11 @@ module.exports = {
 
       // Check if salary record exists for each employee
       employees.forEach((employee) => {
-        const hasSalaryRecord = salaries.some(
-          (salary) => String(salary.employee_obj_id) === String(employee._id)
-        );
+        const hasSalaryRecord = salaries.some((salary) => String(salary.employee_obj_id) === String(employee._id));
+        const filteredSalary = salaries.find((salary) => String(salary.employee_obj_id) === String(employee._id));
         if (hasSalaryRecord) {
-          paidEmployees.push({ ...employee.toObject(), salary_status: "paid" });
-          allEmployees.push({ ...employee.toObject(), salary_status: "paid" });
+          paidEmployees.push({ ...employee.toObject(), salary_id: filteredSalary._id, salary_status: "paid" });
+          allEmployees.push({ ...employee.toObject(), salary_id: filteredSalary._id, salary_status: "paid" });
         } else {
           unpaidEmployees.push({
             ...employee.toObject(),
@@ -334,6 +351,7 @@ module.exports = {
           });
           allEmployees.push({
             ...employee.toObject(),
+
             salary_status: "unpaid",
           });
         }
@@ -345,6 +363,7 @@ module.exports = {
       res.status(500).json({ message: "Server Error" });
     }
   },
+
   explainQuery: async (req, res) => {
     try {
       const db = req.db;

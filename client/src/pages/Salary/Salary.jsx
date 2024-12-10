@@ -10,7 +10,6 @@ const Salary = () => {
   const { toPDF, targetRef } = usePDF({ filename: "Salary.pdf" });
   const navigate = useNavigate();
 
-  const [queryParamsData, setQueryParamsData] = useState({});
   const [salaryDetails, setSalaryDetails] = useState({});
   const [employeeDetails, setEmployeeDetails] = useState({});
 
@@ -18,34 +17,28 @@ const Salary = () => {
   const location = useLocation();
 
   const queryParams = new URLSearchParams(location.search);
-  const incentive = queryParams.get("incentive");
-  const extraBonus = queryParams.get("extra_bonus_amount");
-  const extraAmountRemarks = queryParams.get("extra_amount_remarks");
-  const paymentMethod = queryParams.get("paymentMethod");
-  const chequeNumber = queryParams.get("chequeNumber");
-  const totalWorkingDays = queryParams.get("totalWorkingDays");
-  const paidDate = queryParams.get("paidDate");
-  const month = queryParams.get("month");
-  const year = queryParams.get("year");
 
-  const saveSalaryDetails = async () => {
+  const queryParamsData = {
+    id,
+    incentive: queryParams.get("incentive"),
+    extraBonus: queryParams.get("extra_bonus_amount"),
+    extraAmountRemarks: queryParams.get("extra_amount_remarks"),
+    paymentMethod: queryParams.get("paymentMethod"),
+    chequeNumber: queryParams.get("chequeNumber"),
+    totalWorkingDays: queryParams.get("totalWorkingDays"),
+    paidDate: queryParams.get("paidDate"),
+    month: queryParams.get("month"),
+    year: queryParams.get("year"),
+  };
+
+  const fetchEmployeeDetails = async () => {
     await axios
-      .post(`/api/pay/pay_salary/${id}`, {
-        button: "Post_Salary",
-        salary_month: queryParamsData.month,
-        salary_year: queryParamsData.year,
-        incentive: queryParamsData.incentive,
-        extra_bonus: queryParamsData.extraBonus,
-        payment_method: queryParamsData.paymentMethod,
-        cheque_number: queryParamsData.chequeNumber,
-        extra_amount_remarks: queryParamsData.extraAmountRemarks,
-      })
+      .get(`/api/employee/get_employee/${id}`)
       .then((response) => {
-        console.log(response);
-        console.log(response.data);
+        setEmployeeDetails(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching salary data:", error);
+        console.error("Error fetching employee data:", error);
       });
   };
 
@@ -70,47 +63,31 @@ const Salary = () => {
       });
   };
 
-  const fetchEmployeeDetails = async () => {
+  const saveSalaryDetails = async () => {
     await axios
-      .get(`/api/employee/get_employee/${id}`)
+      .post(`/api/pay/pay_salary/${id}`, {
+        button: "Post_Salary",
+        salary_month: queryParamsData.month,
+        salary_year: queryParamsData.year,
+        incentive: queryParamsData.incentive,
+        extra_bonus: queryParamsData.extraBonus,
+        payment_method: queryParamsData.paymentMethod,
+        cheque_number: queryParamsData.chequeNumber,
+        extra_amount_remarks: queryParamsData.extraAmountRemarks,
+      })
       .then((response) => {
-        setEmployeeDetails(response.data);
+        console.log(response);
+        console.log(response.data);
       })
       .catch((error) => {
-        console.error("Error fetching employee data:", error);
+        console.error("Error fetching salary data:", error);
       });
   };
 
   useEffect(() => {
     fetchEmployeeDetails();
-
-    setQueryParamsData({
-      id,
-      incentive,
-      extraBonus,
-      paymentMethod,
-      extraAmountRemarks,
-      chequeNumber,
-      totalWorkingDays,
-      paidDate,
-      month,
-      year,
-    });
-  }, []);
-
-  useEffect(() => {
-    console.log(queryParamsData);
     fetchSalaryDetails();
-  }, [queryParamsData]);
-
-  useEffect(() => {
-    console.log(queryParamsData);
-    console.log("salry detail", salaryDetails);
-  }, [salaryDetails]);
-
-  useEffect(() => {
-    console.log(employeeDetails);
-  }, [employeeDetails]);
+  }, []);
 
   return (
     <Box p={3}>
@@ -128,23 +105,14 @@ const Salary = () => {
       </Box>
 
       <Paper sx={{ p: 4 }} ref={targetRef}>
-        <Box
-          display={"flex"}
-          justifyContent={"space-between"}
-          alignItems={"center"}
-        >
+        <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
           <img style={{ height: 80 }} src="/vbt-logo.png" alt="logo" />
           <Box textAlign={"right"}>
             <Typography variant="body2">
-              B-343, Street Pagganwala, Near Cheema Masjid, Shadman Colony,
-              Gujrat, Pakistan.
+              B-343, Street Pagganwala, Near Cheema Masjid, Shadman Colony, Gujrat, Pakistan.
             </Typography>
-            <Typography variant="body2">
-              Mobile: (0322, 0346, 0335) 5930603
-            </Typography>
-            <Typography variant="body2">
-              Landline: +92-53-3709168 | +92-53-3728469
-            </Typography>
+            <Typography variant="body2">Mobile: (0322, 0346, 0335) 5930603</Typography>
+            <Typography variant="body2">Landline: +92-53-3709168 | +92-53-3728469</Typography>
           </Box>
         </Box>
 
@@ -161,20 +129,11 @@ const Salary = () => {
                 padding: "8px",
               }}
             >
-              <Typography
-                style={{ color: "white" }}
-                variant={"h7"}
-                fontWeight={700}
-              >
+              <Typography style={{ color: "white" }} variant={"h7"} fontWeight={700}>
                 Full & Final Settlement of Dues
               </Typography>
-              <Typography
-                style={{ color: "white" }}
-                variant={"h7"}
-                fontWeight={700}
-              >
-                For the Month of {getCurrentMonth(queryParamsData.month)},{" "}
-                {queryParamsData.year}
+              <Typography style={{ color: "white" }} variant={"h7"} fontWeight={700}>
+                For the Month of {getCurrentMonth(queryParamsData.month)}, {queryParamsData.year}
               </Typography>
             </div>
           </Grid>
@@ -192,15 +151,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Employee / Internee Name:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {employeeDetails.employeeName}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{employeeDetails.employeeName}</Typography>
                 </div>
               </Grid>
               <Grid item xs={6}>
@@ -214,15 +168,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Employee / Internee Code:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {employeeDetails.employeeID}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{employeeDetails.employeeID}</Typography>
                 </div>
               </Grid>
               <Grid item xs={6}>
@@ -236,15 +185,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Designation:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {employeeDetails.employeeDesignation}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{employeeDetails.employeeDesignation}</Typography>
                 </div>
               </Grid>
               <Grid item xs={6}>
@@ -258,15 +202,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Bank Account Number:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {employeeDetails.bankAccountNumber}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{employeeDetails.bankAccountNumber}</Typography>
                 </div>
               </Grid>
               <Grid item xs={6}>
@@ -280,10 +219,7 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Date Join:
                   </Typography>
                   <Typography style={{ display: "inline-block" }}>
@@ -303,15 +239,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     CNIC #:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {employeeDetails.employeeCNIC}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{employeeDetails.employeeCNIC}</Typography>
                 </div>
               </Grid>
 
@@ -326,15 +257,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Cheque Number:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {queryParamsData.chequeNumber}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{queryParamsData.chequeNumber}</Typography>
                 </div>
               </Grid>
 
@@ -349,15 +275,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Payment Method:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {queryParamsData.paymentMethod}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{queryParamsData.paymentMethod}</Typography>
                 </div>
               </Grid>
               <Grid item xs={6}>
@@ -371,10 +292,7 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Date of Birth:
                   </Typography>
                   <Typography style={{ display: "inline-block" }}>
@@ -394,15 +312,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Gender:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {employeeDetails.gender}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{employeeDetails.gender}</Typography>
                 </div>
               </Grid>
             </Grid>
@@ -421,15 +334,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Address:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {employeeDetails.mailingAddress}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{employeeDetails.mailingAddress}</Typography>
                 </div>
               </Grid>
             </Grid>
@@ -448,10 +356,7 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Working Days by Company:
                   </Typography>
                   <Typography style={{ display: "inline-block" }}>
@@ -470,15 +375,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Days Worked:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {salaryDetails.total_days_worked}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{salaryDetails.total_days_worked}</Typography>
                 </div>
               </Grid>
               <Grid item xs={4}>
@@ -492,15 +392,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Incentive:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    PKR {queryParamsData.incentive}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>PKR {queryParamsData.incentive}</Typography>
                 </div>
               </Grid>
             </Grid>
@@ -519,15 +414,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Basic Pay:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    PKR {salaryDetails.basicPay}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.basicPay}</Typography>
                 </div>
               </Grid>
               <Grid item xs={4}>
@@ -541,15 +431,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Allowences:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    PKR {salaryDetails.allowances}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.allowances}</Typography>
                 </div>
               </Grid>
               <Grid item xs={4}>
@@ -563,15 +448,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Gross Salary:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    PKR {salaryDetails.grossSalary}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.grossSalary}</Typography>
                 </div>
               </Grid>
             </Grid>
@@ -587,11 +467,7 @@ const Salary = () => {
                 padding: "8px",
               }}
             >
-              <Typography
-                fontWeight={700}
-                fontSize={18}
-                style={{ color: "white" }}
-              >
+              <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
                 Leave Information
               </Typography>
             </div>
@@ -610,15 +486,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Short /Half Leave:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {salaryDetails.unpaid_half_leaves}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{salaryDetails.unpaid_half_leaves}</Typography>
                 </div>
               </Grid>
               <Grid item xs={4}>
@@ -632,10 +503,7 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Casual Leave:
                   </Typography>
                   <Typography style={{ display: "inline-block" }}>0</Typography>
@@ -652,10 +520,7 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Sick Leave:
                   </Typography>
                   <Typography style={{ display: "inline-block" }}>0</Typography>
@@ -672,15 +537,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Without Pay Leave:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {salaryDetails.unpaid_fullday_leaves}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{salaryDetails.unpaid_fullday_leaves}</Typography>
                 </div>
               </Grid>
               <Grid item xs={4}>
@@ -694,15 +554,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Cash Leave:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {salaryDetails.paidLeaves}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{salaryDetails.paidLeaves}</Typography>
                 </div>
               </Grid>
               <Grid item xs={4}>
@@ -716,10 +571,7 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Other/Yearly Leave:
                   </Typography>
                   <Typography style={{ display: "inline-block" }}>0</Typography>
@@ -736,15 +588,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Net Salary:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    PKR {salaryDetails.net_salary}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.net_salary}</Typography>
                 </div>
               </Grid>
             </Grid>
@@ -760,11 +607,7 @@ const Salary = () => {
                 padding: "8px",
               }}
             >
-              <Typography
-                fontWeight={700}
-                fontSize={18}
-                style={{ color: "white" }}
-              >
+              <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
                 Extra / Bonus
               </Typography>
             </div>
@@ -783,15 +626,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Extra Bonus Amount:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    PKR {queryParamsData.extraBonus}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>PKR {queryParamsData.extraBonus}</Typography>
                 </div>
               </Grid>
               <Grid item xs={8}>
@@ -805,15 +643,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Extra Amount Remarks:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {queryParamsData.extraAmountRemarks}
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>{queryParamsData.extraAmountRemarks}</Typography>
                 </div>
               </Grid>
             </Grid>
@@ -833,11 +666,7 @@ const Salary = () => {
                     padding: "8px",
                   }}
                 >
-                  <Typography
-                    fontWeight={700}
-                    fontSize={18}
-                    style={{ color: "white" }}
-                  >
+                  <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
                     Advance Payment Information
                   </Typography>
                 </div>
@@ -855,16 +684,11 @@ const Salary = () => {
                         alignItems: "center",
                       }}
                     >
-                      <Typography
-                        style={{ display: "inline-block" }}
-                        fontWeight={700}
-                      >
+                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
                         Loan Taken:
                       </Typography>
 
-                      <Typography style={{ display: "inline-block" }}>
-                        PKR {salaryDetails.loan.loan_amount}
-                      </Typography>
+                      <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.loan.loan_amount}</Typography>
                     </div>
                   </Grid>
                   <Grid item xs={4}>
@@ -878,15 +702,10 @@ const Salary = () => {
                         alignItems: "center",
                       }}
                     >
-                      <Typography
-                        style={{ display: "inline-block" }}
-                        fontWeight={700}
-                      >
+                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
                         Loan Remaining:
                       </Typography>
-                      <Typography style={{ display: "inline-block" }}>
-                        PKR {salaryDetails.loan.loan_left}
-                      </Typography>
+                      <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.loan.loan_left}</Typography>
                     </div>
                   </Grid>
 
@@ -901,10 +720,7 @@ const Salary = () => {
                         alignItems: "center",
                       }}
                     >
-                      <Typography
-                        style={{ display: "inline-block" }}
-                        fontWeight={700}
-                      >
+                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
                         Loan Deducted:
                       </Typography>
                       <Typography
@@ -934,12 +750,8 @@ const Salary = () => {
                     padding: "8px",
                   }}
                 >
-                  <Typography
-                    fontWeight={700}
-                    fontSize={18}
-                    style={{ color: "white" }}
-                  >
-                    Advance Payment Information advance salary
+                  <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
+                    Advance Payment Information
                   </Typography>
                 </div>
               </Grid>
@@ -956,18 +768,13 @@ const Salary = () => {
                         alignItems: "center",
                       }}
                     >
-                      <Typography
-                        style={{ display: "inline-block" }}
-                        fontWeight={700}
-                      >
+                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
                         Advance Salary Taken:
                       </Typography>
 
                       <Typography style={{ display: "inline-block" }}>
                         {salaryDetails.advanceSalary.advance_salary_months}
-                        {salaryDetails.advanceSalary.advance_salary_months > 1
-                          ? " Months"
-                          : " Month"}
+                        {salaryDetails.advanceSalary.advance_salary_months > 1 ? " Months" : " Month"}
                       </Typography>
                     </div>
                   </Grid>
@@ -982,17 +789,12 @@ const Salary = () => {
                         alignItems: "center",
                       }}
                     >
-                      <Typography
-                        style={{ display: "inline-block" }}
-                        fontWeight={700}
-                      >
+                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
                         Advance Salary Remaining:
                       </Typography>
                       <Typography style={{ display: "inline-block" }}>
                         {salaryDetails.advanceSalary.advance_salary_left}
-                        {salaryDetails.advanceSalary.advance_salary_left > 1
-                          ? " Months"
-                          : " Month"}
+                        {salaryDetails.advanceSalary.advance_salary_left > 1 ? " Months" : " Month"}
                       </Typography>
                     </div>
                   </Grid>
@@ -1008,10 +810,7 @@ const Salary = () => {
                         alignItems: "center",
                       }}
                     >
-                      <Typography
-                        style={{ display: "inline-block" }}
-                        fontWeight={700}
-                      >
+                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
                         Advance Salary Deducted:
                       </Typography>
                       <Typography
@@ -1020,8 +819,7 @@ const Salary = () => {
                           color: "red",
                         }}
                       >
-                        {salaryDetails.advanceSalary.advance_salary_deducted}{" "}
-                        Month
+                        {salaryDetails.advanceSalary.advance_salary_deducted} Month
                       </Typography>
                     </div>
                   </Grid>
@@ -1042,18 +840,10 @@ const Salary = () => {
                 padding: "10px",
               }}
             >
-              <Typography
-                fontWeight={700}
-                fontSize={23}
-                style={{ color: "white", display: "inline-block" }}
-              >
+              <Typography fontWeight={700} fontSize={23} style={{ color: "white", display: "inline-block" }}>
                 Net Amount Paid:
               </Typography>
-              <Typography
-                fontWeight={700}
-                fontSize={23}
-                style={{ color: "white", display: "inline-block" }}
-              >
+              <Typography fontWeight={700} fontSize={23} style={{ color: "white", display: "inline-block" }}>
                 PKR {salaryDetails.net_salary}
               </Typography>
             </div>
@@ -1072,15 +862,10 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Paid By:
                   </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    Irfan Mahmood (CEO)
-                  </Typography>
+                  <Typography style={{ display: "inline-block" }}>Irfan Mahmood (CEO)</Typography>
                 </div>
               </Grid>
               <Grid item xs={6}>
@@ -1094,16 +879,11 @@ const Salary = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Paid Date:
                   </Typography>
                   <Typography style={{ display: "inline-block" }}>
-                    {dayjs(queryParamsData.paidDate).format(
-                      "dddd, MMMM D, YYYY"
-                    )}
+                    {dayjs(queryParamsData.paidDate).format("dddd, MMMM D, YYYY")}
                   </Typography>
                 </div>
               </Grid>
@@ -1123,9 +903,8 @@ const Salary = () => {
                 }}
               >
                 <Typography style={{}} variant="body2">
-                  All Previous/Current dues cleared up to the date mentioned
-                  here. So this is Full and Final Payment from Vision Bird
-                  Technologies, Gujrat.
+                  All Previous/Current dues cleared up to the date mentioned here. So this is Full and Final Payment
+                  from Vision Bird Technologies, Gujrat.
                 </Typography>
               </div>
             </Grid>
@@ -1142,10 +921,7 @@ const Salary = () => {
                     justifyContent: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Employee&apos;s/Internee&apos;s Signature
                   </Typography>
                 </div>
@@ -1159,10 +935,7 @@ const Salary = () => {
                     justifyContent: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     Thumb Impression
                   </Typography>
                 </div>
@@ -1176,10 +949,7 @@ const Salary = () => {
                     justifyContent: "center",
                   }}
                 >
-                  <Typography
-                    style={{ display: "inline-block" }}
-                    fontWeight={700}
-                  >
+                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
                     CEO Signature with Stamp
                   </Typography>
                 </div>
