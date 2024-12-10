@@ -48,10 +48,7 @@ const Admin = () => {
       ]);
 
       return responses.map((response, index) => ({
-        count:
-          index === responses.length - 1
-            ? response.data.data.length
-            : response.data.length,
+        count: index === responses.length - 1 ? response.data.data.length : response.data.length,
         title: titles[index],
         bgGradient: bgGradients[index],
         color: colors[index],
@@ -79,7 +76,7 @@ const Admin = () => {
     <>
       <Box>
         <Grid container spacing={5}>
-          {cardData.map((card, index) => (
+          {cardData?.map((card, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
               <DashboardCard
                 background={card.bgGradient}
@@ -96,11 +93,7 @@ const Admin = () => {
 
       <Paper sx={{ width: "100%" }}>
         <TabContext value={tabValue}>
-          <TabList
-            onChange={handleChange}
-            variant="fullWidth"
-            sx={{ marginBottom: "30px" }}
-          >
+          <TabList onChange={handleChange} variant="fullWidth" sx={{ marginBottom: "30px" }}>
             <Tab label="Employees" value="employees" />
             <Tab label="Internees" value="internees" />
           </TabList>
