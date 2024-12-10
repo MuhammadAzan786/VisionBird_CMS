@@ -37,7 +37,7 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
       headerName: "Employee",
       flex: 1,
       renderCell: ({ row }) => (
-        <EmployeeNameCell src={row.employeeProImage.secure_url} userId={row.employeeID} name={row.employeeName} />
+        <EmployeeNameCell src={row.employeeProImage?.secure_url} userId={row.employeeID} name={row.employeeName} />
       ),
     },
     {

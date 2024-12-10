@@ -38,7 +38,9 @@ export default function ViewLeave() {
 
   useEffect(() => {
     axios
-      .get(`/api/leave/get-leave/${id}`)
+      .get(`/api/leave/get-leave/${id}`, {
+        withCredentials: true,
+      })
       .then((response) => {
         setLeaveFrom(response.data.from);
         setLeave(response.data);
@@ -77,33 +79,21 @@ export default function ViewLeave() {
                   <img src={bg} alt="" width={380} />
                 </Box>
                 <Typography variant="body2" textAlign={"center"}>
-                  B-343, Pagganwala Street, Near Cheema Masjid, Shadman Colony,
-                  Gujrat, Pakistan.
+                  B-343, Pagganwala Street, Near Cheema Masjid, Shadman Colony, Gujrat, Pakistan.
                 </Typography>
                 <Typography variant="body2" textAlign={"center"}>
-                  Mobile: 0322-5930603, 0346-5930603, Landline: 053-3709168,
-                  053-3728469
+                  Mobile: 0322-5930603, 0346-5930603, Landline: 053-3709168, 053-3728469
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Typography variant="body2">
                     URL:
-                    <Link
-                      href="https://www.example.com"
-                      target="_blank"
-                      rel="noopener"
-                      sx={{ marginLeft: 1 }}
-                    >
+                    <Link href="https://www.example.com" target="_blank" rel="noopener" sx={{ marginLeft: 1 }}>
                       https://www.visionbird.com
                     </Link>
                   </Typography>
                   <Typography variant="body2" sx={{ paddingLeft: 1 }}>
                     Email:
-                    <Link
-                      href="https://www.example.com"
-                      target="_blank"
-                      rel="noopener"
-                      sx={{ marginLeft: 1 }}
-                    >
+                    <Link href="https://www.example.com" target="_blank" rel="noopener" sx={{ marginLeft: 1 }}>
                       info@visionbird.com
                     </Link>
                   </Typography>
@@ -175,9 +165,7 @@ export default function ViewLeave() {
                   {leave.leaveType !== "Long Leaves" ? (
                     <Grid xs={5} item fullWidth>
                       <TextField
-                        value={dayjs(leave.selectedDate).format(
-                          "dddd, MMMM D, YYYY"
-                        )}
+                        value={dayjs(leave.selectedDate).format("dddd, MMMM D, YYYY")}
                         label="Leave Date"
                         variant="outlined"
                         fullWidth
@@ -222,9 +210,7 @@ export default function ViewLeave() {
                     <>
                       <Grid xs={6} item>
                         <TextField
-                          value={dayjs(leave.leavesStart).format(
-                            "dddd, MMMM D, YYYY"
-                          )}
+                          value={dayjs(leave.leavesStart).format("dddd, MMMM D, YYYY")}
                           label="Leaves Start"
                           variant="outlined"
                           fullWidth
@@ -233,9 +219,7 @@ export default function ViewLeave() {
                       </Grid>
                       <Grid xs={6} item>
                         <TextField
-                          value={dayjs(leave.leavesEnd).format(
-                            "dddd, MMMM D, YYYY"
-                          )}
+                          value={dayjs(leave.leavesEnd).format("dddd, MMMM D, YYYY")}
                           label="Leaves End"
                           variant="outlined"
                           fullWidth

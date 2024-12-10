@@ -9,6 +9,7 @@ const validationSchema = object().shape({});
 
 const Test = () => {
   const [data, setData] = useState("");
+  console.log("testing condition", import.meta.env.VITE_NODE_ENV === "development");
 
   localStorage.setItem("session", "ended");
   const item = localStorage.getItem("session");

@@ -24,19 +24,19 @@ const queryClient = new QueryClient({
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  // <React.StrictMode>
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider theme={customTheme}>
-      <MessageProvider>
-        <Provider store={store}>
-          <PersistGate persistor={persistor} loading={null}>
-            <App />
-          </PersistGate>
-        </Provider>
-      </MessageProvider>
-    </ThemeProvider>
-    {/** React Query Devtools */}
-    {process.env.NODE_ENV === "development" && <ReactQueryDevtools initialIsOpen={false} />}
-  </QueryClientProvider>
-  // </React.StrictMode>
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={customTheme}>
+        <MessageProvider>
+          <Provider store={store}>
+            <PersistGate persistor={persistor} loading={null}>
+              <App />
+            </PersistGate>
+          </Provider>
+        </MessageProvider>
+      </ThemeProvider>
+
+      <ReactQueryDevtools initialIsOpen={import.meta.env.VITE_NODE_ENV === "development"} />
+    </QueryClientProvider>
+  </React.StrictMode>
 );

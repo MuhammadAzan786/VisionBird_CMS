@@ -324,7 +324,7 @@ export default function EmployeeTasksViewPause() {
   const socket = useSelector((state) => state.socket.socket);
 
   const currentUser = employee;
-  const id = currentUser?._id
+  const id = currentUser?._id;
 
   const getTasks = async (id) => {
     try {

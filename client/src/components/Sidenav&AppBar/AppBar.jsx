@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "../../utils/axiosInterceptor";
 
 import InfoIcon from "@mui/icons-material/Info";
-import manAvatar from "/man-avatar.svg";
+import manAvatar from "../../assets/images/dummy.jpg";
 
 // Redux
 import { clearSocket, initializeSocket } from "../../redux/socketSlice";
@@ -451,7 +451,7 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
             }}
           >
             <Avatar
-              src={manAvatar}
+              src={currentUser.employeeProImage?.secure_url || manAvatar}
               onClick={handleMenuClick}
               sx={{
                 cursor: "pointer",

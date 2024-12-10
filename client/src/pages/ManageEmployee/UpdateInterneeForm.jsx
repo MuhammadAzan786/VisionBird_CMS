@@ -27,6 +27,7 @@ import { ScrollToErrorField } from "../../utils/common";
 import UploadFilesInternee from "../../components/upload/UploadFilesInternee";
 
 import axios from "../../utils/axiosInterceptor";
+import { useQueryClient } from "@tanstack/react-query";
 
 // import axios from "axios";
 
@@ -70,6 +71,14 @@ const validationSchema = object().shape({
     then: (schema) => schema.required("Required Field"),
     otherwise: (schema) => schema.notRequired(),
   }),
+
+  interneeProImage: object()
+    .required("Required Field")
+    .test(
+      "is-not-empty", // Test name
+      "The object must not be empty",
+      (value) => value && Object.keys(value).length > 0
+    ),
 });
 
 const UpdateInterneeForm = () => {
@@ -77,6 +86,8 @@ const UpdateInterneeForm = () => {
   const [user, setUser] = useState({});
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
@@ -170,8 +181,9 @@ const UpdateInterneeForm = () => {
           })
           .then(() => {
             setLoading(false);
-            navigate("/manage-internees");
             toast.success("Internee Updated Successfully!");
+            navigate("/manage-internees");
+            queryClient.invalidateQueries("internees");
           })
           .catch((err) => {
             setLoading(false);
@@ -772,7 +784,14 @@ const UpdateInterneeForm = () => {
                 }
                 //ScrollToErrorField is a custom utlity function
                 onClick={() => {
-                  Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
+                  if (Object.keys(errors).length > 0) {
+                    if (errors.interneeProImage) {
+                      alert("Internee Image is required.");
+                    }
+                    ScrollToErrorField(errors, setTouched);
+                  } else {
+                    handleSubmit();
+                  }
                 }}
               >
                 Update Internee

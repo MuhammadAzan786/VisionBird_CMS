@@ -206,6 +206,7 @@ function TaxFiles() {
       console.log(error);
     }
   };
+
   useEffect(() => {
     getFiles();
     getCategory();
@@ -228,16 +229,9 @@ function TaxFiles() {
         }}
       >
         <CardContent>
-          <Box
-            display={"flex"}
-            justifyContent={"space-between"}
-            alignContent={"center"}
-            alignItems={"center"}
-          >
+          <Box display={"flex"} justifyContent={"space-between"} alignContent={"center"} alignItems={"center"}>
             <Box>
-              <Typography variant="h5">
-                {categoryee.categoryTitle} Files
-              </Typography>
+              <Typography variant="h5">{categoryee.categoryTitle} Files</Typography>
               <Typography variant="body2">{categoryee.categoryCode}</Typography>
             </Box>
             <Box>
@@ -250,13 +244,7 @@ function TaxFiles() {
         </CardContent>
       </Card>
 
-      <Modal
-        open={open}
-        onClose={handleClose}
-        closeAfterTransition
-        aria-labelledby=""
-        aria-describedby=""
-      >
+      <Modal open={open} onClose={handleClose} closeAfterTransition aria-labelledby="" aria-describedby="">
         <Box
           sx={{
             position: "absolute",
@@ -284,20 +272,11 @@ function TaxFiles() {
         }}
         p={4}
       >
-        <Button
-          sx={{ marginX: 1, marginBottom: 2 }}
-          onClick={handleClickDate}
-          variant="outlined"
-        >
+        <Button sx={{ marginX: 1, marginBottom: 2 }} onClick={handleClickDate} variant="outlined">
           <FilterAltIcon sx={{ marginRight: "5px" }} />
           Filter
         </Button>
-        <Button
-          sx={{ marginX: 1, marginBottom: 2 }}
-          onClick={getFiles}
-          variant="outlined"
-          color="error"
-        >
+        <Button sx={{ marginX: 1, marginBottom: 2 }} onClick={getFiles} variant="outlined" color="error">
           <FilterAltOffIcon sx={{ marginRight: "5px" }} />
           Remove Filter
         </Button>
@@ -331,11 +310,7 @@ function TaxFiles() {
               <Typography variant="subtitle1"></Typography>
               <DatePicker
                 label="Start Date"
-                value={
-                  selectedDates.startDate
-                    ? dayjs(selectedDates.startDate)
-                    : null
-                }
+                value={selectedDates.startDate ? dayjs(selectedDates.startDate) : null}
                 onChange={(date) => handleDateChange("startDate", date)}
                 slotProps={{
                   textField: { fullWidth: true },
@@ -343,9 +318,7 @@ function TaxFiles() {
               />
               <DatePicker
                 label="End Date"
-                value={
-                  selectedDates.endDate ? dayjs(selectedDates.endDate) : null
-                }
+                value={selectedDates.endDate ? dayjs(selectedDates.endDate) : null}
                 onChange={(date) => handleDateChange("endDate", date)}
                 slotProps={{
                   textField: { fullWidth: true },
