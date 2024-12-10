@@ -15,7 +15,9 @@ export default function ViewLeave() {
   const [leaveFrom, setLeaveFrom] = useState({});
   const [getLeave, setGetLeave] = useState(false);
   const { currentUser } = useSelector((state) => state.user);
-
+  // notification;
+  
+ 
   const sendLeaveStatus = (status) => {
     axios
       .put(`/api/leave/change-status/${id}`, {

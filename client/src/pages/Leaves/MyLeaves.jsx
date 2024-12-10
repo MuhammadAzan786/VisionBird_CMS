@@ -31,6 +31,7 @@ import axios from "../../utils/axiosInterceptor";
 import { useDispatch, useSelector } from "react-redux";
 import LeavesTable from "./leavesTable/LeavesTable";
 import { initializeSocket } from "../../redux/socketSlice";
+
 export default function MyLeaves() {
   const [allLeaves, setAllLeaves] = useState([]);
   const { currentUser } = useSelector((state) => state.user);
@@ -50,6 +51,7 @@ export default function MyLeaves() {
   useEffect(() => {
     getLeaves();
   }, [id]);
+
   useEffect(() => {
     if (socket) {
       socket.on("notification", (data) => {
@@ -64,6 +66,7 @@ export default function MyLeaves() {
       dispatch(initializeSocket(currentUser));
     }
   }, [socket, dispatch, currentUser]);
+
   return (
     <>
       <LeavesTable allLeaves={allLeaves} />
