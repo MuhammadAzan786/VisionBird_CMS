@@ -46,9 +46,10 @@ module.exports = {
 
   allLeaves: async (req, res) => {
     try {
-      console.log("All Leaves Called");
-
-      const all_leaves = await leavesModel.find().sort({ _id: -1 }).populate("from", "employeeName employeeProImage");
+      const all_leaves = await leavesModel
+        .find()
+        .sort({ _id: -1 })
+        .populate("from", "employeeName employeeProImage role");
       res.status(200).json(all_leaves);
     } catch (error) {
       console.error("Error getting leaves: ", error);

@@ -138,9 +138,20 @@ const Navbar = ({
       ],
     },
     {
-      label: "All Leaves",
+      label: "Leaves",
       icon: <DoorFrontOutlined sx={{ fontSize: "1.4rem" }} />,
-      path: "/all-leaves",
+
+      collapsable: true,
+      children: [
+        {
+          label: "Manager Leaves",
+          path: "/Manager-leaves",
+        },
+        {
+          label: "Employee Leaves",
+          path: "/Employee-leavesHistory",
+        },
+      ],
     },
   ];
   const managerMenuList = [
