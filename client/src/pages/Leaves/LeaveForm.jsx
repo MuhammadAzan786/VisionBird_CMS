@@ -14,7 +14,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import bg from "/vbt-logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import dayjs from "dayjs";
 import axios from "../../utils/axiosInterceptor";
@@ -22,7 +22,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import Select from "@mui/material/Select";
 import { palette } from "../../theme/colors";
-
+import { Navigate } from "react-router-dom";
 function LeaveForm() {
   const [reason, setReason] = useState("");
   const [leaveType, setLeaveType] = useState("");
@@ -37,6 +37,7 @@ function LeaveForm() {
   const [selectedManager, setSelectedManager] = useState("");
   const { currentUser } = useSelector((state) => state.user);
 
+  const navigate = useNavigate();
   let id = currentUser._id;
   let role = currentUser.role;
   let name = currentUser.employeeName;
@@ -106,21 +107,21 @@ function LeaveForm() {
         leavesEnd,
       };
     }
-
     axios
       .post("/api/leave/create-leave", leave_information)
       .then((res) => {
         console.log(res);
         toast.success("Leave Request Submitted Successfully");
-        setReason("");
-        setLeaveType("");
-        setLeaveCategory("");
-        setSelectedDate(null);
-        setLeavesStart(null);
-        setLeavesEnd(null);
-        setFromTime(null);
-        setToTime(null);
-        setSelectedManager("");
+        navigate("/my-leaves");
+        // setReason("");
+        // setLeaveType("");
+        // setLeaveCategory("");
+        // setSelectedDate(null);
+        // setLeavesStart(null);
+        // setLeavesEnd(null);
+        // setFromTime(null);
+        // setToTime(null);
+        // setSelectedManager("");
       })
       .catch((error) => {
         toast.error("Error in Submitting Leave Request!!");
