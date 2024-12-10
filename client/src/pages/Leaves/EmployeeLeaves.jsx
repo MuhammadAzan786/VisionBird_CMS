@@ -5,6 +5,7 @@ import LeavesTable from "./leavesTable/LeavesTable";
 
 export default function EmployeeLeaves() {
   const [employeeLeaves, setEmployeeLeaves] = useState([]);
+  const[employeePendingLeaves,setEmployeePendingLeaves]=useState([])
   const { currentUser } = useSelector((state) => state.user);
   const id = currentUser._id;
 
@@ -15,6 +16,10 @@ export default function EmployeeLeaves() {
       })
       .then((response) => {
         setEmployeeLeaves(response.data);
+        const pending = response.data.filter((item) => {
+          return item.state=='Pending'
+        })
+        setEmployeePendingLeaves(pending);
       })
       .catch((error) => {
         console.error("Error fetching leave history:", error);
@@ -23,7 +28,14 @@ export default function EmployeeLeaves() {
 
   return (
     <>
-      <LeavesTable allLeaves={employeeLeaves} />
+      <>
+        {/* <LeavesTable allLeaves={allLeaves} /> */}
+        <LeavesTable
+          allLeaves={employeeLeaves || []}
+          pendingLeaves={employeePendingLeaves || []}
+        />
+      </>
+      {/* <LeavesTable allLeaves={employeeLeaves} /> */}
     </>
   );
 }

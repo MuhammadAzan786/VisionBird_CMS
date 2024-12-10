@@ -63,6 +63,7 @@ import Unauthorized from "./pages/Unauthorized";
 import { clearSocket } from "./redux/socketSlice";
 import { signOut } from "./redux/user/userSlice";
 import Notifications from "./pages/Notifications/Notifications";
+import EmployeeLeaveHistory from "./pages/Leaves/EmployeeLeaveHistory";
 
 const App = () => {
   const socket = useSelector((state) => state.socket.socket);
@@ -208,28 +209,22 @@ const App = () => {
             }
           >
             <Route path="/" element={<Dashboard />} />
-
             {/* Employee Routes */}
-
             <Route path="/employee-profile/:id" element={<EmployeeProfile />} />
-
             <Route
               path="/employeetaskboard/:id"
               element={<EmployeeTaskBoard />}
             />
-
             <Route
               path="/performanceAnalytics"
               element={<EmployeePerformance />}
             />
-
             {/* Portfolio Routes */}
             <Route path="/project/:id" element={<Project />} />
             <Route path="/portfolio/:id" element={<Portfolio />} />
             <Route path="/create-project" element={<CreateProject />} />
             <Route path="/all-portfolio-page" element={<AllPortfolioPage />} />
             <Route path="/all-portfolio" element={<AllPortfolio />} />
-
             {/* Tax Routes */}
             <Route path="/tax" element={<Tax />} />
             <Route path="/add-tax" element={<AddTax />} />
@@ -238,7 +233,6 @@ const App = () => {
             <Route path="/add-files" element={<AddFiles />} />
             <Route path="/tax-file-view/:id" element={<TaxFileView />} />
             <Route path="/tax-file-view/:id" element={<TaxFileView />} />
-
             {/* Task Routes */}
             <Route path="/assignTask" element={<EmployeeTaskForm />} />
             <Route
@@ -250,7 +244,6 @@ const App = () => {
               path="/employeetaskviewPause/:empid"
               element={<EmployeeTasksViewPause />}
             />
-
             {/* Salary Routes */}
             <Route path="/pay-salaries" element={<PaySalaries />} />
             <Route path="/salary/:id" element={<Salary />} />
@@ -260,14 +253,20 @@ const App = () => {
               path="/advance-applications"
               element={<AdvanceApplications />}
             />
-
             {/* Leave Routes */}
             <Route path="/leave-form" element={<LeaveForm />} />
             <Route path="/my-leaves" element={<MyLeaves />} />
             <Route path="/employee-leaves" element={<EmployeeLeaves />} />
-            <Route path="/all-leaves" element={<AllLeaves />} />
-            <Route path="/view-leave/:id" element={<ViewLeave />} />
+            <Route
+              path="/Manager-leaves"
+              element={<AllLeaves table="Manager-leavesHistory" />}
+            />
+            <Route
+              path="/Employee-leavesHistory"
+              element={<AllLeaves table="Employee-leavesHistory" />}
+            />
 
+            <Route path="/view-leave/:id" element={<ViewLeave />} />
             {/* employee of the week Routes */}
             <Route
               path="/employeedailyreportform"
@@ -279,12 +278,10 @@ const App = () => {
             />
             {/* Role Routes */}
             <Route path="/role" element={<Role />} />
-
             {/* Test ========================= ============================================================Routes */}
             <Route path="/notifications" element={<Notifications />} />
             {/* Test ========================= ============================================================Routes */}
             <Route path="/test" element={<Test />} />
-
             <Route path="*" element={<NotFound />} />
           </Route>
 
