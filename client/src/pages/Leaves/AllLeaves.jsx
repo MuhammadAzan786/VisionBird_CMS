@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
 import axios from "../../utils/axiosInterceptor";
 import LeavesTable from "./leavesTable/LeavesTable";
-import {
-  useQuery,
-} from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CustomOverlay from "../../components/Styled/CustomOverlay";
 import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { initializeSocket } from "../../redux/socketSlice";
 export default function AllLeaves() {
   const [allLeaves, setAllLeave] = useState([]);
 
+  const socket = useSelector((state) => state.socket.socket);
+  const { currentUser } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   // Fetch All Leaves
   const query = useQuery({
@@ -20,16 +24,27 @@ export default function AllLeaves() {
       return response.data;
     },
   });
-  // console.log(query);
 
-  // Handle Loading and Error States
+  useEffect(() => {
+    if (socket) {
+      socket.on("notification", () => {
+        queryClient.invalidateQueries("All leaves");
+      });
+      return () => {
+        socket.off("notification", () => {});
+      };
+    } else {
+      dispatch(initializeSocket(currentUser));
+    }
+  }, [socket, dispatch, currentUser]);
+
   if (query.isLoading) {
-    return <CustomOverlay open={ true} />;
+    return <CustomOverlay open={true} />;
   }
 
   if (query.isError) {
     toast.error(query.error.message);
-    return
+    return;
   }
 
   console.log(query);

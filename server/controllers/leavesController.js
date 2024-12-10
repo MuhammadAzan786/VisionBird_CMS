@@ -1,3 +1,4 @@
+const Employee = require("../models/employeemodel");
 const leavesModel = require("../models/leavesModel");
 const notificationModel = require("../models/notificationModel");
 
@@ -13,12 +14,29 @@ module.exports = {
       const leave = await leavesModel.create(req.body);
       const message = `New leave request from ${req.body.name}`;
 
+      const admin = await Employee.findOne({ role: "admin" });
+      console.log("Admin", admin);
+
+      const adminId = admin._id.toString();
+
+      console.log("Amind Id", adminId);
+
+      const employee = Employee.findById(req.body.from);
+      const employeeRole = employee.role;
+
       const notification = await notificationModel.create({
         for: req.body.for,
         message,
         leave_id: leave._id,
       });
-       ioInstance.to(req.body.for.toString()).emit("notification", notification);
+
+      if (employeeRole === "manager") {
+        ioInstance.to(req.body.for.toString()).emit("notification", notification);
+      } else {
+        ioInstance.to(req.body.for.toString()).emit("notification", notification);
+        ioInstance.to(adminId).emit("notification", notification);
+      }
+
       res.status(201).json("Leave request saved.");
     } catch (error) {
       console.error("Error saving leave: ", error);
@@ -28,10 +46,9 @@ module.exports = {
 
   allLeaves: async (req, res) => {
     try {
-      const all_leaves = await leavesModel
-        .find()
-        .sort({ _id: -1 })
-        .populate("from", "employeeName employeeProImage");
+      console.log("All Leaves Called");
+
+      const all_leaves = await leavesModel.find().sort({ _id: -1 }).populate("from", "employeeName employeeProImage");
       res.status(200).json(all_leaves);
     } catch (error) {
       console.error("Error getting leaves: ", error);
@@ -40,7 +57,7 @@ module.exports = {
   },
 
   getLeave: async (req, res) => {
-    console.log('inside leaves')
+    console.log("inside leaves");
     try {
       const _id = req.params.id;
       const leave = await leavesModel.findOne({ _id }).populate("from");
@@ -84,9 +101,7 @@ module.exports = {
       const _id = req.params.id;
       const status = req.body.status;
       const statusForLeave =
-        status == "Rejected"
-          ? `Rejected by ${req.body.statusChangedBy}`
-          : `Accepted by ${req.body.statusChangedBy}`;
+        status == "Rejected" ? `Rejected by ${req.body.statusChangedBy}` : `Accepted by ${req.body.statusChangedBy}`;
       let message = "";
       if (status == "Rejected") {
         message = `Leave request rejected by ${req.body.statusChangedBy}`;
