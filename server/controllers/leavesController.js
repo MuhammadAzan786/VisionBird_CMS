@@ -29,13 +29,11 @@ module.exports = {
         message,
         leave_id: leave._id,
       });
+      const admin = await Employee.findOne({ role: "admin" });
+      ioInstance.to(req.body.for.toString()).emit("notification", notification);
 
-      if (employeeRole === "manager") {
-        ioInstance.to(req.body.for.toString()).emit("notification", notification);
-      } else {
-        ioInstance.to(req.body.for.toString()).emit("notification", notification);
-        ioInstance.to(adminId).emit("notification", notification);
-      }
+      ioInstance.to(req.body.from.toString()).emit("notification", notification);
+      ioInstance.to(admin._id.toString()).emit("notification", notification);
 
       res.status(201).json("Leave request saved.");
     } catch (error) {
@@ -117,8 +115,19 @@ module.exports = {
         message,
         leave_id: _id,
       }); //For has user ID that has requested leave.
+      const admin = await Employee.findOne({ role: "admin" });
       console.log("notification", notification);
+
+      //Employeee, Manager (Dont try to understant,, u Cant)
       ioInstance.to(req.body.for.toString()).emit("notification", notification);
+      console.log("bodyyyyy", req.body);
+
+      //Manager, Admin  (Leaave it as it is , its working)
+      ioInstance.to(req.body.statusChangedById.toString()).emit("notification", notification);
+
+      //Admin (Dont remove this )
+      ioInstance.to(admin._id.toString()).emit("notification", notification);
+
       res.status(200).json({ message: "Leave status changed successfully." });
     } catch (error) {
       console.error("Error changing leave status: ", error);

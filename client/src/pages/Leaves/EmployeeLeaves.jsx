@@ -6,49 +6,37 @@ import { initializeSocket } from "../../redux/socketSlice";
 
 export default function EmployeeLeaves() {
   const [employeeLeaves, setEmployeeLeaves] = useState([]);
-  const[employeePendingLeaves,setEmployeePendingLeaves]=useState([])
+  const [employeePendingLeaves, setEmployeePendingLeaves] = useState([]);
   const { currentUser } = useSelector((state) => state.user);
   const id = currentUser._id;
   const socket = useSelector((state) => state.socket.socket);
   const dispatch = useDispatch();
-
-  const getEmployeeLeaves = () => {
+  const getLeaves = () => {
     axios
       .get(`/api/leave/employee-leaves/${id}`)
       .then((response) => {
         setEmployeeLeaves(response.data);
         const pending = response.data.filter((item) => {
-          return item.state=='Pending'
-        })
+          // console.log("statuss", item.status);
+          return item.status == "Pending";
+        });
+        // console.log("pendinggggggggg", pending);
         setEmployeePendingLeaves(pending);
       })
       .catch((error) => {
         console.error("Error fetching Employee leave history:", error);
       });
   };
-
   useEffect(() => {
-    // axios
-    //   .get(`/api/leave/employee-leaves/${id}`, {
-    //     withCredentials: true,
-    //   })
-    //   .then((response) => {
-    //     setEmployeeLeaves(response.data);
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error fetching leave history:", error);
-    //   });
-
-    getEmployeeLeaves();
+    getLeaves();
   }, [id]);
-
   useEffect(() => {
     if (socket) {
-      socket.on("notification", (data) => {
-        getEmployeeLeaves();
+      socket.on("notification", () => {
+        getLeaves();
       });
       return () => {
-        socket.off("notification", (data) => {
+        socket.off("notification", () => {
           // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
         });
       };
@@ -56,15 +44,11 @@ export default function EmployeeLeaves() {
       dispatch(initializeSocket(currentUser));
     }
   }, [socket, dispatch, currentUser]);
-
   return (
     <>
       <>
         {/* <LeavesTable allLeaves={allLeaves} /> */}
-        <LeavesTable
-          allLeaves={employeeLeaves || []}
-          pendingLeaves={employeePendingLeaves || []}
-        />
+        <LeavesTable allLeaves={employeeLeaves || []} pendingLeaves={employeePendingLeaves || []} />
       </>
       {/* <LeavesTable allLeaves={employeeLeaves} /> */}
     </>

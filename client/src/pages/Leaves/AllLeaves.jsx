@@ -1,12 +1,32 @@
 import { useEffect, useState } from "react";
 import axios from "../../utils/axiosInterceptor";
 import LeavesTable from "./leavesTable/LeavesTable";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CustomOverlay from "../../components/Styled/CustomOverlay";
 import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { initializeSocket } from "../../redux/socketSlice";
 export default function AllLeaves({ table }) {
-  const [allLeaves, setAllLeave] = useState([]);
+  //const [allLeaves, setAllLeave] = useState([]);
+  const socket = useSelector((state) => state.socket.socket);
+  const currentUser = useSelector((state) => state.user);
+  const quryClient = useQueryClient();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (socket) {
+      socket.on("notification", (data) => {
+        quryClient.invalidateQueries("All leaves");
+      });
 
+      return () => {
+        socket.off("notification", (data) => {
+          // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
+        });
+      };
+    } else {
+      dispatch(initializeSocket(currentUser));
+    }
+  }, [socket, dispatch, currentUser]);
   // Fetch All Leaves
   const query = useQuery({
     queryKey: ["All leaves"],
