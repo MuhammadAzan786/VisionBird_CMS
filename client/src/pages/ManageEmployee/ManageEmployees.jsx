@@ -110,6 +110,7 @@ const ManageEmployees = () => {
             <ActiveEmployeesTable searchTerm={searchTerm} />
           </Box>
         </TabPanel>
+
         <TabPanel value="past_employees" sx={{ p: 0 }}>
           <Box>
             <Box sx={{ width: "50%", my: 2 }}>
@@ -134,6 +135,7 @@ const ManageEmployees = () => {
             <InActiveEmployeesTable searchTerm={searchTerm} />
           </Box>
         </TabPanel>
+        
       </TabContext>
     </Paper>
   );

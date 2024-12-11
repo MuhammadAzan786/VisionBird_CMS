@@ -13,6 +13,11 @@ import {
   Checkbox,
   ListItemText,
   Backdrop,
+  Grid,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from "@mui/material";
 import Rating from "@mui/material/Rating";
 import Typography from "@mui/material/Typography";
@@ -55,11 +60,11 @@ const validationSchema = object().shape({
       /^\d{5}-\d{7}-\d$/.test(value || "")
     ),
   qualification: string().required("Required Field"),
+  workExp: string().required("Work Experience Required"),
 });
 
 const InterviewEvalForm = () => {
   const skills = [
- 
     "Figma",
     "Adobe Photoshop",
     "Adobe Illustrator",
@@ -94,12 +99,13 @@ const InterviewEvalForm = () => {
     "SEO",
     "WordPress",
     "Shopify",
-  
   ];
 
   const { showMessage } = useMessage();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [selectedValue, setSelectedValue] = useState("");
+  const [applyForselectedValue, setapplyForselectedValue] = useState("");
   const POST_EVALUATION = "/api/interview/add_evaluation";
   // console.log(value);
 
@@ -204,11 +210,9 @@ const InterviewEvalForm = () => {
       }}
     >
       {({ values, setFieldValue }) => (
-        <Box p={3}>
+        <Box p={0}>
           <Link to={"/interview-evaluation"}>
-            <Button startIcon={<KeyboardReturnIcon />}>
-              Back to Evaluation Page
-            </Button>
+            <Button startIcon={<KeyboardReturnIcon />}>Back</Button>
           </Link>
           <Card elevation={4} sx={{ p: 3, mt: 2 }}>
             <Form>
@@ -250,267 +254,130 @@ const InterviewEvalForm = () => {
                   type="email"
                 />
               </div>
-
-              <div className="grid grid-cols-1 w-full  gap-5">
-                <Field
-                  label="CNIC"
-                  component={TextField}
-                  name="CNIC"
-                  placeholder="XXXXX-XXXXXXX-X"
-                  onInput={(event) => {
-                    const input = event.target.value;
-                    const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                    const formattedCnic = formattedInput
-                      .replace(/(.{5})(.?)/, "$1-$2") // Add dash after the fifth character
-                      .replace(/(.{13})(.?)/, "$1-$2"); // Add dash before the last character
-                    event.target.value = formattedCnic;
-                  }}
-                />
-              </div>
-
-              <div className="grid md:grid-cols-3 w-full  my-4  gap-5">
-                <div>
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabel htmlFor="gender-select">
-                      {" "}
-                      Qualification
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={12} lg={4}>
+                  {" "}
+                  <Field
+                    label="CNIC"
+                    component={TextField}
+                    fullWidth
+                    name="CNIC"
+                    placeholder="XXXXX-XXXXXXX-X"
+                    onInput={(event) => {
+                      const input = event.target.value;
+                      const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
+                      const formattedCnic = formattedInput
+                        .replace(/(.{5})(.?)/, "$1-$2") // Add dash after the fifth character
+                        .replace(/(.{13})(.?)/, "$1-$2"); // Add dash before the last character
+                      event.target.value = formattedCnic;
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} md={12} lg={4}>
+                  <FormControl sx={{ width: "100%" }}>
+                    <InputLabel id="demo-multiple-checkbox-label">
+                      Skills
                     </InputLabel>
-                    <Field
-                      fullWidth
-                      label=" Qualification"
-                      variant="outlined"
-                      name="qualification"
-                      as={Select}
-                      onBlur={() => {}}
-                    >
-                      <MenuItem value="matriculation">Matriculation</MenuItem>
-                      <MenuItem value="intermediate">Intermediate</MenuItem>
-                      <MenuItem value="graduation">Graduation</MenuItem>
-                      <MenuItem value="masters">Masters</MenuItem>
+                    <Field name="expertiseAndSkills">
+                      {({ field }) => (
+                        <Select
+                          {...field}
+                          labelId="demo-multiple-checkbox-label"
+                          id="demo-multiple-checkbox"
+                          multiple
+                          label="Skills"
+                          value={values.expertiseAndSkills}
+                          onChange={(event) =>
+                            setFieldValue(
+                              "expertiseAndSkills",
+                              event.target.value
+                            )
+                          }
+                          renderValue={(selected) => selected.join(", ")}
+                          MenuProps={MenuProps}
+                        >
+                          {skills.map((skill) => (
+                            <MenuItem key={skill} value={skill}>
+                              <Checkbox
+                                checked={values.expertiseAndSkills.includes(
+                                  skill
+                                )}
+                              />
+                              <ListItemText primary={skill} />
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      )}
                     </Field>
                   </FormControl>
-                  <ErrorMessage
-                    name="maritalStatus"
-                    style={{ color: "red" }}
-                    component="div"
-                  />
-                </div>
-
-                <div role="group" aria-labelledby="my-radio-group">
-                  <label className="block font-semibold text-lg">
-                    Work Experience
-                  </label>
-                  <label className="mr-4">
-                    <Field type="radio" name="workExp" value="yes" />
-                    Yes
-                  </label>
-                  <label>
-                    <Field type="radio" name="workExp" value="no" />
-                    No
-                  </label>
-                  <ErrorMessage
-                    name="workExp"
-                    style={{ color: "red" }}
-                    component="div"
-                  />
-                </div>
-
-                <div role="group" aria-labelledby="my-radio-group">
-                  <label className="block font-semibold text-lg">
-                    Applying For
-                  </label>
-                  <label className="mr-4">
-                    <Field type="radio" name="applyFor" value="permanent" />
-                    Permanent
-                  </label>
-                  <label>
-                    <Field type="radio" name="applyFor" value="internship" />
-                    Internship
-                  </label>
-                  <ErrorMessage
-                    name="applyFor"
-                    style={{ color: "red" }}
-                    component="div"
-                  />
-                </div>
-              </div>
-              <div className="grid md:grid-cols-3 w-full  my-4  gap-5">
-                {values.applyFor === "Internship" && (
+                </Grid>
+                <Grid item xs={12} md={12} lg={4}>
                   <div>
                     <FormControl fullWidth variant="outlined">
                       <InputLabel htmlFor="gender-select">
-                        Internship Type
+                        {" "}
+                        Qualification
                       </InputLabel>
                       <Field
                         fullWidth
-                        label=" Internship Type"
+                        label=" Qualification"
                         variant="outlined"
-                        name="internshipType"
+                        name="qualification"
                         as={Select}
                         onBlur={() => {}}
                       >
-                        <MenuItem value="UNPAID">UNPAID</MenuItem>
-                        <MenuItem value="VBT">VBT</MenuItem>
-                        <MenuItem value="PASHA">P@SHA</MenuItem>
-                        <MenuItem value="PSEB">PSEB</MenuItem>
+                        <MenuItem value="matriculation">Matriculation</MenuItem>
+                        <MenuItem value="intermediate">Intermediate</MenuItem>
+                        <MenuItem value="graduation">Graduation</MenuItem>
+                        <MenuItem value="masters">Masters</MenuItem>
                       </Field>
                     </FormControl>
                     <ErrorMessage
-                      name="internshipType"
+                      name="maritalStatus"
                       style={{ color: "red" }}
                       component="div"
                     />
                   </div>
-                )}
+                </Grid>
+              </Grid>
 
-                <Field
-                  component={TextField}
-                  InputLabelProps={{ shrink: true }}
-                  label="Applied On"
-                  name="appliedOn"
-                  type="date"
-                />
-
-                <Field
-                  component={TextField}
-                  InputLabelProps={{ shrink: true }}
-                  label="Called for interview on"
-                  name="interviewCall"
-                  type="date"
-                />
-                <Field
-                  component={TextField}
-                  InputLabelProps={{ shrink: true }}
-                  label="Interview Time"
-                  name="interviewTime"
-                  type="time"
-                />
-              </div>
-              <div className="grid grid-cols-1 w-full  my-4  gap-5">
-                <div>
-                  <FormControl fullWidth variant="outlined">
-                    <InputLabel htmlFor="gender-select"> Response</InputLabel>
+              <div className="grid md:grid-cols w-full  my-4  gap-5">
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={12} lg={4}>
                     <Field
+                      component={TextField}
+                      InputLabelProps={{ shrink: true }}
+                      label="Applied On"
+                      name="appliedOn"
+                      type="date"
                       fullWidth
-                      label=" Response"
-                      variant="outlined"
-                      name="response"
-                      as={Select}
-                      onBlur={() => {}}
-                    >
-                      <MenuItem value="appeared">Appeared</MenuItem>
-                      <MenuItem value="notAppeared">Not Appeared</MenuItem>
-                      <MenuItem value="noResponse">No Response</MenuItem>
-                      <MenuItem value="refused">Refused</MenuItem>
-                    </Field>
-                  </FormControl>
-                  <ErrorMessage
-                    name="response"
-                    style={{ color: "red" }}
-                    component="div"
-                  />
-                </div>
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={12} lg={4}>
+                    <Field
+                      component={TextField}
+                      InputLabelProps={{ shrink: true }}
+                      label="Called for interview on"
+                      name="interviewCall"
+                      type="date"
+                      fullWidth
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={12} lg={4}>
+                    <Field
+                      component={TextField}
+                      InputLabelProps={{ shrink: true }}
+                      label="Interview Time"
+                      name="interviewTime"
+                      type="time"
+                      fullWidth
+                    />
+                  </Grid>
+                </Grid>
               </div>
-              {values.response === "appeared" && (
-                <div className="grid grid-cols-1 md:grid-cols-3">
-                  <div>
-                    <Typography variant="body2" component="legend">
-                      Interview Rating
-                    </Typography>
-                    <Rating
-                      name="interviewRating"
-                      value={Number(values.interviewRating)}
-                      onChange={(e) => {
-                        const newInterviewRating = parseFloat(e.target.value);
-                        setFieldValue("interviewRating", newInterviewRating);
-                        setFieldValue(
-                          "overallRating",
-                          (newInterviewRating + values.testRating) / 2
-                        );
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <Typography variant="body2" component="legend">
-                      Test Rating
-                    </Typography>
-                    <Rating
-                      name="testRating"
-                      value={Number(values.testRating)}
-                      onChange={(e) => {
-                        const newTestRating = parseFloat(e.target.value);
-                        setFieldValue("testRating", newTestRating);
-                        setFieldValue(
-                          "overallRating",
-                          (values.interviewRating + newTestRating) / 2
-                        );
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <Typography variant="body2" component="legend">
-                      Overall Rating
-                    </Typography>
-                    <Rating
-                      name="overallRating"
-                      value={values.overallRating}
-                      disabled
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="grid md:grid-cols-3 w-full  my-4 gap-5">
-                <Field
-                  label="Expected Salary"
-                  component={TextField}
-                  name="expectedSalary"
-                  onInput={(event) => {
-                    const input = event.target.value;
-                    const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                    event.target.value = formattedInput;
-                  }}
-                />
-
-                <FormControl sx={{ width: "100%" }}>
-                  <InputLabel id="demo-multiple-checkbox-label">
-                    Skills
-                  </InputLabel>
-                  <Field name="expertiseAndSkills">
-                    {({ field }) => (
-                      <Select
-                        {...field}
-                        labelId="demo-multiple-checkbox-label"
-                        id="demo-multiple-checkbox"
-                        multiple
-                        label="Skills"
-                        value={values.expertiseAndSkills}
-                        onChange={(event) =>
-                          setFieldValue(
-                            "expertiseAndSkills",
-                            event.target.value
-                          )
-                        }
-                        renderValue={(selected) => selected.join(", ")}
-                        MenuProps={MenuProps}
-                      >
-                        {skills.map((skill) => (
-                          <MenuItem key={skill} value={skill}>
-                            <Checkbox
-                              checked={values.expertiseAndSkills.includes(
-                                skill
-                              )}
-                            />
-                            <ListItemText primary={skill} />
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    )}
-                  </Field>
-                </FormControl>
-
-                <div className="md:flex items-center  w-full">
-                  <label className="block font-semibold `">CV: </label>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={12} lg={4}>
+                  <Typography sx={{ mb: "5px" }}>Upload CV</Typography>
                   <div className="w-full">
                     <input
                       type="file"
@@ -527,9 +394,183 @@ const InterviewEvalForm = () => {
                       component="div"
                     />
                   </div>
-                </div>
-              </div>
+                </Grid>
+                <Grid item xs={12} md={12} lg={4}>
+                  <Typography sx={{ mb: "5px" }}>Work Experience</Typography>
+                  <FormControl component="fieldset" fullWidth>
+                    <RadioGroup
+                      row
+                      aria-labelledby="my-radio-group"
+                      name="workExp"
+                      value={selectedValue}
+                      onChange={(e) => setSelectedValue(e.target.value)}
+                    >
+                      <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                          <Box
+                            sx={{
+                              border:
+                                selectedValue === "yes"
+                                  ? "2px solid #005878"
+                                  : "1px solid #ccc",
+                              px: 1,
+                              py: "5px",
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              "&:hover": { borderColor: "#005878" },
+                            }}
+                          >
+                            <FormControlLabel
+                              value="yes"
+                              control={<Field as={Radio} />}
+                              label={
+                                <Typography sx={{ fontSize: "0.9rem" }}>
+                                  Experienced
+                                </Typography>
+                              }
+                            />
+                          </Box>
+                        </Grid>
 
+                        <Grid item xs={6}>
+                          <Box
+                            sx={{
+                              border:
+                                selectedValue === "no"
+                                  ? "2px solid #005878"
+                                  : "1px solid #ccc",
+                              px: 1,
+                              py: "5px",
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              "&:hover": { borderColor: "#005878" },
+                            }}
+                          >
+                            <FormControlLabel
+                              value="no"
+                              control={<Field as={Radio} />}
+                              label={
+                                <Typography sx={{ fontSize: "0.9rem" }}>
+                                  Inexperienced
+                                </Typography>
+                              }
+                            />
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </RadioGroup>
+
+                    <ErrorMessage
+                      name="workExp"
+                      component="div"
+                      style={{ color: "red", marginTop: "5px" }}
+                    />
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={12} lg={4}>
+                  <Typography sx={{ mb: "5px" }}>Employement Type</Typography>
+                  <FormControl component="fieldset" fullWidth>
+                    <RadioGroup
+                      row
+                      aria-labelledby="my-radio-group"
+                      name="applyFor"
+                      value={applyForselectedValue}
+                      onChange={(e) => setapplyForselectedValue(e.target.value)}
+                      sx={{ width: "100%" }}
+                    >
+                      <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                          <Box
+                            sx={{
+                              border:
+                                applyForselectedValue === "permanent"
+                                  ? "2px solid #005878"
+                                  : "1px solid #ccc",
+                              px: 1,
+                              py: "5px",
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              "&:hover": { borderColor: "#005878" },
+                            }}
+                          >
+                            {" "}
+                            <FormControlLabel
+                              value="permanent"
+                              control={<Field as={Radio} />}
+                              label={
+                                <Typography sx={{ fontSize: "0.9rem" }}>
+                                  Permanent
+                                </Typography>
+                              }
+                            />
+                          </Box>
+                        </Grid>
+
+                        <Grid item xs={6}>
+                          <Box
+                            sx={{
+                              border:
+                                applyForselectedValue === "internship"
+                                  ? "2px solid #005878"
+                                  : "1px solid #ccc",
+                              px: 1,
+                              py: "5px",
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              "&:hover": { borderColor: "#005878" },
+                            }}
+                          >
+                            <FormControlLabel
+                              value="internship"
+                              control={<Field as={Radio} />}
+                              label={
+                                <Typography sx={{ fontSize: "0.9rem" }}>
+                                  Internship
+                                </Typography>
+                              }
+                            />
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </RadioGroup>
+                    <ErrorMessage
+                      name="applyFor"
+                      component="div"
+                      style={{ color: "red", marginTop: "5px" }}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12}>
+                  {values.applyFor === "internship" && (
+                    <div>
+                      <FormControl fullWidth variant="outlined">
+                        <InputLabel htmlFor="gender-select">
+                          Internship Type
+                        </InputLabel>
+                        <Field
+                          fullWidth
+                          label=" Internship Type"
+                          variant="outlined"
+                          name="internshipType"
+                          as={Select}
+                          onBlur={() => {}}
+                        >
+                          <MenuItem value="UNPAID">UNPAID</MenuItem>
+                          <MenuItem value="VBT">VBT</MenuItem>
+                          <MenuItem value="PASHA">P@SHA</MenuItem>
+                          <MenuItem value="PSEB">PSEB</MenuItem>
+                        </Field>
+                      </FormControl>
+                      <ErrorMessage
+                        name="internshipType"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
+                    </div>
+                  )}
+                </Grid>
+              </Grid>
               <Button
                 variant="contained"
                 type="submit"
