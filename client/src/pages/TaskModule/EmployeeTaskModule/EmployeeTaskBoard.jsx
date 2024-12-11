@@ -20,9 +20,7 @@ import {
 } from "@mui/material";
 import Toolbar from "@mui/material/Toolbar";
 import { DataGrid, renderActionsCell } from "@mui/x-data-grid";
-import LinearProgress, {
-  linearProgressClasses,
-} from "@mui/material/LinearProgress";
+import LinearProgress, { linearProgressClasses } from "@mui/material/LinearProgress";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import toast, { Toaster } from "react-hot-toast";
 import { useEffect, useState } from "react";
@@ -109,20 +107,15 @@ const formatTime = (seconds) => {
   const remainingSeconds = seconds % 60;
 
   // Formatting to ensure two digits for hours, minutes, and seconds
-  return `${hours.toString().padStart(2, "0")}:${minutes
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${remainingSeconds
     .toString()
-    .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+    .padStart(2, "0")}`;
 };
 
 const commonCenteringProps = {
   headerAlign: "center", // Center the header
   renderCell: (params) => (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      width="100%"
-    >
+    <Box display="flex" justifyContent="center" alignItems="center" width="100%">
       {params.value}
     </Box>
   ),
@@ -136,11 +129,7 @@ const columns = [
     headerAlign: "center",
     editable: false,
     renderCell: (params) => (
-      <Typography
-        variant="inherit"
-        className="flex align-center text-center w-full"
-        display="block"
-      >
+      <Typography variant="inherit" className="flex align-center text-center w-full" display="block">
         #{params.row.taskTicketNo}
       </Typography>
     ),
@@ -154,7 +143,7 @@ const columns = [
     align: "center",
     renderCell: ({ row }) => (
       <EmployeeNameCell
-        src={row.manager_obj_id.employeeProImage}
+        src={row.manager_obj_id.employeeProImage.secure_url}
         name={row.manager_obj_id.employeeName}
         userId={row.manager_obj_id.email}
       />
@@ -167,9 +156,7 @@ const columns = [
     editable: true,
     headerAlign: "center",
     align: "center",
-    renderCell: ({ row }) => (
-      <CustomChip label={row.taskPriority} status={row.taskPriority} />
-    ),
+    renderCell: ({ row }) => <CustomChip label={row.taskPriority} status={row.taskPriority} />,
   },
   {
     field: "TimeSlots",
@@ -179,9 +166,7 @@ const columns = [
     headerAlign: "center",
     align: "center",
     renderCell: (params) => {
-      const [currentUnixTime, setCurrentUnixTime] = React.useState(
-        Math.floor(new Date().getTime() / 1000)
-      );
+      const [currentUnixTime, setCurrentUnixTime] = React.useState(Math.floor(new Date().getTime() / 1000));
 
       React.useEffect(() => {
         const intervalId = setInterval(() => {
@@ -194,8 +179,7 @@ const columns = [
       // Extracting the timestamps from the row
       const { createdAt, taskTime_1, taskTime_2, taskTime_3 } = params.row;
 
-      const convertToUnix = (timestamp) =>
-        Math.floor(new Date(timestamp).getTime() / 1000);
+      const convertToUnix = (timestamp) => Math.floor(new Date(timestamp).getTime() / 1000);
 
       const createdAtUnix = convertToUnix(createdAt);
       const taskTime1Unix = taskTime_1?.date_time;
@@ -216,12 +200,9 @@ const columns = [
       const taskTime3Duration = taskTime3Unix - createdAtUnix;
 
       // Calculate progress percentage
-      const taskTime1Progress =
-        (taskTime1RemainingTime / taskTime1Duration) * 100;
-      const taskTime2Progress =
-        (taskTime2RemainingTime / taskTime2Duration) * 100;
-      const taskTime3Progress =
-        (taskTime3RemainingTime / taskTime3Duration) * 100;
+      const taskTime1Progress = (taskTime1RemainingTime / taskTime1Duration) * 100;
+      const taskTime2Progress = (taskTime2RemainingTime / taskTime2Duration) * 100;
+      const taskTime3Progress = (taskTime3RemainingTime / taskTime3Duration) * 100;
 
       return (
         <Box sx={{ width: "100%", px: 2 }}>
@@ -319,10 +300,7 @@ const columns = [
         try {
           console.log(`Updating status for task with ID: ${params.row._id}`);
 
-          const response = await axios.put(
-            `/api/task/taskCompleteStatusUpdate/${params.row._id}`,
-            {}
-          );
+          const response = await axios.put(`/api/task/taskCompleteStatusUpdate/${params.row._id}`, {});
           console.log(response);
           if (response.status == 200) {
             console.log("200");
@@ -363,10 +341,7 @@ const columns = [
                     backgroundColor: "transparent !important",
                     transform: "rotate(15deg)", // Rotate icon on hover
                   },
-                  color:
-                    params.row.taskcompleteStatus === "Task UnComplete"
-                      ? "gray"
-                      : "green", // Change color based on task completion status
+                  color: params.row.taskcompleteStatus === "Task UnComplete" ? "gray" : "green", // Change color based on task completion status
                 }}
               />
             </Button>
@@ -395,9 +370,7 @@ export default function EmployeeTaskBoard() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(
-        `/api/task/getTaskByEmpId/${currentUser._id}`
-      );
+      const response = await axios.get(`/api/task/getTaskByEmpId/${currentUser._id}`);
 
       setTask(response.data);
       console.log("tasks");
@@ -421,7 +394,7 @@ export default function EmployeeTaskBoard() {
   function formatDateTime(unixTime) {
     return new Date(unixTime * 1000).toLocaleString(); // Convert UNIX timestamp to readable date
   }
-  
+
   useEffect(() => {
     fetchData(); // Call fetchData function when component mounts
   }, []);
@@ -435,15 +408,8 @@ export default function EmployeeTaskBoard() {
       fetchData(); // Reload all tasks if search text is cleared
     } else {
       const filteredRows = task.filter((row) => {
-        const taskTicketNo = row.taskTicketNo
-          ? row.taskTicketNo.toString().trim()
-          : ""; // Trim whitespace
-        console.log(
-          "Task Ticket No:",
-          taskTicketNo,
-          "Type:",
-          typeof taskTicketNo
-        );
+        const taskTicketNo = row.taskTicketNo ? row.taskTicketNo.toString().trim() : ""; // Trim whitespace
+        console.log("Task Ticket No:", taskTicketNo, "Type:", typeof taskTicketNo);
         console.log("Comparison Result:", taskTicketNo.includes(value));
 
         return taskTicketNo.includes(value); // Filter rows by ticket number
@@ -553,8 +519,7 @@ export default function EmployeeTaskBoard() {
                   <Grid container spacing={1}>
                     <Grid item xs={12}>
                       <Typography variant="subtitle2" color="textSecondary">
-                        <strong style={{ color: "#000000" }}>Task No:</strong>{" "}
-                        {popoverContent.taskTicketNo}
+                        <strong style={{ color: "#000000" }}>Task No:</strong> {popoverContent.taskTicketNo}
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>
@@ -563,14 +528,8 @@ export default function EmployeeTaskBoard() {
                         <Typography
                           component="span"
                           sx={{
-                            color:
-                              popoverContent.taskPriority === "Urgent"
-                                ? "error.main"
-                                : "text.primary",
-                            fontWeight:
-                              popoverContent.taskPriority === "Urgent"
-                                ? "bold"
-                                : "normal",
+                            color: popoverContent.taskPriority === "Urgent" ? "error.main" : "text.primary",
+                            fontWeight: popoverContent.taskPriority === "Urgent" ? "bold" : "normal",
                           }}
                         >
                           {popoverContent.taskPriority}
@@ -579,14 +538,12 @@ export default function EmployeeTaskBoard() {
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="subtitle2" color="textSecondary">
-                        <strong style={{ color: "#000000" }}>Type:</strong>{" "}
-                        {popoverContent.taskType}
+                        <strong style={{ color: "#000000" }}>Type:</strong> {popoverContent.taskType}
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>
                       <Typography variant="subtitle2" color="textSecondary">
-                        <strong style={{ color: "#000000" }}>Date/Time:</strong>{" "}
-                        {popoverContent.DateTime}
+                        <strong style={{ color: "#000000" }}>Date/Time:</strong> {popoverContent.DateTime}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -614,12 +571,8 @@ export default function EmployeeTaskBoard() {
                           return taskTime ? (
                             <TableRow key={num}>
                               <TableCell align="center">{`Time ${num}`}</TableCell>
-                              <TableCell align="center">
-                                {formatDateTime(taskTime.date_time)}
-                              </TableCell>
-                              <TableCell align="center">
-                                {taskTime.points}
-                              </TableCell>
+                              <TableCell align="center">{formatDateTime(taskTime.date_time)}</TableCell>
+                              <TableCell align="center">{taskTime.points}</TableCell>
                             </TableRow>
                           ) : null;
                         })}
@@ -632,7 +585,6 @@ export default function EmployeeTaskBoard() {
           </Popover>
         </div>
       </Box>
-      
     </Paper>
   );
 }

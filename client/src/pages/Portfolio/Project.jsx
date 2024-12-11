@@ -1,15 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, Navigate, Link } from "react-router-dom";
-import {
-  Box,
-  Stack,
-  Typography,
-  Button,
-  Paper,
-  Grid,
-  Avatar,
-  Backdrop,
-} from "@mui/material";
+import { Box, Stack, Typography, Button, Paper, Grid, Avatar, Backdrop } from "@mui/material";
 import { usePDF } from "react-to-pdf";
 import axios from "../../utils/axiosInterceptor";
 import { useMessage } from "../../components/MessageContext";
@@ -112,14 +103,7 @@ const Project = () => {
   // } else {
   return (
     <Box sx={{ userSelect: "none" }}>
-      <Box
-        width={"100%"}
-        display={"flex"}
-        justifyContent={"end"}
-        gap={2}
-        alignItems={"center"}
-        mb={2}
-      >
+      <Box width={"100%"} display={"flex"} justifyContent={"end"} gap={2} alignItems={"center"} mb={2}>
         <Box display={"flex"} gap={2} alignItems={"center"}>
           <Button
             variant="contained"
@@ -145,11 +129,7 @@ const Project = () => {
             Download
           </Button>
 
-          <ShakingButton
-            variant="outlined"
-            onClick={hanldeDelete}
-            color="error"
-          >
+          <ShakingButton variant="outlined" onClick={hanldeDelete} color="error">
             <DeleteIcon className="icon" style={{ marginRight: 8 }} />
             Delete
           </ShakingButton>
@@ -162,16 +142,15 @@ const Project = () => {
             {/* Left section for project image */}
             <Grid item xs={12} md={6}>
               <Stack spacing={2} sx={{ boxShadow: 4 }}>
-                {empProject.project_images &&
-                  empProject.project_images.length > 0 && (
-                    <img
-                      key={empProject.project_images[0]}
-                      src={empProject.project_images[0]}
-                      alt="project"
-                      className="mx-auto w-full"
-                      style={{ objectFit: "cover" }}
-                    />
-                  )}
+                {empProject.project_images && empProject.project_images.length > 0 && (
+                  <img
+                    key={empProject.project_images[0]}
+                    src={empProject.project_images[0]}
+                    alt="project"
+                    className="mx-auto w-full"
+                    style={{ objectFit: "cover" }}
+                  />
+                )}
               </Stack>
             </Grid>
 
@@ -197,7 +176,7 @@ const Project = () => {
                   }}
                 >
                   <Avatar
-                    src={empProject.employee_obj_id?.employeeProImage}
+                    src={empProject.employee_obj_id?.employeeProImage.secure_url}
                     alt={empProject.employee_obj_id?.employeeName}
                     sx={{
                       width: 50,
@@ -208,14 +187,10 @@ const Project = () => {
                   />
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="body2" color="textSecondary">
-                      Made by:{" "}
-                      <strong>
-                        {empProject.employee_obj_id?.employeeName}
-                      </strong>
+                      Made by: <strong>{empProject.employee_obj_id?.employeeName}</strong>
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      Email:{" "}
-                      <strong>{empProject.employee_obj_id?.email}</strong>
+                      Email: <strong>{empProject.employee_obj_id?.email}</strong>
                     </Typography>
                   </Box>
                 </Box>
@@ -236,20 +211,14 @@ const Project = () => {
                       fontWeight: "600",
                     }}
                   >
-                    <CalendarToday
-                      fontSize="small"
-                      sx={{ color: "text.secondary" }}
-                    />
+                    <CalendarToday fontSize="small" sx={{ color: "text.secondary" }} />
                     Created At:{" "}
                     {empProject.createdAt
-                      ? new Date(empProject.createdAt).toLocaleDateString(
-                          "en-US",
-                          {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          }
-                        )
+                      ? new Date(empProject.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
                       : "Date not available"}
                   </Typography>
                 </Box>
@@ -275,12 +244,7 @@ const Project = () => {
                     },
                   }}
                 >
-                  <a
-                    href={empProject.project_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    color="inherit"
-                  >
+                  <a href={empProject.project_url} target="_blank" rel="noopener noreferrer" color="inherit">
                     {empProject.project_url}
                   </a>
                 </Typography>
@@ -296,10 +260,7 @@ const Project = () => {
         </Paper>
       </Box>
       {loading && (
-        <Backdrop
-          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={loading}
-        >
+        <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
           <LoadingAnim />
         </Backdrop>
       )}

@@ -14,8 +14,7 @@ import {
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import { date, object, string } from "yup";
-
+import { object, string } from "yup";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import LoadingAnim from "../../components/LoadingAnim";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
@@ -28,6 +27,7 @@ import toast from "react-hot-toast";
 import { ScrollToErrorField } from "../../utils/common";
 import UploadFilesInternee from "../../components/upload/UploadFilesInternee";
 import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
+import { useQueryClient } from "@tanstack/react-query";
 
 const validationSchema = object().shape({
   firstName: string()
@@ -61,7 +61,6 @@ const validationSchema = object().shape({
   internId: string().required("Required Field"),
   designation: string().required("Required Field"),
   offered_By: string().required("Required Field"),
-  givenOn: date().required("Date is required"),
 
   disability: string()
     .required("Disability is required")
@@ -71,6 +70,14 @@ const validationSchema = object().shape({
     then: (schema) => schema.required("Required Field"),
     otherwise: (schema) => schema.notRequired(),
   }),
+
+  interneeProImage: object()
+    .required("Required Field")
+    .test(
+      "is-not-empty", // Test name
+      "The object must not be empty",
+      (value) => value && Object.keys(value).length > 0
+    ),
 });
 
 const CreateInterneeForm = () => {
@@ -80,6 +87,7 @@ const CreateInterneeForm = () => {
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
 
+  const queryClient = useQueryClient();
   useWindowCloseHandler(tempFilesRef);
 
   return (
@@ -87,35 +95,34 @@ const CreateInterneeForm = () => {
       initialValues={{
         firstName: "",
         fatherName: "",
-        cnic: "",
+        cnic: "34202-2866666-1",
         dob: dayjs().format("YYYY-MM-DD"),
-        mailingAddress: "",
-        mobile: "",
-        email: "",
-        gender: "",
-        maritalStatus: "",
-        otherMobile: "",
-        whosMobile: "",
-        qualification: "",
+        mailingAddress: "lalamusa",
+        mobile: "0331-6281670",
+        email: "alisahi@gmail.com",
+        gender: "male",
+        maritalStatus: "single",
+        otherMobile: "0331-6281670",
+        whosMobile: "personal",
+        qualification: "matriculation",
 
-        rules: "",
-        slack: "",
+        rules: "no",
+        slack: "no",
 
         internshipFrom: dayjs().format("YYYY-MM-DD"),
         internshipTo: "",
         internId: "",
-        designation: "",
+        designation: "MERN",
 
         offered_By: "",
 
-        givenOn: "",
         // Documents
         interneeProImage: {},
         cnicFile: [],
         appointmentFile: [],
         experienceLetter: [],
 
-        disability: "",
+        disability: "no",
         //Ye field formik me nhi hai
         disabilityType: "",
       }}
@@ -147,7 +154,6 @@ const CreateInterneeForm = () => {
 
           disability: values.disability,
           disabilityType: values.kindofdisability,
-          givenOn: values.givenOn,
 
           // Documents
           interneeProImage: values.interneeProImage,
@@ -165,8 +171,9 @@ const CreateInterneeForm = () => {
           })
           .then(() => {
             setLoading(false);
-            navigate("/manage-internees");
             toast.success("Internee Added Successfully!");
+            navigate("/manage-internees");
+            queryClient.invalidateQueries("internees");
           })
           .catch((err) => {
             setLoading(false);
@@ -782,39 +789,6 @@ const CreateInterneeForm = () => {
               </Grid>
             </Grid>
 
-            <Grid container spacing={2} component={Paper} elevation={2} borderRadius={"5px"} mt={2} p={3}>
-              <Grid item xs={12} sm={6} md={6}>
-                <FormControl
-                  fullWidth
-                  variant="outlined"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                >
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Given on"
-                      format="DD/MM/YYYY"
-                      name="givenOn"
-                      value={dayjs(values.dob) || dayjs()}
-                      onChange={(newValue) => {
-                        const fromDate = dayjs(newValue);
-                        setFieldValue("givenOn", fromDate.format("YYYY-MM-DD"));
-                      }}
-                      slotProps={{
-                        textField: {
-                          helperText: "DD/MM/YYYY",
-                        },
-                      }}
-                    />
-                  </LocalizationProvider>
-                  <ErrorMessage name="givenOn" style={{ color: "red" }} component="div" />
-                </FormControl>
-              </Grid>
-            </Grid>
-
             {/* ============================================  Documents   ============================================== */}
 
             <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
@@ -852,9 +826,15 @@ const CreateInterneeForm = () => {
                     }}
                   />
                 }
-                //ScrollToErrorField is a custom utlity function
                 onClick={() => {
-                  Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
+                  if (Object.keys(errors).length > 0) {
+                    if (errors.interneeProImage) {
+                      alert("Internee Image is required.");
+                    }
+                    ScrollToErrorField(errors, setTouched);
+                  } else {
+                    handleSubmit();
+                  }
                 }}
               >
                 Create Internee

@@ -14,7 +14,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import bg from "/vbt-logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import dayjs from "dayjs";
 import axios from "../../utils/axiosInterceptor";
@@ -22,7 +22,8 @@ import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import Select from "@mui/material/Select";
 import { palette } from "../../theme/colors";
-
+import { Navigate } from "react-router-dom";
+import { renderTimeViewClock } from "@mui/x-date-pickers";
 function LeaveForm() {
   const [reason, setReason] = useState("");
   const [leaveType, setLeaveType] = useState("");
@@ -37,6 +38,7 @@ function LeaveForm() {
   const [selectedManager, setSelectedManager] = useState("");
   const { currentUser } = useSelector((state) => state.user);
 
+  const navigate = useNavigate();
   let id = currentUser._id;
   let role = currentUser.role;
   let name = currentUser.employeeName;
@@ -48,6 +50,7 @@ function LeaveForm() {
       !reason ||
       !leaveType ||
       !leaveCategory ||
+      (leaveType === "Short Leave" && (!fromTime || !toTime)) ||
       (leaveType === "Half Leave" && (!fromTime || !toTime)) ||
       (leaveType !== "Long Leaves" && !selectedDate) ||
       (leaveType === "Long Leaves" && (!leavesStart || !leavesEnd))
@@ -67,7 +70,21 @@ function LeaveForm() {
     // If all fields are filled, then submit the form.
     let leave_information = {};
 
-    if (leaveType == "Half Leave") {
+    if (leaveType == "Short Leave") {
+      //Get From and To time
+      leave_information = {
+        from: id,
+        role,
+        name,
+        for: role == "manager" ? admin._id : selectedManager,
+        leaveType,
+        leaveCategory,
+        reason,
+        selectedDate,
+        fromTime,
+        toTime,
+      };
+    } else if (leaveType == "Half Leave") {
       //Get From and To time
       leave_information = {
         from: id,
@@ -106,21 +123,21 @@ function LeaveForm() {
         leavesEnd,
       };
     }
-
     axios
       .post("/api/leave/create-leave", leave_information)
       .then((res) => {
         console.log(res);
         toast.success("Leave Request Submitted Successfully");
-        setReason("");
-        setLeaveType("");
-        setLeaveCategory("");
-        setSelectedDate(null);
-        setLeavesStart(null);
-        setLeavesEnd(null);
-        setFromTime(null);
-        setToTime(null);
-        setSelectedManager("");
+        navigate("/my-leaves");
+        // setReason("");
+        // setLeaveType("");
+        // setLeaveCategory("");
+        // setSelectedDate(null);
+        // setLeavesStart(null);
+        // setLeavesEnd(null);
+        // setFromTime(null);
+        // setToTime(null);
+        // setSelectedManager("");
       })
       .catch((error) => {
         toast.error("Error in Submitting Leave Request!!");
@@ -303,11 +320,23 @@ function LeaveForm() {
                   value={leaveType}
                   onChange={(event) => {
                     setLeaveType(event.target.value);
+                    setFromTime(null);
+                    setToTime(null);
                   }}
                 >
-                  <MenuItem value="Full Leave">Full Leave</MenuItem>
-                  <MenuItem value="Half Leave">Half Leave</MenuItem>
-                  <MenuItem value="Long Leaves">Long Leaves</MenuItem>
+                  <MenuItem value="Short Leave">
+                    Short Leave (less then 2 hours)
+                  </MenuItem>
+
+                  <MenuItem value="Half Leave">
+                    Half Leave (2 to 4 hours)
+                  </MenuItem>
+                  <MenuItem value="Full Leave">
+                    Full Leave(1 day or More than 4 hours){" "}
+                  </MenuItem>
+                  <MenuItem value="Long Leaves">
+                    Long Leaves (More than 1 day)
+                  </MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -337,6 +366,150 @@ function LeaveForm() {
 
             <Grid spacing={2} container xs={12} item>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
+                {leaveType == "Short Leave" ? (
+                  <>
+                    <Grid xs={6} item fullWidth>
+                      <DatePicker
+                        sx={{ width: "100%" }}
+                        label="Select Short Leave Date"
+                        format="dddd, DD MMMM, YYYY"
+                        value={selectedDate}
+                        onChange={(newValue) => setSelectedDate(newValue)}
+                        // renderInput={(params) => <TextField {...params} />}
+                        minDate={dayjs(new Date())}
+                      />
+                    </Grid>
+                    <Grid xs={3} item>
+                      <FormControl fullWidth>
+                        <TimePicker
+                          // desktopModeMediaQuery="Desktop"
+                          viewRenderers={{
+                            hours: renderTimeViewClock,
+                            minutes: renderTimeViewClock,
+                            seconds: renderTimeViewClock,
+                          }}
+                          label="From"
+                          value={
+                            fromTime ? dayjs(`2000-01-01T${fromTime}`) : null
+                          }
+                          onChange={(newValue) => {
+                            const time = newValue
+                              ? newValue.format("HH:mm")
+                              : null;
+
+                            setFromTime(time);
+                            const toTime = newValue
+                              .add(2, "hour")
+                              .format("HH:mm");
+                            setToTime(toTime);
+
+                            if (time && toTime) {
+                              console.log("timeeeeeee totime", time, toTime);
+
+                              const from = dayjs(`2000-01-01T${time}`);
+                              const to = dayjs(`2000-01-01T${toTime}`);
+                              const diffInMinutes =
+                                to.diff(from, "minute") ||
+                                from.diff(to, "minute");
+                              if (diffInMinutes > 240) {
+                                console.log("120000000");
+                                setLeaveType("Full Leave");
+                                toast(
+                                  "Leave more than 4hrs will be considered Full leave.",
+                                  {
+                                    icon: "ℹ️",
+                                  }
+                                );
+                                // toast.error(
+                                //   "Short leave more than 4hrs will be considered Full leave."
+                                // );
+                              }
+                             else if (diffInMinutes > 120) {
+                                setLeaveType("Half Leave");
+                                toast(
+                                  "Leave more than 2hrs will be considered Half leave.",
+                                  {
+                                    icon: "ℹ️",
+                                  }
+                                );
+                                // toast.error(
+                                //   "Short leave more than 4hrs will be considered Half leave."
+                                // );
+                              }
+
+                              // if (diffInMinutes > 120) {
+                              //   setLeaveType("Half Leave");
+                              //   toast.error(
+                              //     "Short leave more than 2hrs will be considered Full leave."
+                              //   );
+                              // }
+                            }
+                          }}
+                          renderInput={(params) => <TextField {...params} />}
+                        />
+                      </FormControl>
+                    </Grid>
+                    <Grid xs={3} item>
+                      <FormControl fullWidth>
+                        <TimePicker
+                          // desktopModeMediaQuery="Desktop"
+                          viewRenderers={{
+                            hours: renderTimeViewClock,
+                            minutes: renderTimeViewClock,
+                            seconds: renderTimeViewClock,
+                          }}
+                          label="To"
+                          value={toTime ? dayjs(`2000-01-01T${toTime}`) : null}
+                          onChange={(newValue) => {
+                            const time = newValue
+                              ? newValue.format("HH:mm")
+                              : null;
+                            setToTime(time);
+
+                            if (time && fromTime) {
+                              const from = dayjs(`2000-01-01T${fromTime}`);
+                              const to = dayjs(`2000-01-01T${time}`);
+                              const diffInMinutes =
+                                to.diff(from, "minute") ||
+                                from.diff(to, "minute");
+                              if (diffInMinutes > 240) {
+                                console.log("120000000");
+                                setLeaveType("Full Leave");
+                                toast(
+                                  "Leave more than 4hrs will be considered Full leave.",
+                                  {
+                                    icon: "ℹ️",
+                                  }
+                                );
+                                // toast.error(
+                                //   "Short leave more than 4hrs will be considered Full leave."
+                                // );
+                              } else if (diffInMinutes > 120) {
+                                setLeaveType("Half Leave");
+                                toast(
+                                  "Leave more than 2hrs will be considered Half leave.",
+                                  {
+                                    icon: "ℹ️",
+                                  }
+                                );
+                                // toast.error(
+                                //   "Short leave more than 2hrs will be considered Half leave."
+                                // );
+                              }
+                              // if (diffInMinutes > 240) {
+                              //   setLeaveType("Full Leave");
+                              //   toast.error(
+                              //     "Half Leave more than 4hrs will be considered Full Leave."
+                              //   );
+                              // }
+                            }
+                          }}
+                          renderInput={(params) => <TextField {...params} />}
+                        />
+                      </FormControl>
+                    </Grid>
+                  </>
+                ) : null}
                 {leaveType == "Half Leave" ? (
                   <>
                     <Grid xs={6} item fullWidth>
@@ -351,60 +524,118 @@ function LeaveForm() {
                       />
                     </Grid>
                     <Grid xs={3} item>
-                      <TimePicker
-                        label="From"
-                        value={
-                          fromTime ? dayjs(`2000-01-01T${fromTime}`) : null
-                        }
-                        onChange={(newValue) => {
-                          const time = newValue
-                            ? newValue.format("HH:mm")
-                            : null;
-                          setFromTime(time);
-
-                          if (time && toTime) {
-                            const from = dayjs(`2000-01-01T${time}`);
-                            const to = dayjs(`2000-01-01T${toTime}`);
-                            const diffInMinutes = to.diff(from, "minute");
-                            if (diffInMinutes > 240) {
-                              setLeaveType("Full Leave");
-                              toast.error(
-                                "Half leave more than 4hrs will be considered Full leave."
-                              );
-                            }
+                      <FormControl fullWidth>
+                        <TimePicker
+                          // desktopModeMediaQuery="Desktop"
+                          viewRenderers={{
+                            hours: renderTimeViewClock,
+                            minutes: renderTimeViewClock,
+                            seconds: renderTimeViewClock,
+                          }}
+                          label="From"
+                          value={
+                            fromTime ? dayjs(`2000-01-01T${fromTime}`) : null
                           }
-                        }}
-                        renderInput={(params) => <TextField {...params} />}
-                      />
+                          onChange={(newValue) => {
+                            const time = newValue
+                              ? newValue.format("HH:mm")
+                              : null;
+                            setFromTime(time);
+                            const toTime = newValue
+                              .add(4, "hour")
+                              .format("HH:mm");
+                            setToTime(toTime);
+
+                            if (time && toTime) {
+                              const from = dayjs(`2000-01-01T${time}`);
+                              const to = dayjs(`2000-01-01T${toTime}`);
+                              const diffInMinutes =
+                                to.diff(from, "minute") ||
+                                from.diff(to, "minute");
+                              if (diffInMinutes > 240) {
+                                setLeaveType("Full Leave");
+                                toast(
+                                  "Leave more than 4hrs will be considered Full leave.",
+                                  {
+                                    icon: "ℹ️",
+                                  }
+                                );
+                                // toast.error(
+                                //   "Half leave more than 4hrs will be considered Full leave."
+                                // );
+                              } else if (diffInMinutes <= 120) {
+                                setLeaveType("Short Leave");
+                                toast(
+                                  "Leave less than 2hrs will be considered Short Leave.",
+                                  {
+                                    icon: "ℹ️",
+                                  }
+                                );
+                                // toast.error(
+                                //   "Half Leave less than 2hrs will be considered Short Leave."
+                                // );
+                              } 
+                            }
+                          }}
+                          renderInput={(params) => <TextField {...params} />}
+                        />
+                      </FormControl>
                     </Grid>
                     <Grid xs={3} item>
-                      <TimePicker
-                        label="To"
-                        value={toTime ? dayjs(`2000-01-01T${toTime}`) : null}
-                        onChange={(newValue) => {
-                          const time = newValue
-                            ? newValue.format("HH:mm")
-                            : null;
-                          setToTime(time);
+                      <FormControl fullWidth>
+                        <TimePicker
+                          // desktopModeMediaQuery="Desktop"
+                          viewRenderers={{
+                            hours: renderTimeViewClock,
+                            minutes: renderTimeViewClock,
+                            seconds: renderTimeViewClock,
+                          }}
+                          label="To"
+                          value={toTime ? dayjs(`2000-01-01T${toTime}`) : null}
+                          onChange={(newValue) => {
+                            const time = newValue
+                              ? newValue.format("HH:mm")
+                              : null;
+                            setToTime(time);
 
-                          if (time && fromTime) {
-                            const from = dayjs(`2000-01-01T${fromTime}`);
-                            const to = dayjs(`2000-01-01T${time}`);
-                            const diffInMinutes = to.diff(from, "minute");
-                            if (diffInMinutes > 240) {
-                              setLeaveType("Full Leave");
-                              toast.error(
-                                "Half Leave more than 4hrs will be considered Full Leave."
-                              );
+                            if (time && fromTime) {
+                              const from = dayjs(`2000-01-01T${fromTime}`);
+                              const to = dayjs(`2000-01-01T${time}`);
+                              const diffInMinutes =
+                                to.diff(from, "minute") ||
+                                from.diff(to, "minute");
+                               if (diffInMinutes > 240) {
+                                setLeaveType("Full Leave");
+                                toast(
+                                  "Leave more than 4hrs will be considered Full Leave.",
+                                  {
+                                    icon: "ℹ️",
+                                  }
+                                );
+                                // toast.error(
+                                //   "Half Leave more than 4hrs will be considered Full Leave."
+                                // );
+                              }
+                             else if (diffInMinutes <= 120) {
+                                setLeaveType("Short Leave");
+                                toast(
+                                  "Leave less than 2hrs will be considered Short Leave.",
+                                  {
+                                    icon: "ℹ️",
+                                  }
+                                );
+                                // toast.error(
+                                //   "Half Leave less than 2hrs will be considered Short Leave."
+                                // );
+                              } 
                             }
-                          }
-                        }}
-                        renderInput={(params) => <TextField {...params} />}
-                      />
+                          }}
+                          renderInput={(params) => <TextField {...params} />}
+                        />
+                      </FormControl>
                     </Grid>
                   </>
                 ) : null}
-
                 {leaveType == "Full Leave" ? (
                   <>
                     <Grid xs={12} item fullWidth>
@@ -419,7 +650,6 @@ function LeaveForm() {
                     </Grid>
                   </>
                 ) : null}
-
                 {leaveType == "Long Leaves" ? (
                   <>
                     <Grid xs={6} item fullWidth>

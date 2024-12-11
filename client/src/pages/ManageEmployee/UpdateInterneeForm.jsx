@@ -27,6 +27,7 @@ import { ScrollToErrorField } from "../../utils/common";
 import UploadFilesInternee from "../../components/upload/UploadFilesInternee";
 
 import axios from "../../utils/axiosInterceptor";
+import { useQueryClient } from "@tanstack/react-query";
 
 // import axios from "axios";
 
@@ -70,6 +71,14 @@ const validationSchema = object().shape({
     then: (schema) => schema.required("Required Field"),
     otherwise: (schema) => schema.notRequired(),
   }),
+
+  interneeProImage: object()
+    .required("Required Field")
+    .test(
+      "is-not-empty", // Test name
+      "The object must not be empty",
+      (value) => value && Object.keys(value).length > 0
+    ),
 });
 
 const UpdateInterneeForm = () => {
@@ -77,6 +86,8 @@ const UpdateInterneeForm = () => {
   const [user, setUser] = useState({});
   const { id } = useParams();
   const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
@@ -121,7 +132,6 @@ const UpdateInterneeForm = () => {
         internId: user.internId || "",
         designation: user.designation || "",
         experienceLetter: user.experienceLetter || "",
-        givenOn: user.givenOn ? user.givenOn.split("T")[0] : "",
         offered_By: user.offered_By || "",
         interneeProImage: user.interneeProImage || "",
         disability: user.disability || "no",
@@ -155,7 +165,7 @@ const UpdateInterneeForm = () => {
           appointmentFile: values.appointmentFile,
           cnicFile: values.cnicFile,
           experienceLetter: values.experienceLetter,
-          givenOn: values.givenOn,
+
           interneeProImage: values.interneeProImage,
           disability: values.disability,
           disabilityType: values.kindofdisability,
@@ -171,8 +181,9 @@ const UpdateInterneeForm = () => {
           })
           .then(() => {
             setLoading(false);
-            navigate("/manage-internees");
             toast.success("Internee Updated Successfully!");
+            navigate("/manage-internees");
+            queryClient.invalidateQueries("internees");
           })
           .catch((err) => {
             setLoading(false);
@@ -734,38 +745,6 @@ const UpdateInterneeForm = () => {
               </Grid>
             </Grid>
 
-            <Grid container spacing={2} component={Paper} elevation={2} borderRadius={"5px"} mt={2} p={3}>
-              <Grid item xs={12} sm={6} md={6}>
-                <FormControl
-                  fullWidth
-                  variant="outlined"
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "5px",
-                    },
-                  }}
-                >
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Given on"
-                      format="DD/MM/YYYY"
-                      name="givenOn"
-                      value={dayjs(values.dob) || dayjs()}
-                      onChange={(newValue) => {
-                        const fromDate = dayjs(newValue);
-                        setFieldValue("givenOn", fromDate.format("YYYY-MM-DD"));
-                      }}
-                      slotProps={{
-                        textField: {
-                          helperText: "DD/MM/YYYY",
-                        },
-                      }}
-                    />
-                  </LocalizationProvider>
-                </FormControl>
-              </Grid>
-            </Grid>
-
             {/* ============================================  Documents   ============================================== */}
 
             <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
@@ -805,7 +784,14 @@ const UpdateInterneeForm = () => {
                 }
                 //ScrollToErrorField is a custom utlity function
                 onClick={() => {
-                  Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
+                  if (Object.keys(errors).length > 0) {
+                    if (errors.interneeProImage) {
+                      alert("Internee Image is required.");
+                    }
+                    ScrollToErrorField(errors, setTouched);
+                  } else {
+                    handleSubmit();
+                  }
                 }}
               >
                 Update Internee

@@ -23,9 +23,7 @@ function AllPortfolioEmployees() {
   const getEmp = async () => {
     try {
       const searchTerm = "";
-      const response = await axios.get(
-        `/api/employee/get_managers_employees?search=${searchTerm}`
-      );
+      const response = await axios.get(`/api/employee/get_managers_employees?search=${searchTerm}`);
       setEmployees(response.data);
       console.log(response.data);
     } catch (error) {
@@ -86,8 +84,7 @@ function AllPortfolioEmployees() {
                   right: -16,
                   width: 100,
                   height: 25,
-                  backgroundColor:
-                    employee.role === "manager" ? "#1E3E62" : "#5B99C2",
+                  backgroundColor: employee.role === "manager" ? "#1E3E62" : "#5B99C2",
                   color: "white",
                   textAlign: "center",
                   lineHeight: "25px",
@@ -102,7 +99,7 @@ function AllPortfolioEmployees() {
 
               <Avatar
                 alt={employee.employeeName}
-                src={employee.employeeProImage}
+                src={employee.employeeProImage.secure_url}
                 sx={{
                   width: 100,
                   height: 100,

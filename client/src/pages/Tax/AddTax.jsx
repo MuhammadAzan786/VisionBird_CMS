@@ -3,9 +3,12 @@ import { useState } from "react";
 import axios from "../../utils/axiosInterceptor";
 import { useMessage } from "../../components/MessageContext";
 import Swal from "sweetalert2";
-
+import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
+import CustomOverlay from "../../components/Styled/CustomOverlay";
 
 function AddTax({ closeModal, loadCategories }) {
+
+  const queryclient=useQueryClient()
   const style = {
     position: "absolute",
     top: "50%",
@@ -62,7 +65,50 @@ function AddTax({ closeModal, loadCategories }) {
   //       Swal.fire("Failed!", "Category creation failed.", "error");
   //     });
   // };
+  const mutation = useMutation({
+    mutationFn: async (formdata) => {
+      return await axios.post(
+        "/api/tax_Category/create_tax_category",
+        formdata,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    },
+  });
 
+  if (mutation.isPending) {
+    return <CustomOverlay open ={true} />;
+  }
+
+  if (mutation.isError) {
+    console.log("errr", mutation.error);
+   
+    Swal.fire("Failed!", "Category creation failed.", "error");
+  }
+  if (mutation.isSuccess) {
+    closeModal();
+
+    queryclient.invalidateQueries("tax");
+
+    // loadCategories();
+
+    Swal.fire("Created!", "Category has been created.", "success");
+  } // if (mutation.isPending) {
+  //   return <CustomOverlay />;
+  // }
+  // if (mutation.isSuccess) {
+  //   closeModal();
+  //   Swal.fire("Created!", "Category has been created.", "success");
+  // }
+
+  // if (mutation.isError) {
+  //   console.log("errr", mutation.error);
+  //   closeModal();
+  //   Swal.fire("Failed!", "Category creation failed.", "error");
+  // }
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -74,26 +120,7 @@ function AddTax({ closeModal, loadCategories }) {
       formDataToSend.append("image", data.image[0]); // Add the selected image file
     }
 
-    try {
-      const response = await axios.post(
-        "/api/tax_Category/create_tax_category",
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log(response.data);
-
-      loadCategories();
-      closeModal();
-      Swal.fire("Created!", "Category has been created.", "success");
-    } catch (error) {
-      console.log(error);
-      closeModal();
-      Swal.fire("Failed!", "Category creation failed.", "error");
-    }
+    mutation.mutate(formDataToSend);
   };
 
   return (

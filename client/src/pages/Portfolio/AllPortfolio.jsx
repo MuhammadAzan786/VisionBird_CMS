@@ -37,9 +37,7 @@ const AllPortfolio = () => {
   const getAllPosts = async (page = 1) => {
     setLoading(true);
     await axios
-      .get(
-        `/api/posts/get_all_emp_posts?search=${searchTerm || ""}&page=${page}`
-      )
+      .get(`/api/posts/get_all_emp_posts?search=${searchTerm || ""}&page=${page}`)
       .then((response) => {
         setProjects(response.data.data);
         setTotalPages(response.data.totalPages);
@@ -67,8 +65,7 @@ const AllPortfolio = () => {
     setCurrentPage(page);
   };
 
-  const handleSuccess = () =>
-    showMessage("success", "Project deleted successfully!");
+  const handleSuccess = () => showMessage("success", "Project deleted successfully!");
   const handleError = () => showMessage("error", "Project deletion failed!");
 
   const deletePost = async (id) => {
@@ -76,9 +73,7 @@ const AllPortfolio = () => {
     await axios
       .delete(`/api/posts/delete_post/${id}`)
       .then(() => {
-        setProjects((prevProjects) =>
-          prevProjects.filter((post) => post._id !== id)
-        );
+        setProjects((prevProjects) => prevProjects.filter((post) => post._id !== id));
         handleSuccess();
         setLoading(false);
       })
@@ -174,10 +169,7 @@ const AllPortfolio = () => {
                     gap: "0.3rem",
                   }}
                 >
-                  <Link
-                    to={`/project/${project._id}`}
-                    style={{ textDecoration: "none" }}
-                  >
+                  <Link to={`/project/${project._id}`} style={{ textDecoration: "none" }}>
                     <IconButton
                       sx={{
                         color: "#fff",
@@ -234,12 +226,8 @@ const AllPortfolio = () => {
                       fontSize: { xs: "0.7rem", sm: "0.8rem", md: "1rem" },
                     }}
                   >
-                    {project.project_description
-                      .split(" ")
-                      .slice(0, 4)
-                      .join(" ")}{" "}
-                    {project.project_description.split(" ").length > 4 &&
-                      " ..."}
+                    {project.project_description.split(" ").slice(0, 4).join(" ")}{" "}
+                    {project.project_description.split(" ").length > 4 && " ..."}
                   </Typography>
                 </Box>
               </Box>
@@ -254,13 +242,11 @@ const AllPortfolio = () => {
                 flexDirection: "row",
                 gap: "0.5rem",
               }}
-              onClick={() =>
-                navigate(`/employee-profile/${project.employee_obj_id._id}`)
-              }
+              onClick={() => navigate(`/employee-profile/${project.employee_obj_id._id}`)}
             >
               <Avatar
-                src={project.employee_obj_id?.employeeProImage}
-                alt={project.employee_obj_id?.employeeName}
+                src={project.employee_obj_id?.employeeProImage.secure_url}
+                alt={project.employee_obj_id?.employeeName.secure_url}
                 sx={{
                   width: { xs: 15, sm: 20 },
                   height: { xs: 15, sm: 20 },
@@ -297,10 +283,7 @@ const AllPortfolio = () => {
         </Grid>
       </Grid>
       {loading && (
-        <Backdrop
-          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={loading}
-        >
+        <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
           <LoadingAnim />
         </Backdrop>
       )}

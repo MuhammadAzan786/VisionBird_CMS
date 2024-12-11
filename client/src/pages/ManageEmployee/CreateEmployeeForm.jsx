@@ -28,44 +28,33 @@ import "../../index.css";
 import axios from "../../utils/axiosInterceptor";
 import { ScrollToErrorField } from "../../utils/common";
 import { useWindowCloseHandler } from "../../hooks/useWindowCloseHandler";
+import { QueryClient, useQueries, useQueryClient } from "@tanstack/react-query";
 
 const validationSchema = object().shape({
   firstName: string()
     .required("Required Name")
-    .matches(
-      /^[a-zA-Z\s]+$/,
-      "Only alphabetic characters and spaces are allowed"
-    ),
+    .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
   fatherName: string()
     .required("Required Name")
     .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters are allowed"),
   cnic: string()
     .required("Required CNIC")
-    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) =>
-      /^\d{5}-\d{7}-\d$/.test(value || "")
-    ),
+    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) => /^\d{5}-\d{7}-\d$/.test(value || "")),
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
 
   mobile: string()
     .required("Required Field")
-    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) =>
-      /^03\d{2}-\d{7}$/.test(value || "")
-    ),
+    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
   email: string().email().required("Required Email"),
   gender: string().required("Required Field"),
   maritalStatus: string().required("Required Field"),
   otherMobile: string()
     .required("Required Field")
-    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) =>
-      /^03\d{2}-\d{7}$/.test(value || "")
-    ),
+    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
   whosMobile: string()
     .required("Required Name")
-    .matches(
-      /^[a-zA-Z\s]+$/,
-      "Only alphabetic characters and spaces are allowed"
-    ),
+    .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
   qualification: string().required("Required Field"),
   startDate: string().required("Date Required"),
   probation: string().required("Please select "),
@@ -73,20 +62,7 @@ const validationSchema = object().shape({
   bankAccount: string().required("Required Field"),
   empId: string().required("Required Field"),
   designation: string().required("Required Field"),
-  userName: string()
-    .required("Required Field")
-    .test("unique-username", "Username already exists", async (value) => {
-      if (!value) return true; // Skip validation if the field is empty
-      try {
-        const response = await axios.get("/api/employee/check_username", {
-          params: { username: value },
-        });
-        return !response.data.exists;
-      } catch (error) {
-        console.error("Error checking username:", error);
-        return false; // Treat as invalid if the API call fails
-      }
-    }),
+  userName: string().required("Required Field"),
   password: string().required("Required Field"),
   role: string().required("Required Field"),
 
@@ -98,6 +74,14 @@ const validationSchema = object().shape({
     then: (schema) => schema.required("Required Field"),
     otherwise: (schema) => schema.notRequired(),
   }),
+
+  employeeProImage: object()
+    .required("Required Field")
+    .test(
+      "is-not-empty", // Test name
+      "The object must not be empty",
+      (value) => value && Object.keys(value).length > 0
+    ),
 });
 
 function CreateEmployeeForm() {
@@ -108,6 +92,10 @@ function CreateEmployeeForm() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const userNameInputRef = useRef();
 
   const tempFilesRef = useRef([]);
   const deletedFilesRef = useRef([]);
@@ -120,43 +108,52 @@ function CreateEmployeeForm() {
       initialValues={{
         firstName: "",
         fatherName: "",
-        cnic: "",
+        cnic: "34202-2866666-1",
         dob: "",
-        mailingAddress: "",
-        disability: "",
+        mailingAddress: "lalamusa",
+        disability: "no",
         kindofdisability: "",
-        mobile: "",
-        email: "",
-        gender: "",
-        maritalStatus: "",
-        otherMobile: "",
-        whosMobile: "",
-        qualification: "",
+        mobile: "0331-6281670",
+        email: "ali@gmail.com",
+        gender: "male",
+        maritalStatus: "single",
+        otherMobile: "0331-6281670",
+        whosMobile: "personal",
+        qualification: "matriculation",
         startDate: new Date().toISOString().substr(0, 10),
         dateconfirmed: new Date().toISOString().substr(0, 10),
-        probation: "",
-        probationMonths: "",
-        policyBook: "",
-        appointment: "",
-        rules: "",
-        annualLeave: "",
-        attendence: "",
-        localServerAccount: "",
-        superAdmin: "",
-        slack: "",
-        whatsApp: "",
-        empCard: "",
-        bankAccount: "",
-        accountNo: "",
+
         empId: "",
-        designation: "",
+        designation: "Graphic Designer",
+
+        userName: "",
+        password: "",
+        role: "employee",
+
+        probation: "no",
+        probationMonths: "",
+
         BasicPayInProbationPeriod: 0,
         BasicPayAfterProbationPeriod: 0,
         AllowancesInProbationPeriod: 0,
         AllowancesAfterProbationPeriod: 0,
-        userName: "",
-        password: "",
-        role: "",
+
+        bankAccount: "no",
+        accountNo: "",
+
+        // Onboarding Questionnaire
+        policyBook: "no",
+        appointment: "no",
+        annualLeave: "no",
+        attendence: "no",
+        localServerAccount: "no",
+        rules: "no",
+        slack: "no",
+        superAdmin: "no",
+        whatsApp: "no",
+        empCard: "no",
+
+        // Documents
         employeeProImage: {},
         policeCertificateUpload: [],
         cnicScanCopy: [],
@@ -199,11 +196,9 @@ function CreateEmployeeForm() {
           employeeID: values.empId,
           employeeDesignation: values.designation,
           BasicPayInProbationPeriod: values.BasicPayInProbationPeriod || 0,
-          BasicPayAfterProbationPeriod:
-            values.BasicPayAfterProbationPeriod || 0,
+          BasicPayAfterProbationPeriod: values.BasicPayAfterProbationPeriod || 0,
           AllowancesInProbationPeriod: values.AllowancesInProbationPeriod || 0,
-          AllowancesAfterProbationPeriod:
-            values.AllowancesAfterProbationPeriod || 0,
+          AllowancesAfterProbationPeriod: values.AllowancesAfterProbationPeriod || 0,
           employeeUsername: values.userName,
           employeePassword: values.password,
 
@@ -231,6 +226,8 @@ function CreateEmployeeForm() {
           .then(() => {
             setLoading(false);
             toast.success("Employee Added Successfully!");
+
+            queryClient.invalidateQueries("employees");
             navigate("/manage-employees");
           })
           .catch((err) => {
@@ -623,6 +620,7 @@ function CreateEmployeeForm() {
                     }}
                     className="w-full"
                     disabled={role === "manager"}
+                    inputRef={userNameInputRef}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -1158,6 +1156,7 @@ function CreateEmployeeForm() {
                 <Button
                   type="button"
                   variant="contained"
+                  sx={{ marginTop: "20px" }}
                   endIcon={
                     <PersonAddAltIcon
                       sx={{
@@ -1166,8 +1165,19 @@ function CreateEmployeeForm() {
                     />
                   }
                   //ScrollToErrorField is a custom utlity function
+                  // onClick={() => {
+                  //   Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
+                  // }}
+
                   onClick={() => {
-                    Object.keys(errors).length > 0 ? ScrollToErrorField(errors, setTouched) : handleSubmit();
+                    if (Object.keys(errors).length > 0) {
+                      if (errors.employeeProImage) {
+                        alert("Employee Image is required.");
+                      }
+                      ScrollToErrorField(errors, setTouched);
+                    } else {
+                      handleSubmit();
+                    }
                   }}
                 >
                   Create
@@ -1175,7 +1185,13 @@ function CreateEmployeeForm() {
               </div>
             </Form>
             {loading && (
-              <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+              <Backdrop
+                sx={{
+                  color: "#fff",
+                  zIndex: (theme) => theme.zIndex.drawer + 1,
+                }}
+                open={loading}
+              >
                 <LoadingAnim />
               </Backdrop>
             )}

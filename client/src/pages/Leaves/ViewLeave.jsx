@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import axios from "../../utils/axiosInterceptor";
 import { Box, Button, Grid, Paper, TextField, Typography } from "@mui/material";
 import bg from "/vbt-logo.png";
 import dayjs from "dayjs";
 import toast, { Toaster } from "react-hot-toast";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { palette } from "../../theme/colors";
+import { initializeSocket } from "../../redux/socketSlice";
 
 export default function ViewLeave() {
   const { id } = useParams();
@@ -15,30 +16,37 @@ export default function ViewLeave() {
   const [leaveFrom, setLeaveFrom] = useState({});
   const [getLeave, setGetLeave] = useState(false);
   const { currentUser } = useSelector((state) => state.user);
+  // notification;
+  const socket = useSelector((state) => state.socket.socket);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const sendLeaveStatus = (status) => {
     axios
       .put(`/api/leave/change-status/${id}`, {
         status,
         statusChangedBy: currentUser.employeeName,
+        statusChangedById: currentUser._id,
         for: leaveFrom._id,
       })
       .then((res) => {
         setGetLeave(!getLeave);
         console.log(res);
         toast.success("Leave status changed successfully");
+        if (currentUser.role == "admin") {
+          navigate("/Manager-leaves");
+        } else {
+          navigate("/employee-leaves");
+        }
       })
       .catch((error) => {
         toast.error("Error in changing leave status!!!");
         console.log(error);
       });
   };
-
-  useEffect(() => {
+  const getLeaves = async () => {
     axios
-      .get(`http://localhost:4000/api/leave/get-leave/${id}`, {
-        withCredentials: true,
-      })
+      .get(`/api/leave/get-leave/${id}`)
       .then((response) => {
         setLeaveFrom(response.data.from);
         setLeave(response.data);
@@ -46,7 +54,24 @@ export default function ViewLeave() {
       .catch((error) => {
         console.error("Error fetching leave history:", error);
       });
+  };
+  useEffect(() => {
+    getLeaves();
   }, [id, getLeave]);
+  useEffect(() => {
+    if (socket) {
+      socket.on("notification", () => {
+        getLeaves();
+      });
+      return () => {
+        socket.off("notification", () => {
+          // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
+        });
+      };
+    } else {
+      dispatch(initializeSocket(currentUser));
+    }
+  }, [socket, dispatch, currentUser]);
 
   const formatTime = (time) => {
     const [hours, minutes] = time.split(":");
@@ -208,6 +233,28 @@ export default function ViewLeave() {
                       </Grid>
                     </>
                   ) : null}
+                  {leave.leaveType == "Short Leave" ? (
+                    <>
+                      <Grid xs={2} item>
+                        <TextField
+                          value={formatTime(leave.fromTime)}
+                          label="From"
+                          variant="outlined"
+                          fullWidth
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Grid>
+                      <Grid xs={2} item>
+                        <TextField
+                          value={formatTime(leave.toTime)}
+                          label="To"
+                          variant="outlined"
+                          fullWidth
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Grid>
+                    </>
+                  ) : null}
 
                   <Grid xs={leave.leaveType == "Long Leaves" ? 6 : 4} item>
                     <TextField
@@ -244,7 +291,15 @@ export default function ViewLeave() {
                       </Grid>
                     </>
                   ) : null}
-                  <Grid xs={leave.leaveType == "Half Leave" ? 8 : 12} item>
+                  <Grid
+                    xs={
+                      leave.leaveType == "Half Leave" ||
+                      leave.leaveType == "Short Leave"
+                        ? 8
+                        : 12
+                    }
+                    item
+                  >
                     <TextField
                       value={leave.status}
                       label="Leave status"

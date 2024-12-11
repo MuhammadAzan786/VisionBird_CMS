@@ -31,9 +31,9 @@ const formatTime = (seconds) => {
   const remainingSeconds = seconds % 60;
 
   // Formatting to ensure two digits for hours, minutes, and seconds
-  return `${hours.toString().padStart(2, "0")}:${minutes
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${remainingSeconds
     .toString()
-    .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+    .padStart(2, "0")}`;
 };
 
 const columns = () => [
@@ -45,11 +45,7 @@ const columns = () => [
     headerAlign: "center",
     editable: false,
     renderCell: (params) => (
-      <Typography
-        variant="inherit"
-        className="flex align-center text-center w-full"
-        display="block"
-      >
+      <Typography variant="inherit" className="flex align-center text-center w-full" display="block">
         #{params.row.taskTicketNo}
       </Typography>
     ),
@@ -63,7 +59,7 @@ const columns = () => [
     align: "center",
     renderCell: ({ row }) => (
       <EmployeeNameCell
-        src={row.manager_obj_id.employeeProImage}
+        src={row.manager_obj_id.employeeProImage.secure_url}
         name={row.manager_obj_id.employeeName}
         userId={row.manager_obj_id.email}
       />
@@ -108,10 +104,8 @@ const columns = () => [
             variant="filled"
             sx={{
               width: "50%",
-              backgroundColor:
-                params.row.taskPriority == "Urgent" ? "#ffe3e2" : "#e8fadd",
-              color:
-                params.row.taskPriority == "Urgent" ? "#ff5d59" : "#66CA24",
+              backgroundColor: params.row.taskPriority == "Urgent" ? "#ffe3e2" : "#e8fadd",
+              color: params.row.taskPriority == "Urgent" ? "#ff5d59" : "#66CA24",
             }}
           />
         </Box>
@@ -128,9 +122,7 @@ const columns = () => [
     headerAlign: "center",
     align: "center",
     renderCell: (params) => {
-      const [currentUnixTime, setCurrentUnixTime] = React.useState(
-        Math.floor(new Date().getTime() / 1000)
-      );
+      const [currentUnixTime, setCurrentUnixTime] = React.useState(Math.floor(new Date().getTime() / 1000));
 
       useEffect(() => {
         const intervalId = setInterval(() => {
@@ -143,8 +135,7 @@ const columns = () => [
       // Extracting the timestamps from the row
       const { createdAt, taskTime_1, taskTime_2, taskTime_3 } = params.row;
 
-      const convertToUnix = (timestamp) =>
-        Math.floor(new Date(timestamp).getTime() / 1000);
+      const convertToUnix = (timestamp) => Math.floor(new Date(timestamp).getTime() / 1000);
 
       const createdAtUnix = convertToUnix(createdAt);
       const taskTime1Unix = taskTime_1?.date_time;
@@ -165,12 +156,9 @@ const columns = () => [
       const taskTime3Duration = taskTime3Unix - createdAtUnix;
 
       // Calculate progress percentage
-      const taskTime1Progress =
-        (taskTime1RemainingTime / taskTime1Duration) * 100;
-      const taskTime2Progress =
-        (taskTime2RemainingTime / taskTime2Duration) * 100;
-      const taskTime3Progress =
-        (taskTime3RemainingTime / taskTime3Duration) * 100;
+      const taskTime1Progress = (taskTime1RemainingTime / taskTime1Duration) * 100;
+      const taskTime2Progress = (taskTime2RemainingTime / taskTime2Duration) * 100;
+      const taskTime3Progress = (taskTime3RemainingTime / taskTime3Duration) * 100;
 
       return (
         <Box sx={{ width: "100%", px: 2 }}>
@@ -277,9 +265,7 @@ const columns = () => [
               color: "#767989",
             }}
           >
-            {params.row.taskcompleteStatus == "Task UnComplete"
-              ? "Not Completed"
-              : "Completed"}
+            {params.row.taskcompleteStatus == "Task UnComplete" ? "Not Completed" : "Completed"}
           </Typography>
 
           {/*         
@@ -339,29 +325,16 @@ export default function EmployeeTasksViewPause() {
 
   const currentUser = employee;
   const id = currentUser?._id;
-  // const getEmployee = async (empid) => {
-  //   const response = await axios.get(
-  //     `http://localhost:4000/api/employee/get_employee/${empid}`,
-  //     { withCredentials: true }
-  //   );
-  //   if (!response) {
-  //     console.error("Error fetching employee data");
-  //     return;
-  //   }
-
-  //   setEmployee(response.data);
-  // };
 
   const getTasks = async (id) => {
     try {
-       const response = await axios.get(
-        `/api/task/getTaskByEmpId/${id}`);
-        console.log("response",response)
+      const response = await axios.get(`/api/task/getTaskByEmpId/${id}`);
+      console.log("response", response);
       // const tasks = response.data.map((task) => ({
       //   id: task._id, // Ensure _id is used as the unique identifier
       //   ...task,
       // }));
- 
+
       setRows(response.data); // Set the rows with the fetched tasks
     } catch (error) {
       console.error("Error fetching tasks:", error);
@@ -400,15 +373,8 @@ export default function EmployeeTasksViewPause() {
       getTasks(empid); // Reload all tasks if search text is cleared
     } else {
       const filteredRows = rows.filter((row) => {
-        const taskTicketNo = row.taskTicketNo
-          ? row.taskTicketNo.toString().trim()
-          : ""; // Trim whitespace
-        console.log(
-          "Task Ticket No:",
-          taskTicketNo,
-          "Type:",
-          typeof taskTicketNo
-        );
+        const taskTicketNo = row.taskTicketNo ? row.taskTicketNo.toString().trim() : ""; // Trim whitespace
+        console.log("Task Ticket No:", taskTicketNo, "Type:", typeof taskTicketNo);
         console.log("Comparison Result:", taskTicketNo.includes(value));
 
         return taskTicketNo.includes(value); // Filter rows by ticket number
@@ -511,8 +477,7 @@ export default function EmployeeTasksViewPause() {
                 <Grid container spacing={1}>
                   <Grid item xs={12}>
                     <Typography variant="subtitle2" color="textSecondary">
-                      <strong style={{ color: "#000000" }}>Task No:</strong>{" "}
-                      {popoverContent.taskTicketNo}
+                      <strong style={{ color: "#000000" }}>Task No:</strong> {popoverContent.taskTicketNo}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>
@@ -521,14 +486,8 @@ export default function EmployeeTasksViewPause() {
                       <Typography
                         component="span"
                         sx={{
-                          color:
-                            popoverContent.taskPriority === "Urgent"
-                              ? "error.main"
-                              : "text.primary",
-                          fontWeight:
-                            popoverContent.taskPriority === "Urgent"
-                              ? "bold"
-                              : "normal",
+                          color: popoverContent.taskPriority === "Urgent" ? "error.main" : "text.primary",
+                          fontWeight: popoverContent.taskPriority === "Urgent" ? "bold" : "normal",
                         }}
                       >
                         {popoverContent.taskPriority}
@@ -537,14 +496,12 @@ export default function EmployeeTasksViewPause() {
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="subtitle2" color="textSecondary">
-                      <strong style={{ color: "#000000" }}>Type:</strong>{" "}
-                      {popoverContent.taskType}
+                      <strong style={{ color: "#000000" }}>Type:</strong> {popoverContent.taskType}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="subtitle2" color="textSecondary">
-                      <strong style={{ color: "#000000" }}>Date/Time:</strong>{" "}
-                      {popoverContent.DateTime}
+                      <strong style={{ color: "#000000" }}>Date/Time:</strong> {popoverContent.DateTime}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -572,12 +529,8 @@ export default function EmployeeTasksViewPause() {
                         return taskTime ? (
                           <TableRow key={num}>
                             <TableCell align="center">{`Time ${num}`}</TableCell>
-                            <TableCell align="center">
-                              {formatDateTime(taskTime.date_time)}
-                            </TableCell>
-                            <TableCell align="center">
-                              {taskTime.points}
-                            </TableCell>
+                            <TableCell align="center">{formatDateTime(taskTime.date_time)}</TableCell>
+                            <TableCell align="center">{taskTime.points}</TableCell>
                           </TableRow>
                         ) : null;
                       })}
@@ -588,8 +541,7 @@ export default function EmployeeTasksViewPause() {
             )}
           </Typography>
         </Popover>
-
-         </Paper>
+      </Paper>
     </Box>
   );
 }

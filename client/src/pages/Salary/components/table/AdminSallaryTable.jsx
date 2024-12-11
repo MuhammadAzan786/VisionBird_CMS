@@ -14,6 +14,8 @@ import { CustomDataGrid } from "../styled/CustomDataGrid";
 import { GridActionsCellItem, GridRowModes } from "@mui/x-data-grid";
 import { CustomChip } from "../../../../components/Styled/CustomChip";
 import EmployeeNameCell from "../../../../components/Grid Cells/EmployeeProfileCell";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import CustomOverlay from "../../../../components/Styled/CustomOverlay";
 
 const status = ["pending", "approved", "rejected"];
 const colStyle = {
@@ -23,40 +25,84 @@ const colStyle = {
 
 const AdminSalaryTable = () => {
   const { currentUser } = useSelector((state) => state.user);
-  const [rows, setRows] = useState([]);
+  //
+  // const [rows, setRows] = useState([]);
   const [rowModesModel, setRowModesModel] = useState({});
 
-  const fetchAllRequests = async () => {
-    try {
+  const queryClient = useQueryClient();
+  const [rows, setRows] = useState([]);
+
+  const {
+    data: fetchAllRequests = [],
+    isError,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["al"],
+    queryFn: async () => {
+      if (!currentUser) return [];
       const result = await axios.post(
         "/api/advance_payments/admin/advance/salary/list",
-        {
-          currentUser,
-        }
+        { currentUser }
       );
+      console.log("resultttttttttt",result.data)
+      return result.data || [];
+    },
+    // enabled: !!currentUser,
+    // staleTime: 1000,
+    // refetchInterval:5000
+  });
 
-      return result.data;
-    } catch (error) {
-      toast.error("there is an error retreiving all data");
-    }
-  };
-  useEffect(() => {
-    fetchAllRequests().then((response) => {
-      const newData = response.map((item) => {
-        return {
-          ...item,
-          id: item._id,
-          employee_name: item.employee_obj_id.employeeName,
-          employee_img: item.employee_obj_id.employeeProImage,
-          employee_id: item.employee_obj_id.employeeID,
-          current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
-          request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
-        };
-      });
+  if (isLoading) {
+    return <CustomOverlay open={true} />;
+  }
+  if (error) {
+    toast.error(error.message);
+  }
+  if (fetchAllRequests && fetchAllRequests.length > 0 && rows.length === 0) {
+    const newData = fetchAllRequests.map((item) => ({
+      ...item,
+      id: item._id,
+      employee_name: item?.employee_obj_id?.employeeName,
+      employee_img: item?.employee_obj_id?.employeeProImage,
+      employee_id: item?.employee_obj_id?.employeeID,
+      current_salary: item?.employee_obj_id?.BasicPayAfterProbationPeriod,
+      request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
+    }));
+    setRows(newData); // Only set rows if they haven't been set already
+  }
 
-      setRows(newData);
-    });
-  }, []);
+  // const fetchAllRequests = async () => {
+  //   try {
+  //     const result = await axios.post(
+  //       "/api/advance_payments/admin/advance/salary/list",
+  //       {
+  //         currentUser,
+  //       }
+  //     );
+
+  //     return result.data;
+  //   } catch (error) {
+  //     toast.error("there is an error retreiving all data");
+  //   }
+  // };
+  // useEffect(() => {
+  // fetchAllRequests().then((response) => {
+  // const newData = fetchAllRequests.map((item) => {
+  //   return {
+  //     ...item,
+  //     id: item._id,
+  //     employee_name: item.employee_obj_id.employeeName,
+  //     employee_img: item.employee_obj_id.employeeProImage,
+  //     employee_id: item.employee_obj_id.employeeID,
+  //     current_salary: item.employee_obj_id.BasicPayAfterProbationPeriod,
+  //     request_date: dayjs(item.createdAt).format("DD MMM, YYYY"),
+  //   };
+  // });
+
+  // setRows(newData);
+  // });
+  // }, []);
 
   const columns = [
     {
@@ -64,11 +110,7 @@ const AdminSalaryTable = () => {
       headerName: "Employee",
       width: 150,
       renderCell: ({ row }) => (
-        <EmployeeNameCell
-          userId={row.employee_id}
-          name={row.employee_name}
-          src={row.employee_img}
-        />
+        <EmployeeNameCell userId={row.employee_id} name={row.employee_name} src={row.employee_img} />
       ),
     },
     {
@@ -139,8 +181,7 @@ const AdminSalaryTable = () => {
         } else if (params.value === "approved") {
           icon = <CheckCircle />;
         }
-        const label =
-          params.value.charAt(0).toUpperCase() + params.value.slice(1);
+        const label = params.value.charAt(0).toUpperCase() + params.value.slice(1);
         return <CustomChip label={label} status={params.value} icon={icon} />;
       },
     },
@@ -184,10 +225,7 @@ const AdminSalaryTable = () => {
             onClick={handleEditClick(id)}
             size="medium"
             sx={iconStyles.edit}
-            disabled={
-              row.approval_status === "rejected" ||
-              row.approval_status === "approved"
-            }
+            disabled={row.approval_status === "rejected" || row.approval_status === "approved"}
           />,
         ];
       },
@@ -215,16 +253,13 @@ const AdminSalaryTable = () => {
       return { ...newRow, isNew: false };
     }
     try {
-      const res = await axios.post(
-        `/api/advance_payments/admin/advance-applications/?type=advanceSalary`,
-        {
-          currentUser,
-          _id: id,
-          approval_status,
-          activity_status,
-          employee_obj_id,
-        }
-      );
+      const res = await axios.post(`/api/advance_payments/admin/advance-applications/?type=advanceSalary`, {
+        currentUser,
+        _id: id,
+        approval_status,
+        activity_status,
+        employee_obj_id,
+      });
 
       const newObj = { ...res.data, id: res.data._id };
       toast.success("Loan status updated successfully!");
@@ -245,6 +280,31 @@ const AdminSalaryTable = () => {
     toast.error("An error occurred while updating the row.");
   };
 
+  
+  // const updateEmployeeStatus = async (data) => {
+  //   try {
+  //     await axios.put(`/api/employee/update_employee_status/${data.id}`, {
+  //       employeeStatus: data.newStatus,
+  //     });
+  //     toast.success(`Status Updated to ${data.newStatus}`);
+  //   } catch (error) {
+  //     console.error("Error updating employee status:", error.message);
+  //   }
+  // };
+  // const mutation = useMutation({
+  //   mutationFn: updateEmployeeStatus, // Pass the mutation function
+  //   onSuccess: () => {
+  //     console.log("Employee status updated successfully!");
+  //     queryClient.invalidateQueries("activeEmployees");
+  //     queryClient.invalidateQueries("inactiveEmployees");
+  //     queryClient.refetchQueries("activeEmployees");
+  //     queryClient.refetchQueries("inactiveEmployees");
+  //   },
+  //   onError: (error) => {
+  //     console.error("Error updating employee status:", error.message);
+  //   },
+  // });
+
   return (
     <CustomDataGrid
       rows={rows}
@@ -262,9 +322,7 @@ const AdminSalaryTable = () => {
   );
 };
 
-const monthCell = (params) => (
-  <>{params.value > 1 ? `${params.value} Months` : `${params.value} Month`}</>
-);
+const monthCell = (params) => <>{params.value > 1 ? `${params.value} Months` : `${params.value} Month`}</>;
 
 const iconStyles = {
   edit: {

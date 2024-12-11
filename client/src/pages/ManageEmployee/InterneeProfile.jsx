@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "../../utils/axiosInterceptor";
-import { Box, Typography, Avatar, Divider, Button, Paper } from "@mui/material";
+import { Box, Typography, Avatar, Button, Paper } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { usePDF } from "react-to-pdf";
 import { useMessage } from "../../components/MessageContext";
 import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
-import { Link as RouterLink, MemoryRouter } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
@@ -25,6 +25,15 @@ import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOu
 import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
+import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
+import CurrencyExchangeOutlinedIcon from "@mui/icons-material/CurrencyExchangeOutlined";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
+import { useQueryClient } from "@tanstack/react-query";
+import ViewDocuments from "../../components/ViewDocuments";
+import ViewDocumentInternee from "../../components/ViewDocumentInternee";
+import toast from "react-hot-toast";
 
 const InterneeProfile = () => {
   const { currentUser } = useSelector((state) => state.user);
@@ -58,26 +67,19 @@ const InterneeProfile = () => {
   const color = getRandomColor();
 
   const [user, setUser] = useState([]);
-  const profilePic = user.interneeProImage?.secure_url;
+  const profilePic = user?.interneeProImage?.secure_url;
   const cnicFile = user.cnicFile;
-  const appointmentletter = user.appointmentFile;
-  const experienceletter = user.experienceLetter;
   const getUser = async () => {
     try {
       const response = await axios.get(`/api/internee/get_internee/${id}`);
-
-      // Assuming response.data contains the employee data
       setUser(response.data);
     } catch (error) {
       if (error.response) {
-        // The request was made and the server responded with a status code
         console.error(`Server responded with status ${error.response.status}`);
         console.error(`Error message: ${error.response.data.message}`);
       } else if (error.request) {
-        // The request was made but no response was received
         console.error("Request made but no response received");
       } else {
-        // Something else happened while setting up the request
         console.error("Error setting up the request:", error.message);
       }
       console.error("Error fetching employee data:", error);
@@ -95,23 +97,22 @@ const InterneeProfile = () => {
   const dateOfBirth = dateformat(user.dob);
   const internshipfrom = dateformat(user.internshipFrom);
   const internshipto = dateformat(user.internshipTo);
-  const experianceLetter = dateformat(user.givenOn);
 
   const handleEdit = () => {
     navigate(`/update-internee/${id}`);
   };
 
+  const queryClient = useQueryClient();
+
   const handleDelete = async () => {
-    navigate("/manage-employees");
     try {
-      const response = await axios.delete(
-        `/api/internee/delete_internee/${id}`
-      );
-      handleSuccess();
+      await axios.delete(`/api/internee/delete_internee/${id}`);
+      toast.success("Interneee Deleted Successfully!");
+      navigate("/manage-internees");
+      queryClient.invalidateQueries("internees");
     } catch (error) {
-      // Handle different types of errors
       console.log("Error:", error);
-      handleError();
+      toast.error("Internee Deleting Employee");
     }
   };
 
@@ -152,6 +153,7 @@ const InterneeProfile = () => {
                   }}
                   color="success"
                   variant="outlined"
+                  disableRipple
                   onClick={() => toPDF()}
                 >
                   Download Profile
@@ -209,11 +211,7 @@ const InterneeProfile = () => {
               ></Avatar>
             </Box>
 
-            <Box
-              ml={{ xs: 0, md: 3 }}
-              mt={{ xs: 2, md: 8 }}
-              textAlign={{ xs: "center", md: "left" }}
-            >
+            <Box ml={{ xs: 0, md: 3 }} mt={{ xs: 2, md: 8 }} textAlign={{ xs: "center", md: "left" }}>
               <Typography fontSize={25} fontWeight={500} color={"#212F3D"}>
                 {user.firstName}
               </Typography>
@@ -224,67 +222,27 @@ const InterneeProfile = () => {
                 gap={2}
                 mt={2}
               >
-                <Typography
-                  fontSize={15}
-                  color={"#5F6A6A"}
-                  display="flex"
-                  alignItems="center"
-                >
-                  <ColorLensOutlinedIcon
-                    sx={{ marginRight: 1, color: "#5F6A6A" }}
-                  />
+                <Typography fontSize={15} color={"#5F6A6A"} display="flex" alignItems="center">
+                  <ColorLensOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
                   {user.designation}
                 </Typography>
-                <Typography
-                  fontSize={15}
-                  color={"#5F6A6A"}
-                  display="flex"
-                  alignItems="center"
-                >
-                  <ManageAccountsOutlinedIcon
-                    sx={{ marginRight: 1, color: "#5F6A6A" }}
-                  />
+                <Typography fontSize={15} color={"#5F6A6A"} display="flex" alignItems="center">
+                  <ManageAccountsOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
                   {user.role || "INTERNEE"}
                 </Typography>
-                <Typography
-                  fontSize={15}
-                  color={"#5F6A6A"}
-                  display="flex"
-                  alignItems="center"
-                >
-                  <BadgeOutlinedIcon
-                    sx={{ marginRight: 1, color: "#5F6A6A" }}
-                  />
+                <Typography fontSize={15} color={"#5F6A6A"} display="flex" alignItems="center">
+                  <BadgeOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
                   {user.internId}
                 </Typography>
               </Box>
-              <Box
-                display={{ xs: "flex", md: "none" }}
-                mt={3}
-                justifyContent={"center"}
-                alignItems={"center"}
-              >
-                <Button
-                  sx={{ margin: 1 }}
-                  variant="contained"
-                  onClick={() => toPDF()}
-                  color="success"
-                >
+              <Box display={{ xs: "flex", md: "none" }} mt={3} justifyContent={"center"} alignItems={"center"}>
+                <Button sx={{ margin: 1 }} variant="contained" onClick={() => toPDF()} color="success">
                   Download Profile
                 </Button>
-                <Button
-                  sx={{ margin: 1 }}
-                  variant="contained"
-                  onClick={handleEdit}
-                >
+                <Button sx={{ margin: 1 }} variant="contained" onClick={handleEdit}>
                   Update Profile
                 </Button>
-                <Button
-                  sx={{ margin: 1 }}
-                  variant="contained"
-                  color="error"
-                  onClick={handleDelete}
-                >
+                <Button sx={{ margin: 1 }} variant="contained" color="error" onClick={handleDelete}>
                   Delete Profile
                 </Button>
               </Box>
@@ -382,15 +340,8 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
-              <CreditCardOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <CreditCardOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Cnic:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -399,12 +350,7 @@ const InterneeProfile = () => {
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
               <CakeOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Date of Birth:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -413,12 +359,7 @@ const InterneeProfile = () => {
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
               <ManOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Gender:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -426,15 +367,8 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
-              <VolunteerActivismOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <VolunteerActivismOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Marital Status:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -442,15 +376,8 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
-              <EscalatorWarningOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <EscalatorWarningOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Father Name:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -458,15 +385,8 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
-              <AutoStoriesOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <AutoStoriesOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Qualification:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -495,15 +415,8 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
-              <ContactMailOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <ContactMailOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Mail Address:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -511,15 +424,8 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
-              <SmartphoneOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <SmartphoneOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Mobile #:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -527,15 +433,8 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
-              <LocalPhoneOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <LocalPhoneOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Gardian Number:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -543,15 +442,8 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
-              <EscalatorWarningOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <EscalatorWarningOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Gardian Relation:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -560,12 +452,7 @@ const InterneeProfile = () => {
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
               <EmailOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Email:
               </Typography>
               <Typography fontSize={13} color={"#212F3D"}>
@@ -573,77 +460,6 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
           </Grid>
-
-          <Grid
-            xs={12}
-            md={5.85}
-            item
-            gap={2}
-            component={Paper}
-            elevation={3}
-            p={2}
-            mt={2}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-            }}
-          >
-            <Grid item>
-              <Typography fontSize={20} color={"#BFC9CA "}>
-                Documents
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <CreditScoreOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Cnic Scanned Copy
-              </Typography>
-              <a href={cnicFile} target="_blank">
-                <Button sx={{ padding: 0 }}>Click Here</Button>
-              </a>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <LocalPoliceOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Appointment File{" "}
-              </Typography>
-              <a href={user.appointmentFile} target="_blank">
-                <Button sx={{ padding: 0 }}>Click Here</Button>
-              </a>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <WorkspacePremiumOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Experience Letter
-              </Typography>
-              <a href={user.experienceLetter} target="_blank">
-                <Button sx={{ padding: 0 }}>Click Here</Button>
-              </a>
-            </Grid>
-          </Grid>
-
           <Grid
             xs={12}
             md={5.85}
@@ -665,15 +481,8 @@ const InterneeProfile = () => {
             </Grid>
 
             <Grid item display={"flex"} alignItems={"center"}>
-              <HandshakeOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <HandshakeOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Date of Joining:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -681,15 +490,8 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
-              <EventAvailableOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <EventAvailableOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 {" "}
                 Ending Date :
               </Typography>
@@ -719,12 +521,7 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Added on Slack:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
@@ -732,18 +529,28 @@ const InterneeProfile = () => {
               </Typography>
             </Grid>
             <Grid item display={"flex"} alignItems={"center"}>
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
+              <Typography fontSize={15} fontWeight={600} marginRight={1} color={"#212F3D"}>
                 Rules policy check:
               </Typography>
               <Typography fontSize={15} color={"#212F3D"}>
                 {user.rules}
               </Typography>
             </Grid>
+          </Grid>
+        </Grid>
+        <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+          <Grid item xs={12}>
+            <Typography
+              sx={{
+                fontWeight: "600",
+                fontSize: "20px",
+                color: "#3b4056",
+                mb: 5,
+              }}
+            >
+              Upload Documents
+            </Typography>
+            {user && <ViewDocumentInternee values={user} />}
           </Grid>
         </Grid>
       </Grid>

@@ -159,44 +159,30 @@ module.exports = {
   },
 
   Delete_internee: async (req, res) => {
-    const userId = req.params.id;
     try {
-      //finding the document to delete
-      const document = await Internee.findOne({ _id: userId });
-      if (!document) {
-        res.status(400).json({ error: "Internee not found" });
+      const userId = req.params.id;
+
+      const deletedInternee = await Internee.findByIdAndDelete(userId);
+
+      if (!deletedInternee) {
+        return res.status(404).json({ message: "Internee not Deleted" });
       }
 
-      //deleting the document from mongo db
-      const deleteDone = await Internee.deleteOne({ _id: userId });
-      if (!deleteDone) {
-        return res.status(400).json({ error: "Internee not deleted" });
-      }
+      const { interneeProImage } = deletedInternee;
 
-      const deleteFromCloudinary = async (url) => {
-        if (url) {
-          const segments = url.split("/");
-          // Extract the public ID which includes folder and file name but excludes extension
-          const publicId = segments.slice(7, segments.length - 1).join("/") + "/" + segments.pop().split(".")[0];
+      const folderName = interneeProImage.public_id.split("/").slice(0, -1).join("/");
+      console.log("folderName", folderName);
 
-          console.log("Deleting", publicId);
-          try {
-            await cloudinary.uploader.destroy(publicId);
-            console.log(`Deleted Cloudinary file: ${publicId}`);
-          } catch (err) {
-            console.log(`Failed to delete Cloudinary file: ${publicId}`, err);
-          }
-        }
-      };
+      await cloudinary.api.delete_resources_by_prefix(folderName, { resource_type: "image" });
+      await cloudinary.api.delete_resources_by_prefix(folderName, { resource_type: "raw" });
+      await cloudinary.api.delete_folder(folderName);
 
-      await deleteFromCloudinary(document.appointmentFile),
-        await deleteFromCloudinary(document.cnicFile),
-        await deleteFromCloudinary(document.experienceLetter),
-        await deleteFromCloudinary(document.interneeProImage),
-        res.status(200).json({ message: "Internee Deleted" });
+      console.log("Internee deleted Successfully");
+
+      res.status(200).json({ message: "Internee deleted Successfully" });
     } catch (error) {
-      console.log(error);
-      res.status(500).send({ error: error.message });
+      console.log("DELETE_INTERNEE_ERROR", error);
+      res.status(501).json({ message: "Internee deletetion Unsuccessfull" });
     }
   },
 };

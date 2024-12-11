@@ -23,11 +23,12 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import CustomOverlay from "../../components/Styled/CustomOverlay";
 
 function Tax() {
   const [selectedCategoryId, setSelectedCategoryId] = useState();
   const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = useState();
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const [updateOpen, setUpdateOpen] = React.useState(false);
@@ -42,6 +43,7 @@ function Tax() {
   const isSmallScreen = useMediaQuery("(max-width:570px)");
   const { showMessage } = useMessage();
 
+  const queryclient = useQueryClient();
   const handleMouseEnter = (index) => {
     setHoveredIndex(index);
   };
@@ -50,38 +52,46 @@ function Tax() {
     setHoveredIndex(-1);
   };
 
-  // const handleSuccess = () => {
-  //   showMessage("success", "Category Deleted successfully!");
-  // };
+  const getCategories = async () => {
+    // setLoading(true);
+    const res = await axios.get("/api/tax_Category/get_categories");
+    // console.log("res",res)
 
-  // const handleError = () => {
-  //   showMessage("error", "Category Deletion failed!");
-  // };
-
-  const getCategories = () => {
-    setLoading(true);
-    axios
-      .get("/api/tax_Category/get_categories")
-      .then((response) => {
-        setLoading(false);
-        console.log("cechk", response.data.categories[0].categoryImage.src);
-        setData(response.data.categories);
-        setCategories(response.data.totalCategories);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-      });
+    return res.data;
+    //.then((response) => {
+    // setLoading(false);
+    //console.log("cechk", response.data.categories[0].categoryImage.src);
+    // return response.data;
+    //});
   };
 
-  useEffect(() => {
-    getCategories();
-  }, []);
+  const query = useQuery({
+    queryKey: ["tax"],
+    queryFn: async () => {
+      const res = await axios.get("/api/tax_Category/get_categories");
+      return res.data;
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (id) => {
+      await axios.delete(`/api/tax_Category/delete_category/${id}`);
+    },
+    onSuccess: () => {
+      queryclient.invalidateQueries(["tax"]);
+      Swal.fire("Deleted!", "Your category has been deleted.", "success");
+    },
+    onError: () => {
+      Swal.fire("Failed!", "Category deletion failed.", "error");
+    },
+  });
+
+
 
   const handleDelete = (id) => {
     Swal.fire({
       title: "Are you sure?",
-      text: "You wont be able to revert this!",
+      text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -89,21 +99,7 @@ function Tax() {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        setLoading(true);
-        axios
-          .delete(`/api/tax_Category/delete_category/${id}`)
-          .then((response) => {
-            console.log(response.data);
-            setData(data.filter((item) => item._id !== id));
-            setCategories(categories - 1);
-            setLoading(false);
-            Swal.fire("Deleted!", "Your category has been deleted.", "success");
-          })
-          .catch((err) => {
-            console.log(err);
-            setLoading(false);
-            Swal.fire("Failed!", "Category deletion failed.", "error");
-          });
+        mutation.mutate(id);
       }
     });
   };
@@ -115,131 +111,143 @@ function Tax() {
 
   return (
     <>
-      <Paper>
-        <Grid container alignItems={"center"}>
-          <Grid item xs={6} md={6}>
-            <Button onClick={handleOpen} variant="outlined">
-              Create Category
-            </Button>
-          </Grid>
-          {!isSmallScreen && (
-            <Grid item xs={6} md={6} textAlign={"end"}>
-              <Typography variant="body2" fontWeight={700}>
-                Total Tax Categories :<span> {categories}</span>
-              </Typography>
-            </Grid>
-          )}
-        </Grid>
-      </Paper>
-
-      {/* ===============modal for adding new Categories ============ */}
-      <Modal open={open} onClose={handleClose}>
-        <div>
-          <AddTax closeModal={handleClose} loadCategories={getCategories} />
-        </div>
-      </Modal>
-
-      <Paper>
-        <Grid container spacing={2}>
-          {data.map((file, index) => (
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={4}
-              onClick={() => {
-                cardClick(file._id);
-              }}
-              style={{ cursor: "pointer" }}
-              key={file._id}
-            >
-              <Card
-                sx={{
-                  maxWidth: 600,
-                }}
-              >
-                <CardMedia
-                  sx={{ height: 140, borderRadius: "5px" }}
-                  image={(data && file.categoryImage.src) || placeholderImg}
-                  title={file.categoryTitle}
-                />
-                <CardContent>
-                  <Typography
-                    variant="h6"
-                    fontSize={16}
-                    fontWeight={700}
-                    onMouseEnter={() => handleMouseEnter(index)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    {hoveredIndex === index
-                      ? file.categoryTitle
-                      : file.categoryTitle.split(" ").slice(0, 2).join(" ")}
-                    {file.categoryTitle.split(" ").length > 2 &&
-                    hoveredIndex !== index
-                      ? " ..."
-                      : ""}
+      {query.isLoading || mutation.isPending ? (
+        <CustomOverlay open={true} />
+      ) : (
+        <>
+          {/* <h2>asjkdha</h2> */}
+          <Paper>
+            <Grid container alignItems={"center"}>
+              <Grid item xs={6} md={6}>
+                <Button onClick={handleOpen} variant="outlined">
+                  Create Category
+                </Button>
+              </Grid>
+              {!isSmallScreen && (
+                <Grid item xs={6} md={6} textAlign={"end"}>
+                  <Typography variant="body2" fontWeight={700}>
+                    Total Tax Categories :
+                    <span> {query?.data?.totalCategories || 0}</span>
                   </Typography>
-                  <Typography variant="body2">{file.categoryCode}</Typography>
-                </CardContent>
-
-                <Box
-                  display={"flex"}
-                  justifyContent={"space-between"}
-                  paddingX={1}
-                  paddingBottom={1}
-                >
-                  <Box>
-                    <DeleteOutlineIcon
-                      sx={{
-                        fontSize: "1.3rem",
-                        transition: "transform 0.2s",
-                        "&:hover": {
-                          transform: "scale(1.2)",
-                        },
-                        marginLeft: 0.5,
-                      }}
-                      color="error"
-                      onClick={() => handleDelete(file._id)}
-                    />
-
-                    <UpdateIcon
-                      sx={{
-                        fontSize: "1.3rem",
-                        transition: "transform 0.2s",
-                        "&:hover": {
-                          transform: "scale(1.2)",
-                        },
-                        marginLeft: 0.7,
-                      }}
-                      color="success"
-                      onClick={() => handleUpdateOpen(file._id)}
-                    />
-                  </Box>
-                  <Box>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      color="primary"
-                      onClick={() => handleAddFile(file._id)}
-                    >
-                      Add Files
-                    </Button>
-                  </Box>
-                </Box>
-              </Card>
+                </Grid>
+              )}
             </Grid>
-          ))}
-          <Modal open={updateOpen} onClose={handleUpdateClose}>
+          </Paper>
+
+          {/* ===============modal for adding new Categories ============ */}
+          <Modal open={open} onClose={handleClose}>
             <div>
-              <UpdateTax
-                closeModal={handleUpdateClose}
-                loadCategories={getCategories}
-                categoryId={selectedCategoryId}
-              />
+              <AddTax closeModal={handleClose} />
             </div>
           </Modal>
-        </Grid>
-      </Paper>
+
+          <Paper>
+            <Grid container spacing={2}>
+              {(query?.data?.categories || []).map((file, index) => (
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  onClick={() => {
+                    cardClick(file._id);
+                  }}
+                  style={{ cursor: "pointer" }}
+                  key={file._id}
+                >
+                  <Card
+                    sx={{
+                      maxWidth: 600,
+                    }}
+                  >
+                    <CardMedia
+                      sx={{ height: 140, borderRadius: "5px" }}
+                      image={
+                        (query.data.categories && file.categoryImage.src) ||
+                        placeholderImg
+                      }
+                      title={file.categoryTitle}
+                    />
+                    <CardContent>
+                      <Typography
+                        variant="h6"
+                        fontSize={16}
+                        fontWeight={700}
+                        onMouseEnter={() => handleMouseEnter(index)}
+                        onMouseLeave={handleMouseLeave}
+                      >
+                        {hoveredIndex === index
+                          ? file.categoryTitle
+                          : file.categoryTitle.split(" ").slice(0, 2).join(" ")}
+                        {file.categoryTitle.split(" ").length > 2 &&
+                        hoveredIndex !== index
+                          ? " ..."
+                          : ""}
+                      </Typography>
+                      <Typography variant="body2">
+                        {file.categoryCode}
+                      </Typography>
+                    </CardContent>
+
+                    <Box
+                      display={"flex"}
+                      justifyContent={"space-between"}
+                      paddingX={1}
+                      paddingBottom={1}
+                    >
+                      <Box>
+                        <DeleteOutlineIcon
+                          sx={{
+                            fontSize: "1.3rem",
+                            transition: "transform 0.2s",
+                            "&:hover": {
+                              transform: "scale(1.2)",
+                            },
+                            marginLeft: 0.5,
+                          }}
+                          color="error"
+                          onClick={() => handleDelete(file._id)}
+                        />
+
+                        <UpdateIcon
+                          sx={{
+                            fontSize: "1.3rem",
+                            transition: "transform 0.2s",
+                            "&:hover": {
+                              transform: "scale(1.2)",
+                            },
+                            marginLeft: 0.7,
+                          }}
+                          color="success"
+                          onClick={() => handleUpdateOpen(file._id)}
+                        />
+                      </Box>
+                      <Box>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="primary"
+                          onClick={() => handleAddFile(file._id)}
+                        >
+                          Add Files
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Card>
+                </Grid>
+              ))}
+              <Modal open={updateOpen} onClose={handleUpdateClose}>
+                <div>
+                  <UpdateTax
+                    closeModal={handleUpdateClose}
+                    categoryId={selectedCategoryId}
+                  />
+                </div>
+              </Modal>
+            </Grid>
+          </Paper>
+        </>
+      )}
     </>
   );
 }
