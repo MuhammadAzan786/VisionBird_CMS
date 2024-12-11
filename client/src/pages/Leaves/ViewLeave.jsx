@@ -233,6 +233,28 @@ export default function ViewLeave() {
                       </Grid>
                     </>
                   ) : null}
+                  {leave.leaveType == "Short Leave" ? (
+                    <>
+                      <Grid xs={2} item>
+                        <TextField
+                          value={formatTime(leave.fromTime)}
+                          label="From"
+                          variant="outlined"
+                          fullWidth
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Grid>
+                      <Grid xs={2} item>
+                        <TextField
+                          value={formatTime(leave.toTime)}
+                          label="To"
+                          variant="outlined"
+                          fullWidth
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Grid>
+                    </>
+                  ) : null}
 
                   <Grid xs={leave.leaveType == "Long Leaves" ? 6 : 4} item>
                     <TextField
@@ -269,7 +291,15 @@ export default function ViewLeave() {
                       </Grid>
                     </>
                   ) : null}
-                  <Grid xs={leave.leaveType == "Half Leave" ? 8 : 12} item>
+                  <Grid
+                    xs={
+                      leave.leaveType == "Half Leave" ||
+                      leave.leaveType == "Short Leave"
+                        ? 8
+                        : 12
+                    }
+                    item
+                  >
                     <TextField
                       value={leave.status}
                       label="Leave status"
