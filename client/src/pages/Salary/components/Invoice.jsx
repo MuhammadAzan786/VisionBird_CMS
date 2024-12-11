@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { Box, Grid, Paper, styled, Typography } from "@mui/material";
 
 const Invoice = ({ salaryData }) => {

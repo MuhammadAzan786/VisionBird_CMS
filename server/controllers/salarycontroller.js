@@ -10,7 +10,7 @@ module.exports = {
     try {
       const { button } = req.body;
 
-      console.log("ye req ki body hai", req.body);
+      console.log("ye req ki body hai", req.body.paid_leaves);
 
       let basicpay, allowances, grossSalary, per_day_wage, per_hour_wage, num_of_month_salary_paid;
 
@@ -383,6 +383,31 @@ module.exports = {
     } catch (error) {
       console.error("Error executing query:", error);
       res.status(500).json({ error: "Error executing query" });
+    }
+  },
+
+  calculate_leaves: (req, res) => {
+    try {
+      console.log("Caclulate Leaves", req.body);
+
+      //Total Salalry and per day salary
+      const totalDaysInMonth = 31;
+      salaryPerday = 31000 / totalDaysInMonth;
+      let totalSalary = 0;
+
+      // leaves calculate
+      let fullLeaves = 0;
+      let halfLeaves = 0;
+
+      halfLeaves = 3;
+
+      if (halfLeaves === 3) {
+        fullLeaves += 1;
+      }
+
+      res.status(200).json({ message: "success", halfLeaves, fullLeaves, salaryPerday, totalDaysInMonth, totalSalary });
+    } catch (error) {
+      res.status(501).json({ message: "error" });
     }
   },
 };

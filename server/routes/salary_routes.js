@@ -26,4 +26,7 @@ router.post(
   authorizeRoles("admin", "manager"),
   salaryController.paid_unpaid_salary_report
 );
+
+// for testing purpose
+router.post("/calculate_leaves", auth, authorizeRoles("admin", "manager"), salaryController.calculate_leaves);
 module.exports = router;
