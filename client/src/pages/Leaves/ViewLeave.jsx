@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import axios from "../../utils/axiosInterceptor";
 import { Box, Button, Grid, Paper, TextField, Typography } from "@mui/material";
 import bg from "/vbt-logo.png";
 import dayjs from "dayjs";
 import toast, { Toaster } from "react-hot-toast";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { palette } from "../../theme/colors";
+import { initializeSocket } from "../../redux/socketSlice";
 
 export default function ViewLeave() {
   const { id } = useParams();
@@ -16,31 +17,36 @@ export default function ViewLeave() {
   const [getLeave, setGetLeave] = useState(false);
   const { currentUser } = useSelector((state) => state.user);
   // notification;
-  
- 
+  const socket = useSelector((state) => state.socket.socket);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const sendLeaveStatus = (status) => {
     axios
       .put(`/api/leave/change-status/${id}`, {
         status,
         statusChangedBy: currentUser.employeeName,
+        statusChangedById: currentUser._id,
         for: leaveFrom._id,
       })
       .then((res) => {
         setGetLeave(!getLeave);
         console.log(res);
         toast.success("Leave status changed successfully");
+        if (currentUser.role == "admin") {
+          navigate("/Manager-leaves");
+        } else {
+          navigate("/employee-leaves");
+        }
       })
       .catch((error) => {
         toast.error("Error in changing leave status!!!");
         console.log(error);
       });
   };
-
-  useEffect(() => {
+  const getLeaves = async () => {
     axios
-      .get(`/api/leave/get-leave/${id}`, {
-        withCredentials: true,
-      })
+      .get(`/api/leave/get-leave/${id}`)
       .then((response) => {
         setLeaveFrom(response.data.from);
         setLeave(response.data);
@@ -48,7 +54,24 @@ export default function ViewLeave() {
       .catch((error) => {
         console.error("Error fetching leave history:", error);
       });
+  };
+  useEffect(() => {
+    getLeaves();
   }, [id, getLeave]);
+  useEffect(() => {
+    if (socket) {
+      socket.on("notification", () => {
+        getLeaves();
+      });
+      return () => {
+        socket.off("notification", () => {
+          // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
+        });
+      };
+    } else {
+      dispatch(initializeSocket(currentUser));
+    }
+  }, [socket, dispatch, currentUser]);
 
   const formatTime = (time) => {
     const [hours, minutes] = time.split(":");
@@ -79,21 +102,33 @@ export default function ViewLeave() {
                   <img src={bg} alt="" width={380} />
                 </Box>
                 <Typography variant="body2" textAlign={"center"}>
-                  B-343, Pagganwala Street, Near Cheema Masjid, Shadman Colony, Gujrat, Pakistan.
+                  B-343, Pagganwala Street, Near Cheema Masjid, Shadman Colony,
+                  Gujrat, Pakistan.
                 </Typography>
                 <Typography variant="body2" textAlign={"center"}>
-                  Mobile: 0322-5930603, 0346-5930603, Landline: 053-3709168, 053-3728469
+                  Mobile: 0322-5930603, 0346-5930603, Landline: 053-3709168,
+                  053-3728469
                 </Typography>
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Typography variant="body2">
                     URL:
-                    <Link href="https://www.example.com" target="_blank" rel="noopener" sx={{ marginLeft: 1 }}>
+                    <Link
+                      href="https://www.example.com"
+                      target="_blank"
+                      rel="noopener"
+                      sx={{ marginLeft: 1 }}
+                    >
                       https://www.visionbird.com
                     </Link>
                   </Typography>
                   <Typography variant="body2" sx={{ paddingLeft: 1 }}>
                     Email:
-                    <Link href="https://www.example.com" target="_blank" rel="noopener" sx={{ marginLeft: 1 }}>
+                    <Link
+                      href="https://www.example.com"
+                      target="_blank"
+                      rel="noopener"
+                      sx={{ marginLeft: 1 }}
+                    >
                       info@visionbird.com
                     </Link>
                   </Typography>
@@ -165,7 +200,9 @@ export default function ViewLeave() {
                   {leave.leaveType !== "Long Leaves" ? (
                     <Grid xs={5} item fullWidth>
                       <TextField
-                        value={dayjs(leave.selectedDate).format("dddd, MMMM D, YYYY")}
+                        value={dayjs(leave.selectedDate).format(
+                          "dddd, MMMM D, YYYY"
+                        )}
                         label="Leave Date"
                         variant="outlined"
                         fullWidth
@@ -210,7 +247,9 @@ export default function ViewLeave() {
                     <>
                       <Grid xs={6} item>
                         <TextField
-                          value={dayjs(leave.leavesStart).format("dddd, MMMM D, YYYY")}
+                          value={dayjs(leave.leavesStart).format(
+                            "dddd, MMMM D, YYYY"
+                          )}
                           label="Leaves Start"
                           variant="outlined"
                           fullWidth
@@ -219,7 +258,9 @@ export default function ViewLeave() {
                       </Grid>
                       <Grid xs={6} item>
                         <TextField
-                          value={dayjs(leave.leavesEnd).format("dddd, MMMM D, YYYY")}
+                          value={dayjs(leave.leavesEnd).format(
+                            "dddd, MMMM D, YYYY"
+                          )}
                           label="Leaves End"
                           variant="outlined"
                           fullWidth

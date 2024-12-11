@@ -44,7 +44,7 @@ export default function MyLeaves() {
       .get(`/api/leave/my-leaves/${id}`)
       .then((response) => {
         setAllLeaves(response.data);
-        const pending = allLeaves.filter((item) => {
+        const pending = response.data.filter((item) => {
           // console.log("statuss", item.status);
           return item.status == "Pending";
         });
@@ -58,6 +58,7 @@ export default function MyLeaves() {
   useEffect(() => {
     getLeaves();
   }, [id]);
+
   console.log("myy all", allLeaves);
   useEffect(() => {
     if (socket) {

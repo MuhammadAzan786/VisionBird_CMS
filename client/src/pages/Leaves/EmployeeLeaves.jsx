@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import axios from "../../utils/axiosInterceptor";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import LeavesTable from "./leavesTable/LeavesTable";
+import { initializeSocket } from "../../redux/socketSlice";
 
 export default function EmployeeLeaves() {
   const [employeeLeaves, setEmployeeLeaves] = useState([]);
-  const[employeePendingLeaves,setEmployeePendingLeaves]=useState([])
+  const [employeePendingLeaves, setEmployeePendingLeaves] = useState([]);
   const { currentUser } = useSelector((state) => state.user);
   const id = currentUser._id;
-
-  useEffect(() => {
+  const socket = useSelector((state) => state.socket.socket);
+  const dispatch = useDispatch();
+  const getLeaves = () => {
     axios
       .get(`/api/leave/employee-leaves/${id}`, {
         withCredentials: true,
@@ -17,15 +19,33 @@ export default function EmployeeLeaves() {
       .then((response) => {
         setEmployeeLeaves(response.data);
         const pending = response.data.filter((item) => {
-          return item.state=='Pending'
-        })
+          // console.log("statuss", item.status);
+          return item.status == "Pending";
+        });
+        // console.log("pendinggggggggg", pending);
         setEmployeePendingLeaves(pending);
       })
       .catch((error) => {
         console.error("Error fetching leave history:", error);
       });
+  };
+  useEffect(() => {
+    getLeaves();
   }, [id]);
-
+  useEffect(() => {
+    if (socket) {
+      socket.on("notification", () => {
+        getLeaves();
+      });
+      return () => {
+        socket.off("notification", () => {
+          // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
+        });
+      };
+    } else {
+      dispatch(initializeSocket(currentUser));
+    }
+  }, [socket, dispatch, currentUser]);
   return (
     <>
       <>

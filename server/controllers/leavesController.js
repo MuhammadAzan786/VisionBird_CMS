@@ -1,3 +1,4 @@
+const Employee = require("../models/employeemodel");
 const leavesModel = require("../models/leavesModel");
 const notificationModel = require("../models/notificationModel");
 
@@ -18,7 +19,12 @@ module.exports = {
         message,
         leave_id: leave._id,
       });
-       ioInstance.to(req.body.for.toString()).emit("notification", notification);
+      const admin=await Employee.findOne({role:"admin"})
+      ioInstance.to(req.body.for.toString()).emit("notification", notification);
+      
+      ioInstance.to(req.body.from.toString()).emit("notification", notification);
+       ioInstance.to(admin._id.toString()).emit("notification", notification);
+      
       res.status(201).json("Leave request saved.");
     } catch (error) {
       console.error("Error saving leave: ", error);
@@ -40,7 +46,7 @@ module.exports = {
   },
 
   getLeave: async (req, res) => {
-    console.log('inside leaves')
+    console.log("inside leaves");
     try {
       const _id = req.params.id;
       const leave = await leavesModel.findOne({ _id }).populate("from");
@@ -101,8 +107,21 @@ module.exports = {
         message,
         leave_id: _id,
       }); //For has user ID that has requested leave.
+      const admin=await Employee.findOne({role:"admin"})
       console.log("notification", notification);
+
+      //Employeee, Manager (Dont try to understant,, u Cant)
       ioInstance.to(req.body.for.toString()).emit("notification", notification);
+      console.log("bodyyyyy", req.body);
+
+      //Manager, Admin  (Leaave it as it is , its working)
+      ioInstance
+        .to(req.body.statusChangedById.toString())
+        .emit("notification", notification);
+      
+      //Admin (Dont remove this )
+       ioInstance.to(admin._id.toString()).emit("notification", notification);
+      
       res.status(200).json({ message: "Leave status changed successfully." });
     } catch (error) {
       console.error("Error changing leave status: ", error);
