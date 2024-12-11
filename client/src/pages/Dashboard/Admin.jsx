@@ -5,10 +5,13 @@ import folderopendot from "/folder-open-dot.svg";
 import userIcon from "/user-round.svg";
 import graduationcap from "/graduation-cap.svg";
 import axios from "../../utils/axiosInterceptor";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import EmployeesTable from "../../components/Tables/EmployeesTable";
 import InterneeTable from "../../components/Tables/InterneeTable";
+import { useQuery } from "@tanstack/react-query";
+import CustomOverlay from "../../components/Styled/CustomOverlay";
+import toast from "react-hot-toast";
 
 const titles = ["Employees", "Internees", "Tasks", "Portfolios"];
 const bgGradients = [
@@ -21,65 +24,59 @@ const bgGradients = [
 const colors = ["#2979E2", "#27097A", "#7A4100", "#EB593B"];
 const bgColors = ["#2574DF", "#994CF4", "#EAA416", "#EB593B"];
 const icons = [userIcon, graduationcap, clipboardList, folderopendot];
-const defaultCardData = Array(4)
-  .fill(null)
-  .map((item, index) => {
-    return {
-      count: 0,
-      title: titles[index],
-      bgGradient: bgGradients[index],
-      color: colors[index],
-      bgColor: bgColors[index],
-      icon: icons[index],
-    };
-  });
 
 const Admin = () => {
-  const [cardData, setCardData] = useState(defaultCardData);
-  const [tabValue, setValue] = useState("employees");
+  const [tabValue, setTabValue] = useState("employees");
 
   const handleChange = (e, value) => {
-    setValue(value);
+    setTabValue(value);
   };
-  const fetchCardData = async () => {
-    try {
-      const data = await Promise.all([
+
+  const {
+    data: fetchedCardData,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["Card data"],
+    queryFn: async () => {
+      const responses = await Promise.all([
         axios.get("/api/employee/all_employees"),
         axios.get("/api/internee/get_internees"),
         axios.get("/api/task/getTask"),
         axios.get("/api/posts/get_all_emp_posts"),
       ]);
 
-      const cardList = data.map((item, index) => {
-        if (index === data.length - 1) {
-          return {
-            count: item.data.data.length,
-          };
-        }
-        return {
-          count: item.data.length,
-        };
-      });
+      return responses.map((response, index) => ({
+        count: index === responses.length - 1 ? response.data.data.length : response.data.length,
+        title: titles[index],
+        bgGradient: bgGradients[index],
+        color: colors[index],
+        bgColor: bgColors[index],
+        icon: icons[index],
+      }));
+    },
+  });
 
-      setCardData((prev) => {
-        return prev.map((item, index) => {
-          return { ...item, count: cardList[index].count };
-        });
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // Handle Loading State
+  if (isLoading) {
+    return <CustomOverlay open={true} />;
+  }
 
-  useEffect(() => {
-    fetchCardData();
-  }, []);
+  // Handle Error State
+  if (isError) {
+    toast.error(error.message || "Failed to load data.");
+    return null;
+  }
+
+  // Use the fetched data
+  const cardData = fetchedCardData;
 
   return (
     <>
       <Box>
         <Grid container spacing={5}>
-          {cardData.map((card, index) => (
+          {cardData?.map((card, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
               <DashboardCard
                 background={card.bgGradient}
@@ -96,11 +93,7 @@ const Admin = () => {
 
       <Paper sx={{ width: "100%" }}>
         <TabContext value={tabValue}>
-          <TabList
-            onChange={handleChange}
-            variant="fullWidth"
-            sx={{ marginBottom: "30px" }}
-          >
+          <TabList onChange={handleChange} variant="fullWidth" sx={{ marginBottom: "30px" }}>
             <Tab label="Employees" value="employees" />
             <Tab label="Internees" value="internees" />
           </TabList>

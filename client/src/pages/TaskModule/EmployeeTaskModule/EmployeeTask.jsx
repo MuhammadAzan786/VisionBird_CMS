@@ -18,21 +18,13 @@ const EmployeeTask = () => {
   const fetchEmployees = async () => {
     try {
       const searchTerm = "";
-      const response = await axios.get(
-        `/api/employee/get_managers_employees?search=${searchTerm}`
-      );
+      const response = await axios.get(`/api/employee/get_managers_employees?search=${searchTerm}`);
       console.log(response);
       const fetchedEmployees = await Promise.all(
         response.data.map(async (employee) => {
           // Fetch tasks for each employee
-          const assignTasks = await fetchTasks(
-            employee._id,
-            "getAssignedTasksByEmployeeIdDate"
-          );
-          const completeTasks = await fetchTasks(
-            employee._id,
-            "getCompletedTasksByEmployeeIdDate"
-          );
+          const assignTasks = await fetchTasks(employee._id, "getAssignedTasksByEmployeeIdDate");
+          const completeTasks = await fetchTasks(employee._id, "getCompletedTasksByEmployeeIdDate");
 
           return {
             ...employee,
@@ -62,7 +54,6 @@ const EmployeeTask = () => {
   //    navigate(`/employeetaskboard/${id}`)
   //   else
   //   navigate(`/employeetaskviewPause/${id}`)
-          
 
   // }
 
@@ -128,17 +119,14 @@ const EmployeeTask = () => {
                     transition: "0.3s ease-in-out",
                   },
                 }}
-              //  onClick={CardClicked(employee._id)}
-                onClick={() =>{
-                  console.log("usercurrent",currentUser)
-                  console.log(currentUser.role,currentUser._id,employee._id)
-                  if(currentUser.role=='manager' & currentUser._id==employee._id)
-                    navigate(`/employeetaskboard/${employee._id}`)
-                    else
-                    navigate(`/employeetaskviewPause/${employee._id}`)
-                }
-                
-                }
+                //  onClick={CardClicked(employee._id)}
+                onClick={() => {
+                  console.log("usercurrent", currentUser);
+                  console.log(currentUser.role, currentUser._id, employee._id);
+                  if ((currentUser.role == "manager") & (currentUser._id == employee._id))
+                    navigate(`/employeetaskboard/${employee._id}`);
+                  else navigate(`/employeetaskviewPause/${employee._id}`);
+                }}
               >
                 <Box
                   sx={{
@@ -149,10 +137,7 @@ const EmployeeTask = () => {
                     width: "100%",
                   }}
                 >
-                  <Avatar
-                    alt={employee.employeeName}
-                    src={employee.employeeProImage}
-                  />
+                  <Avatar alt={employee.employeeName} src={employee.employeeProImage.secure_url} />
                   <Box sx={{ flex: 1 }}>
                     <Typography
                       sx={{

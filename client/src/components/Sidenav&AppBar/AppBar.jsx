@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "../../utils/axiosInterceptor";
 
 import InfoIcon from "@mui/icons-material/Info";
-import manAvatar from "/man-avatar.svg";
+import manAvatar from "../../assets/images/dummy.jpg";
 
 // Redux
 import { clearSocket, initializeSocket } from "../../redux/socketSlice";
@@ -52,7 +52,7 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
   const { currentUser } = useSelector((state) => state.user);
   const [notifications, setNotifications] = React.useState([]);
   const [totalNotifications, setTotalNotifications] = React.useState(0);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
   const [permission, setPermission] = React.useState(Notification.permission);
   const [navScroll, setNavScroll] = useState();
 
@@ -237,7 +237,7 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
           transition: "0.4s ease-in-out",
         }}
       >
-        {/* {greaterthanlg && */}
+        {/* {grea terthanlg && */}
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "" }}>
           <Box
             sx={{
@@ -451,7 +451,7 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
             }}
           >
             <Avatar
-              src={manAvatar}
+              src={currentUser.employeeProImage?.secure_url || manAvatar}
               onClick={handleMenuClick}
               sx={{
                 cursor: "pointer",

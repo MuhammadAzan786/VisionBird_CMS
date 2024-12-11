@@ -1,15 +1,7 @@
-import React, { useState, useEffect } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "../../utils/axiosInterceptor";
 import { useNavigate } from "react-router-dom";
-import {
-  Alert,
-  Box,
-  CircularProgress,
-  MenuItem,
-  Select,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, CircularProgress, MenuItem, Select, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
 import PropTypes from "prop-types";
@@ -17,6 +9,7 @@ import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
+import { useState } from "react";
 
 const InterneeTable = ({ searchTerm }) => {
   const navigate = useNavigate();
@@ -29,9 +22,7 @@ const InterneeTable = ({ searchTerm }) => {
 
   const fetchInternees = async ({ queryKey }) => {
     const [, searchTerm] = queryKey;
-    const response = await axios.get(
-      `/api/internee/get_internees?search=${searchTerm || ""}`
-    );
+    const response = await axios.get(`/api/internee/get_internees?search=${searchTerm || ""}`);
     return response.data;
   };
 
@@ -60,6 +51,7 @@ const InterneeTable = ({ searchTerm }) => {
   const mutation = useMutation({
     mutationFn: updateInterneeStatus,
     onSuccess: () => {
+      queryClient.invalidateQueries("employees");
       console.log("Internee status updated successfully!");
       queryClient.invalidateQueries("activeInternees");
       queryClient.invalidateQueries("inactiveInternees");
@@ -78,9 +70,9 @@ const InterneeTable = ({ searchTerm }) => {
       width: 300,
       renderCell: ({ row }) => (
         <EmployeeNameCell
-          src={row.interneeProImage?.secure_url}
           userId={row.internId}
           name={row.firstName}
+          src={row?.interneeProImage?.secure_url}
         />
       ),
     },
@@ -92,9 +84,7 @@ const InterneeTable = ({ searchTerm }) => {
       headerName: "Internship From",
       width: 200,
       renderCell: (params) => (
-        <Typography variant="inherit">
-          {dayjs(params.row.internshipFrom).format("MMMM D, YYYY")}
-        </Typography>
+        <Typography variant="inherit">{dayjs(params.row.internshipFrom).format("MMMM D, YYYY")}</Typography>
       ),
     },
     {
@@ -102,23 +92,11 @@ const InterneeTable = ({ searchTerm }) => {
       headerName: "Internship To",
       width: 200,
       renderCell: (params) => (
-        <Typography variant="inherit">
-          {dayjs(params.row.internshipTo).format("MMMM D, YYYY")}
-        </Typography>
+        <Typography variant="inherit">{dayjs(params.row.internshipTo).format("MMMM D, YYYY")}</Typography>
       ),
     },
 
     { field: "offered_By", headerName: "Offered by", width: 100 },
-    {
-      field: "givenOn",
-      headerName: "Given On",
-      width: 300,
-      renderCell: (params) => (
-        <Typography variant="inherit">
-          {dayjs(params.row.givenOn).format("dddd, MMMM D, YYYY")}
-        </Typography>
-      ),
-    },
   ];
 
   const statusColumn = {
@@ -127,7 +105,7 @@ const InterneeTable = ({ searchTerm }) => {
     width: 250,
     renderCell: (params) => {
       const { id } = params.row;
-      const [status, setStatus] = React.useState(params.value);
+      const [status, setStatus] = useState(params.value);
       const handleChange = (event) => {
         const newStatus = event.target.value;
         setStatus(newStatus);

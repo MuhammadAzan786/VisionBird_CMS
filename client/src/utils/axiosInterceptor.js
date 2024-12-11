@@ -9,8 +9,6 @@ axios.defaults.baseURL =
 console.log("Axios Base URL:", axios.defaults.baseURL);
 axios.defaults.withCredentials = true;
 
-axios.create();
-
 // Adding the response interceptor globally to check for token expiration
 axios.interceptors.response.use(
   (response) => {

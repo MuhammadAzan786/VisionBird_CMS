@@ -33,15 +33,17 @@ import {
   Stack,
   Paper,
 } from "@mui/material";
-
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 const PaySalaries = () => {
   const navigate = useNavigate();
 
   const [tabValue, setTabValue] = useState("all");
-
-  const [paidEmp, setPaidEmp] = React.useState([]);
-  const [unpaidEmp, setUnpaidEmp] = React.useState([]);
-  const [allEmp, setallEmp] = React.useState([]);
 
   const [selectedEmployeeId, setSelectedEmployeeId] = React.useState(null);
   const [paymentMethod, setPaymentMethod] = React.useState("Cash");
@@ -55,10 +57,7 @@ const PaySalaries = () => {
   });
   const [paidDate, setPaidDate] = React.useState(dayjs());
   const [totalWorkingDays, setTotalWorkingDays] = React.useState(
-    getWorkingDays(
-      Number(selectedDate.year),
-      Number(selectedDate.month) - 1
-    ).toString()
+    getWorkingDays(Number(selectedDate.year), Number(selectedDate.month) - 1).toString()
   );
 
   const handlePaymentMethodChange = (event) => {
@@ -77,10 +76,7 @@ const PaySalaries = () => {
     setSelectedDate({ month: selectedMonthName, year: selectedYear });
 
     // Set working days for the selected year/month
-    const workingDays = getWorkingDays(
-      Number(selectedYear),
-      Number(selectedMonthName) - 1
-    );
+    const workingDays = getWorkingDays(Number(selectedYear), Number(selectedMonthName) - 1);
     setTotalWorkingDays(workingDays);
 
     //If year/month changes set paid date to 1 of that year/month
@@ -98,30 +94,54 @@ const PaySalaries = () => {
   };
 
   //Get Paid & Unpaid empolyee details
-  const fetchEmployees = async () => {
-    await axios
-      .post("/api/pay/paid_unpaid_salary_report", {
+  // const fetchEmployees = async () => {
+  //   await axios
+  //     .post("/api/pay/paid_unpaid_salary_report", {
+  //       month: selectedDate.month,
+  //       year: selectedDate.year,
+  //     })
+  //     .then((response) => {
+  //       const { paidEmployees, unpaidEmployees, allEmployees } = response.data;
+
+  //       // Save the arrays separately
+  //       setPaidEmp(paidEmployees);
+  //       setUnpaidEmp(unpaidEmployees);
+  //       setallEmp(allEmployees);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching employee data:", error);
+  //     });
+  // };
+  // //Fetch Paid & Unpaid Employee if selectedDate Change
+  // useEffect(() => {
+  //   fetchEmployees();
+  // }, [selectedDate]);
+
+  const queryClient = useQueryClient();
+  const {
+    data: { paidEmployees = [], unpaidEmployees = [], allEmployees = [] } = {},
+    isError,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["salaries", selectedDate.month, selectedDate.year],
+    queryFn: async () => {
+      if (!selectedDate.month || !selectedDate.year) {
+        throw new Error("Invalid date selected");
+      }
+
+      const response = await axios.post("/api/pay/paid_unpaid_salary_report", {
         month: selectedDate.month,
         year: selectedDate.year,
-      })
-      .then((response) => {
-        const { paidEmployees, unpaidEmployees, allEmployees } = response.data;
-
-        // Save the arrays separately
-        setPaidEmp(paidEmployees);
-        setUnpaidEmp(unpaidEmployees);
-        setallEmp(allEmployees);
-      })
-      .catch((error) => {
-        console.error("Error fetching employee data:", error);
       });
-  };
 
-  //Fetch Paid & Unpaid Employee if selectedDate Change
-  useEffect(() => {
-    fetchEmployees();
-  }, [selectedDate]);
+      console.log("API Response:", response.data);
+      return response.data;
+    },
+    enabled: !!selectedDate.month && !!selectedDate.year, // Prevent unnecessary queries
+  });
 
+ 
   //Show employee details when double clicked
   const navigateTo = (employee) => {
     navigate(`/employee-profile/${employee.id}`);
@@ -155,16 +175,12 @@ const PaySalaries = () => {
             }}
           >
             <Avatar
-              src={params.row.employeeProImage}
+              src={params.row.employeeProImage.secure_url}
               alt="avatar"
               sx={{ border: "5px solid #F5F5F5", width: 50, height: 50 }}
             />
             <Stack sx={{ alignItems: "start", gap: "0" }}>
-              <Typography
-                fontWeight={500}
-                fontSize={15}
-                sx={{ fontFamily: "Poppins, sans-serif" }}
-              >
+              <Typography fontWeight={500} fontSize={15} sx={{ fontFamily: "Poppins, sans-serif" }}>
                 {params.row.employeeName}
               </Typography>
               <Typography color="#a0a0a0" fontSize={12}>
@@ -180,9 +196,7 @@ const PaySalaries = () => {
       headerName: "Designation",
       width: 200,
       ...colStyle,
-      renderCell: (params) => (
-        <CustomChip label={params.value} status={params.value} />
-      ),
+      renderCell: (params) => <CustomChip label={params.value} status={params.value} />,
     },
     {
       field: "email",
@@ -209,12 +223,7 @@ const PaySalaries = () => {
       width: 150,
       ...colStyle,
       renderCell: (params) => {
-        return (
-          <CustomChip
-            label={WordCaptitalize(params.value)}
-            status={params.value}
-          />
-        );
+        return <CustomChip label={WordCaptitalize(params.value)} status={params.value} />;
       },
     },
     {
@@ -302,18 +311,18 @@ const PaySalaries = () => {
               <Tab label="Unpaid" value="unpaid" sx={{ letterSpacing: 1 }} />
               <Tab label="Paid" value="paid" sx={{ letterSpacing: 1 }} />
             </TabList>
-            <Typography>{` ${dayjs(
-              new Date(selectedDate.year, selectedDate.month - 1)
-            ).format("MMMM, YYYY")}`}</Typography>
+            <Typography>{` ${dayjs(new Date(selectedDate.year, selectedDate.month - 1)).format(
+              "MMMM, YYYY"
+            )}`}</Typography>
           </Box>
 
           <TabPanel value="all" sx={{ padding: "0" }}>
             <DataGrid
               columns={columns}
               rows={
-                allEmp.length < 0
+                allEmployees.length < 0
                   ? []
-                  : allEmp.map((employee) => {
+                  : allEmployees.map((employee) => {
                       return { ...employee, id: employee._id };
                     })
               }
@@ -325,9 +334,9 @@ const PaySalaries = () => {
             <DataGrid
               columns={columns}
               rows={
-                unpaidEmp.length < 0
+                unpaidEmployees.length < 0
                   ? []
-                  : unpaidEmp.map((employee) => {
+                  : unpaidEmployees.map((employee) => {
                       return { ...employee, id: employee._id };
                     })
               }
@@ -340,9 +349,9 @@ const PaySalaries = () => {
             <DataGrid
               columns={columns}
               rows={
-                paidEmp.length < 0
+                paidEmployees.length < 0
                   ? []
-                  : paidEmp.map((employee) => {
+                  : paidEmployees.map((employee) => {
                       return { ...employee, id: employee._id };
                     })
               }
@@ -426,9 +435,7 @@ const PaySalaries = () => {
         <DialogTitle>Please fillout all the fields correctly.</DialogTitle>
 
         <DialogContent>
-          <DialogContentText
-            sx={{ color: "red", display: "flex", justifyContent: "center" }}
-          >
+          <DialogContentText sx={{ color: "red", display: "flex", justifyContent: "center" }}>
             {errorText}
           </DialogContentText>
           <TextField

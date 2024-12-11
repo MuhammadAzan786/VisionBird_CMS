@@ -47,8 +47,6 @@ const interneeSchema = new Schema({
     },
   },
 
-  givenOn: { type: Date, required: true },
-
   // Documents
   interneeProImage: {
     type: Object, // Changed from String to Object

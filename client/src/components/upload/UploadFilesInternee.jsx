@@ -11,13 +11,14 @@ import {
   ListItemAvatar,
   ListItemIcon,
   ListItemText,
+  styled,
   Tab,
 } from "@mui/material";
 import { useState } from "react";
 import { customColors } from "../../theme/colors";
 import { cloudinaryConfig } from "../../utils/cloudinaryConfig";
-
-// import placeholder from "../../assets/images/placeholder.jpeg";
+import { AXIOS_CLODUDINARY } from "../../utils/axios/axiosCloudinary";
+import CustomOverlay from "../Styled/CustomOverlay";
 
 const UploadFilesInternee = ({
   values,
@@ -28,58 +29,89 @@ const UploadFilesInternee = ({
   deletedFilesRef,
 }) => {
   const [tabValue, setTabValue] = useState("interneeProImage");
+  const [progress, setProgress] = useState();
   const handleTabValue = (event, newValue) => {
     setTabValue(newValue);
   };
 
-  const sendtoCloudinary = async (file) => {
-    const isImage = /image\/(jpeg|png|gif|bmp|svg|webp|tiff)/i.test(file.type);
-    const resourceType = isImage ? "image" : "raw";
+  const sendtoCloudinary = async (filesList) => {
+    const filesArray = Array.from(filesList);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("context", `original_filename=${file.name}`);
-    formData.append("folder", `${parentFolder}/${folderName}`);
-    formData.append("upload_preset", cloudinaryConfig.upload_preset);
+    // Use `map` to return an array of promises
+    const cloudinaryResponses = await Promise.all(
+      filesArray.map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("context", `original_filename=${file.name}`);
+        formData.append("folder", `${parentFolder}/${folderName}`);
+        formData.append("upload_preset", cloudinaryConfig.upload_preset);
 
-    try {
-      const response = await fetch(cloudinaryConfig.getApiUrl(resourceType), {
-        method: "POST",
-        body: formData,
-      });
+        // try {
+        //   const response = await fetch(cloudinaryConfig.getApiUrl("auto"), {
+        //     method: "POST",
+        //     body: formData,
+        //   });
 
-      // Handle the response
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
+        //   // Handle the response
+        //   if (!response.ok) {
+        //     throw new Error("Upload failed");
+        //   }
 
-      const CloudinaryData = await response.json();
+        //   const CloudinaryData = await response.json();
+        //   const { secure_url, resource_type, public_id, context } = CloudinaryData;
+        //   tempFilesRef.current.push(public_id);
 
-      const { secure_url, resource_type, public_id, context } = CloudinaryData;
+        //   return { secure_url, resource_type, public_id, original_file_name: context?.custom?.original_filename };
+        // } catch (error) {
+        //   console.error("Error uploading image:", error);
+        //   return null; // Return `null` if the upload fails, or you can handle the error differently
+        // }
 
-      const original_file_name = context?.custom?.original_filename;
+        try {
+          const response1 = await AXIOS_CLODUDINARY.post("/auto/upload", formData, {
+            onUploadProgress: (progressEvent) => {
+              const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
 
-      const baseFileMetadata = { public_id, secure_url, original_file_name, resource_type };
+              setProgress(percentage);
+            },
+          });
+          console.log("Axios Response", response1.data);
 
-      console.log("Cloudinary Returned", baseFileMetadata);
+          const { secure_url, resource_type, public_id, context } = response1.data;
 
-      // For all new uploads Garbage Files collector
-      tempFilesRef.current.push(public_id);
+          tempFilesRef.current.push(public_id);
 
-      if (tabValue === "interneeProImage") {
-        // checking if its not null for. bcz it will push a null
-        if (values.interneeProImage.public_id !== undefined) {
-          deletedFilesRef.current.push(values.interneeProImage.public_id);
+          return {
+            secure_url,
+            resource_type,
+            public_id,
+            original_file_name: context?.custom?.original_filename,
+          };
+        } catch (error) {
+          console.error("Error uploading", error);
+          return null;
         }
+      })
+    );
 
-        setFieldValue("interneeProImage", baseFileMetadata);
-        return;
-      } else {
-        setFieldValue(tabValue, [...(values[tabValue] || []), baseFileMetadata]);
+    setProgress(0);
+    const successfulUploads = cloudinaryResponses.filter((response) => response !== null);
+
+    console.log("Succesfull uplaods", successfulUploads);
+
+    if (tabValue === "interneeProImage") {
+      // checking if its not null for. bcz it will push a null
+      if (values.interneeProImage.public_id !== undefined) {
+        deletedFilesRef.current.push(values.interneeProImage.public_id);
       }
-    } catch (error) {
-      console.error("Error uploading image:", error);
+      setFieldValue("interneeProImage", successfulUploads[0]);
+      return;
+    } else {
+      setFieldValue(tabValue, [...values[tabValue], ...successfulUploads]);
     }
+
+    console.log("Cloudinary Upload Results:", successfulUploads);
+    return successfulUploads;
   };
 
   const handleDelete = async (public_id) => {
@@ -118,8 +150,9 @@ const UploadFilesInternee = ({
           <input
             type="file"
             name="file"
+            multiple={tabValue !== "interneeProImage"}
             onChange={(event) => {
-              Array.from(event.target.files).forEach((file) => sendtoCloudinary(file));
+              sendtoCloudinary(event.target.files);
             }}
             style={{
               position: "absolute",
@@ -164,28 +197,47 @@ const UploadFilesInternee = ({
 
           {/* =======================================Tab Panel =================================== */}
 
-          <TabPanel value="interneeProImage" sx={{ padding: "0", height: "100%" }}>
-            {/* {profileImage.length > 0 && <MediaList data={profileImage} handleDelete={handleDelete} />} */}
-            {Object.keys(values.interneeProImage).length > 0 && (
-              <MediaList data={[values.interneeProImage]} handleDelete={handleDelete} />
-            )}
-          </TabPanel>
+          <CustomTabPanel value="interneeProImage">
+            <Box sx={{ marginTop: "20px" }}>
+              <List>
+                {Object.keys(values.interneeProImage).length > 0 && (
+                  <MediaList data={[values.interneeProImage]} handleDelete={handleDelete} />
+                )}
+                {progress > 0 && <CustomOverlay open={true} />}
+              </List>
+            </Box>
+          </CustomTabPanel>
 
-          <TabPanel value="cnicFile" sx={{ padding: "0", height: "100%" }}>
-            {values.cnicFile.length > 0 && <MediaList data={values.cnicFile} handleDelete={handleDelete} />}
-          </TabPanel>
+          <CustomTabPanel value="cnicFile">
+            <Box sx={{ marginTop: "20px" }}>
+              <List>
+                {values.cnicFile.length > 0 && <MediaList data={values.cnicFile} handleDelete={handleDelete} />}
+                {progress > 0 && <CustomOverlay open={true} />}
+              </List>
+            </Box>
+          </CustomTabPanel>
 
-          <TabPanel value="appointmentFile" sx={{ padding: "0" }}>
-            {values.appointmentFile.length > 0 && (
-              <MediaList data={values.appointmentFile} handleDelete={handleDelete} />
-            )}
-          </TabPanel>
+          <CustomTabPanel value="appointmentFile">
+            <Box sx={{ marginTop: "20px" }}>
+              <List>
+                {values.appointmentFile.length > 0 && (
+                  <MediaList data={values.appointmentFile} handleDelete={handleDelete} />
+                )}
+                {progress > 0 && <CustomOverlay open={true} />}
+              </List>
+            </Box>
+          </CustomTabPanel>
 
-          <TabPanel value="experienceLetter" sx={{ padding: "0" }}>
-            {values.experienceLetter.length > 0 && (
-              <MediaList data={values.experienceLetter} handleDelete={handleDelete} />
-            )}
-          </TabPanel>
+          <CustomTabPanel value="experienceLetter">
+            <Box sx={{ marginTop: "20px" }}>
+              <List>
+                {values.experienceLetter.length > 0 && (
+                  <MediaList data={values.experienceLetter} handleDelete={handleDelete} />
+                )}
+                {progress > 0 && <CustomOverlay open={true} />}
+              </List>
+            </Box>
+          </CustomTabPanel>
         </TabContext>
       </Grid>
     </Grid>
@@ -194,38 +246,59 @@ const UploadFilesInternee = ({
 
 const MediaList = ({ data, handleDelete }) => {
   return (
-    <Box sx={{ marginTop: "20px" }}>
-      <List>
-        {data.map((item, index) => (
-          <ListItem
-            key={index}
-            sx={{
-              border: "1px solid #e8ebee",
-              borderRadius: "8px",
-              backgroundColor: "#00587824",
-              mb: 2,
-            }}
-            secondaryAction={
-              <IconButton edge="end" sx={{ color: "red" }} onClick={() => handleDelete(item.public_id)}>
-                <Close />
-              </IconButton>
-            }
-          >
-            {item.resource_type === "image" ? (
-              <ListItemAvatar>
-                <Avatar src={item.secure_url} alt="asd" sx={{ borderRadius: 2 }} />
-              </ListItemAvatar>
-            ) : (
-              <ListItemIcon>
-                <InsertDriveFile sx={{ color: "#005878" }} />
-              </ListItemIcon>
-            )}
-            <ListItemText primary={item.original_file_name} />
-          </ListItem>
-        ))}
-      </List>
-    </Box>
+    <>
+      {data.map((item, index) => (
+        <ListItem
+          key={index}
+          sx={{
+            border: "1px solid #e8ebee",
+            borderRadius: "8px",
+            backgroundColor: "#00587824",
+            mb: 2,
+          }}
+          secondaryAction={
+            <IconButton edge="end" sx={{ color: "red" }} onClick={() => handleDelete(item.public_id)}>
+              <Close />
+            </IconButton>
+          }
+        >
+          {item.resource_type === "image" ? (
+            <ListItemAvatar>
+              <Avatar src={item.secure_url} alt="asd" sx={{ borderRadius: 2 }} />
+            </ListItemAvatar>
+          ) : (
+            <ListItemIcon>
+              <InsertDriveFile sx={{ color: "#005878" }} />
+            </ListItemIcon>
+          )}
+          <ListItemText primary={item.original_file_name} />
+        </ListItem>
+      ))}
+    </>
   );
 };
+
+const CustomTabPanel = styled(TabPanel)(({ theme }) => ({
+  padding: "0",
+  paddingRight: "40px",
+  maxHeight: "300px",
+  overflowY: "auto",
+  "::-webkit-scrollbar": {
+    backgroundColor: "transparent",
+    height: "10px",
+    width: "10px",
+  },
+  "::-webkit-scrollbar-track": {
+    boxShadow: "inset 0 0 6px rgba(0,0,0,0.3)",
+    borderRadius: "10px",
+    backgroundColor: "#F5F5F5",
+  },
+  "::-webkit-scrollbar-thumb": {
+    borderRadius: "10px",
+    boxShadow: "inset 0 0 6px rgba(0,0,0,.3)",
+    backgroundColor: theme.palette.primary.main,
+    width: "6px",
+  },
+}));
 
 export default UploadFilesInternee;

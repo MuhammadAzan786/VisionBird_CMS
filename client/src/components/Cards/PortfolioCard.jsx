@@ -9,12 +9,7 @@ function PortfolioCard() {
 
   const getPortfolio = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:4000/api/posts/get_all_emp_posts",
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await axios.get("/api/posts/get_all_emp_posts");
       setPortfolios(response.data);
       console.log(response.data);
     } catch (error) {
@@ -93,19 +88,10 @@ function PortfolioCard() {
                 justifyContent: "space-between",
               }}
             >
-              <Typography
-                sx={{ fontSize: 13, fontWeight: 500 }}
-                variant="h5"
-                component="h2"
-                textAlign={"center"}
-              >
+              <Typography sx={{ fontSize: 13, fontWeight: 500 }} variant="h5" component="h2" textAlign={"center"}>
                 NO. of Portfolios
               </Typography>
-              <Typography
-                sx={{ fontWeight: 600, color: "#666666" }}
-                variant="h3"
-                component="p"
-              >
+              <Typography sx={{ fontWeight: 600, color: "#666666" }} variant="h3" component="p">
                 {portfolios.length}
               </Typography>
             </Box>

@@ -35,10 +35,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           </Provider>
         </MessageProvider>
       </ThemeProvider>
-      {/** React Query Devtools */}
-      {import.meta.env.VITE_NODE_ENV === "development" && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )}
+
+      <ReactQueryDevtools initialIsOpen={import.meta.env.VITE_NODE_ENV === "development"} />
     </QueryClientProvider>
   </React.StrictMode>
 );

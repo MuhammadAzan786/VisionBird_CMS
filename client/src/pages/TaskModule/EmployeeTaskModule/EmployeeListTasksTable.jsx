@@ -69,10 +69,7 @@ const EmployeeListTasksTable = () => {
 
       renderCell: (params) => (
         <>
-          <Avatar
-            alt={params.row.employeeName}
-            src={params.row.employeeProImage}
-          />
+          <Avatar alt={params.row.employeeName} src={params.row.employeeProImage.secure_url} />
           <Box sx={{ ml: 3 }} display="flex" flexDirection="column">
             <Typography
               variant="inherit"
@@ -86,11 +83,7 @@ const EmployeeListTasksTable = () => {
             >
               {params.row.employeeName}
             </Typography>
-            <Typography
-              variant="caption"
-              display="block"
-              sx={{ fontWeight: "500", color: "#767989" }}
-            >
+            <Typography variant="caption" display="block" sx={{ fontWeight: "500", color: "#767989" }}>
               {params.row.employeeID}
             </Typography>
           </Box>

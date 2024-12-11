@@ -53,26 +53,16 @@ const InterneeEvaluationTable = () => {
               sx={{ borderRadius: "5px" }} // Rounded corners for the input
             />
             <FormHelperText sx={{ marginTop: 1, color: "text.secondary" }}>
-              Search by name, contact number (e.g., 0310-7747768), or CNIC
-              (e.g., 34201-8603239-7).
+              Search by name, contact number (e.g., 0310-7747768), or CNIC (e.g., 34201-8603239-7).
             </FormHelperText>
           </Grid>
           <Grid item md={6}>
             <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-              <Button
-                component={Link}
-                to={"/evaluation-form"}
-                variant="outlined"
-                size="large"
-              >
+              <Button component={Link} to={"/evaluation-form"} variant="outlined" size="large">
                 <AddIcon sx={{ mr: 1 }} /> Evaluation Form
               </Button>
 
-              <Button
-                onClick={toggleTalentAquistion}
-                variant="contained"
-                size="large"
-              >
+              <Button onClick={toggleTalentAquistion} variant="contained" size="large">
                 <PersonSearchIcon sx={{ mr: 1 }} /> Talent Acquisition
               </Button>
             </Box>

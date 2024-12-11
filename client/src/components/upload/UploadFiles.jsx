@@ -11,70 +11,81 @@ import {
   ListItemAvatar,
   ListItemIcon,
   ListItemText,
+  styled,
   Tab,
 } from "@mui/material";
 import { useState } from "react";
 import { customColors } from "../../theme/colors";
 import { cloudinaryConfig } from "../../utils/cloudinaryConfig";
+import { AXIOS_CLODUDINARY } from "../../utils/axios/axiosCloudinary";
 
-// import placeholder from "../../assets/images/placeholder.jpeg";
+import CustomOverlay from "../../components/Styled/CustomOverlay";
 
 const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName, tempFilesRef, deletedFilesRef }) => {
   const [tabValue, setTabValue] = useState("employeeProImage");
+  const [progress, setProgress] = useState();
   const handleTabValue = (event, newValue) => {
     setTabValue(newValue);
   };
 
-  console.log("ye valuees hain", values);
+  console.log("Progress Number", progress);
 
-  const sendtoCloudinary = async (file) => {
-    const isImage = /image\/(jpeg|png|gif|bmp|svg|webp|tiff)/i.test(file.type);
-    const resourceType = isImage ? "image" : "raw";
+  const sendtoCloudinary = async (filesList) => {
+    const filesArray = Array.from(filesList);
+    const cloudinaryResponses = await Promise.all(
+      filesArray.map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("context", `original_filename=${file.name}`);
+        formData.append("folder", `${parentFolder}/${folderName}`);
+        formData.append("upload_preset", cloudinaryConfig.upload_preset);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("context", `original_filename=${file.name}`);
-    formData.append("folder", `${parentFolder}/${folderName}`);
-    formData.append("upload_preset", cloudinaryConfig.upload_preset);
+        try {
+          const response1 = await AXIOS_CLODUDINARY.post("/auto/upload", formData, {
+            onUploadProgress: (progressEvent) => {
+              const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
 
-    try {
-      const response = await fetch(cloudinaryConfig.getApiUrl(resourceType), {
-        method: "POST",
-        body: formData,
-      });
+              setProgress(percentage);
+            },
+          });
+          console.log("Axios Response", response1.data);
 
-      // Handle the response
-      if (!response.ok) {
-        throw new Error("Upload failed");
-      }
+          const { secure_url, resource_type, public_id, context } = response1.data;
 
-      const CloudinaryData = await response.json();
+          tempFilesRef.current.push(public_id);
 
-      const { secure_url, resource_type, public_id, context } = CloudinaryData;
-
-      const original_file_name = context?.custom?.original_filename;
-
-      const baseFileMetadata = { public_id, secure_url, original_file_name, resource_type };
-
-      console.log("Cloudinary Returned", baseFileMetadata);
-
-      // For all new uploads Garbage Files collector
-      tempFilesRef.current.push(public_id);
-
-      if (tabValue === "employeeProImage") {
-        // checking if its not null for. bcz it will push a null
-        if (values.employeeProImage.public_id !== undefined) {
-          deletedFilesRef.current.push(values.employeeProImage.public_id);
+          return {
+            secure_url,
+            resource_type,
+            public_id,
+            original_file_name: context?.custom?.original_filename,
+          };
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          return null;
         }
+      })
+    );
 
-        setFieldValue("employeeProImage", baseFileMetadata);
-        return;
-      } else {
-        setFieldValue(tabValue, [...(values[tabValue] || []), baseFileMetadata]);
+    setProgress(0);
+
+    const successfulUploads = cloudinaryResponses.filter((response) => response !== null);
+
+    console.log("Succesfull uplaods", successfulUploads);
+
+    if (tabValue === "employeeProImage") {
+      // checking if its not null for. bcz it will push a null
+      if (values.employeeProImage.public_id !== undefined) {
+        deletedFilesRef.current.push(values.employeeProImage.public_id);
       }
-    } catch (error) {
-      console.error("Error uploading image:", error);
+      setFieldValue("employeeProImage", successfulUploads[0]);
+      return;
+    } else {
+      setFieldValue(tabValue, [...values[tabValue], ...successfulUploads]);
     }
+
+    console.log("Cloudinary Upload Results:", successfulUploads);
+    return successfulUploads;
   };
 
   const handleDelete = async (public_id) => {
@@ -112,8 +123,9 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
           <input
             type="file"
             name="file"
+            multiple={tabValue !== "employeeProImage"}
             onChange={(event) => {
-              Array.from(event.target.files).forEach((file) => sendtoCloudinary(file));
+              sendtoCloudinary(event.target.files);
             }}
             style={{
               position: "absolute",
@@ -158,28 +170,39 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
 
           {/* =======================================Tab Panel =================================== */}
 
-          <TabPanel value="employeeProImage" sx={{ padding: "0", height: "100%" }}>
-            {/* {profileImage.length > 0 && <MediaList data={profileImage} handleDelete={handleDelete} />} */}
-            {Object.keys(values.employeeProImage).length > 0 && (
-              <MediaList data={[values.employeeProImage]} handleDelete={handleDelete} />
-            )}
-          </TabPanel>
+          <CustomTabPanel value="employeeProImage">
+            <Box sx={{ marginTop: "20px" }}>
+              <List>
+                {Object.keys(values.employeeProImage).length > 0 && (
+                  <MediaList data={[values.employeeProImage]} handleDelete={handleDelete} />
+                )}
+                {progress > 0 && <CustomOverlay open={true} />}
+              </List>
+            </Box>
+          </CustomTabPanel>
 
-          <TabPanel value="cnicScanCopy" sx={{ padding: "0", height: "100%" }}>
-            {values.cnicScanCopy.length > 0 && <MediaList data={values.cnicScanCopy} handleDelete={handleDelete} />}
-          </TabPanel>
+          <CustomTabPanel value="cnicScanCopy">
+            <Box sx={{ marginTop: "20px" }}>
+              <List>
+                {values.cnicScanCopy.length > 0 && <MediaList data={values.cnicScanCopy} handleDelete={handleDelete} />}
+                {progress > 0 && <CustomOverlay open={true} />}
+              </List>
+            </Box>
+          </CustomTabPanel>
 
-          <TabPanel value="policeCertificateUpload" sx={{ padding: "0" }}>
+          <CustomTabPanel value="policeCertificateUpload">
             {values.policeCertificateUpload.length > 0 && (
               <MediaList data={values.policeCertificateUpload} handleDelete={handleDelete} />
             )}
-          </TabPanel>
+            {progress > 0 && <CustomOverlay open={true} />}
+          </CustomTabPanel>
 
-          <TabPanel value="degreesScanCopy" sx={{ padding: "0" }}>
+          <CustomTabPanel value="degreesScanCopy">
             {values.degreesScanCopy.length > 0 && (
               <MediaList data={values.degreesScanCopy} handleDelete={handleDelete} />
             )}
-          </TabPanel>
+            {progress > 0 && <CustomOverlay open={true} />}
+          </CustomTabPanel>
         </TabContext>
       </Grid>
     </Grid>
@@ -188,9 +211,9 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
 
 const MediaList = ({ data, handleDelete }) => {
   return (
-    <Box sx={{ marginTop: "20px" }}>
-      <List>
-        {data.map((item, index) => (
+    <>
+      {data.map((item, index) => {
+        return (
           <ListItem
             key={index}
             sx={{
@@ -207,7 +230,7 @@ const MediaList = ({ data, handleDelete }) => {
           >
             {item.resource_type === "image" ? (
               <ListItemAvatar>
-                <Avatar src={item.secure_url} alt="asd" sx={{ borderRadius: 2 }} />
+                <Avatar src={item.secure_url} alt={item.original_file_name} sx={{ borderRadius: 2 }} />
               </ListItemAvatar>
             ) : (
               <ListItemIcon>
@@ -216,10 +239,33 @@ const MediaList = ({ data, handleDelete }) => {
             )}
             <ListItemText primary={item.original_file_name} />
           </ListItem>
-        ))}
-      </List>
-    </Box>
+        );
+      })}
+    </>
   );
 };
+
+const CustomTabPanel = styled(TabPanel)(({ theme }) => ({
+  padding: "0",
+  paddingRight: "40px",
+  maxHeight: "300px",
+  overflowY: "auto",
+  "::-webkit-scrollbar": {
+    backgroundColor: "transparent",
+    height: "10px",
+    width: "10px",
+  },
+  "::-webkit-scrollbar-track": {
+    boxShadow: "inset 0 0 6px rgba(0,0,0,0.3)",
+    borderRadius: "10px",
+    backgroundColor: "#F5F5F5",
+  },
+  "::-webkit-scrollbar-thumb": {
+    borderRadius: "10px",
+    boxShadow: "inset 0 0 6px rgba(0,0,0,.3)",
+    backgroundColor: theme.palette.primary.main,
+    width: "6px",
+  },
+}));
 
 export default UploadFiles;

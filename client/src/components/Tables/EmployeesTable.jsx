@@ -78,11 +78,7 @@ const EmployeesTable = ({ searchTerm }) => {
       headerName: "Employee",
       flex: 1,
       renderCell: ({ row }) => (
-        <EmployeeNameCell
-          src={row.employeeProImage?.secure_url}
-          userId={row.employeeID}
-          name={row.employeeName}
-        />
+        <EmployeeNameCell src={row.employeeProImage?.secure_url} userId={row.employeeID} name={row.employeeName} />
       ),
     },
     {
@@ -121,9 +117,9 @@ const EmployeesTable = ({ searchTerm }) => {
     flex: 1,
     renderCell: (params) => {
       const { id } = params.row;
-      console.log("idddd", id);
+      // console.log("idddd", id);
       const [status, setStatus] = React.useState(params.value);
-      console.log(status);
+      // console.log(status);
       const handleChange = (event) => {
         const newStatus = event.target.value;
         setStatus(newStatus);

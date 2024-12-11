@@ -10,77 +10,72 @@ import dayjs from "dayjs";
 import { CustomDataGrid } from "./components/styled/CustomDataGrid";
 import { CustomChip } from "../../components/Styled/CustomChip";
 import CustomOverlay from "../../components/Styled/CustomOverlay";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const SalaryReportTable = () => {
   const [year, setYear] = useState(""); // State to store selected year
-  const [data, setData] = useState([]); // State to store fetched data
-  const [loading, setLoading] = useState(false); // State to track loading status
+  //const [loading, setLoading] = useState(false); // State to track loading status
 
-  const fetchReport = async () => {
-    if (!year) {
-      alert("Please select a year");
-      return;
-    }
-
-    setLoading(true); // Set loading to true while fetching data
-
-    try {
+  const queryClient = useQueryClient();
+  const {
+    data = [], // Default to empty array if data is undefined
+    isError,
+    isLoading:loading,
+    error,
+  } = useQuery({
+    queryKey: ["salaries", year],
+    queryFn: async () => {
+      if (!year) return []; // Return an empty array if no year is selected
       const response = await axios.post("/api/pay/yearly_salary_report", {
         year,
       });
-      console.log(response.data);
-      setData(response.data);
-    } catch (error) {
-      console.error("Error fetching report:", error);
-    } finally {
-      setLoading(false); // Set loading to false after data fetching is done
-    }
-  };
+      return response.data || []; // Ensure response.data is returned as an array
+    },
+    enabled: !!year, // Prevent unnecessary queries if no year is selected
+  });
+  if (error) {
+    toast.error(error.message)
+  }
 
   // Define columns dynamically based on emp_id
-
   let columns = [
     {
       field: "employee_name",
       headerName: "Employee Name",
       width: 250,
-
-      renderCell: (params) => {
-        return (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              // justifyContent: "center",
-              width: "100%",
-              height: "100%",
-              gap: 1,
-            }}
-          >
-            <Avatar
-              src={params.row.emp_img}
-              alt="avatar"
-              sx={{ border: "5px solid #F5F5F5", width: 50, height: 50 }}
-            />
-            <Stack sx={{ alignItems: "start", gap: "0" }}>
-              <Typography
-                fontWeight={500}
-                fontSize={15}
-                sx={{ fontFamily: "Poppins, sans-serif" }}
-              >
-                {params.row.name}
-              </Typography>
-              <Typography color="#a0a0a0" fontSize={12}>
-                {params.row.emp_id}
-              </Typography>
-            </Stack>
-          </Box>
-        );
-      },
+      renderCell: (params) => (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          <Avatar
+            src={params.row.emp_img}
+            alt="avatar"
+            sx={{ border: "5px solid #F5F5F5", width: 50, height: 50 }}
+          />
+          <Stack sx={{ alignItems: "start" }}>
+            <Typography fontWeight={500} fontSize={15}>
+              {params.row.name}
+            </Typography>
+            <Typography color="#a0a0a0" fontSize={12}>
+              {params.row.emp_id}
+            </Typography>
+          </Stack>
+        </Box>
+      ),
     },
   ];
 
-  if (data.length > 0 && data[0].monthlySalaryStatus) {
+  // Ensure data is available and not empty before accessing properties
+  if (
+    Array.isArray(data) &&
+    data.length > 0 &&
+    Array.isArray(data[0].monthlySalaryStatus)
+  ) {
     // If monthlySalaryStatus is present in the first employee's data, create columns for each month
     const months = data[0].monthlySalaryStatus.map((monthStatus) => ({
       field: `${monthStatus.month}_status`,
@@ -91,9 +86,11 @@ const SalaryReportTable = () => {
       renderCell: (params) => {
         const label = params.row.monthlySalaryStatus.find(
           (status) => status.month === monthStatus.month
-        ).status;
+        )?.status;
 
-        return <CustomChip label={label} status={label.toLowerCase()} />;
+        return label ? (
+          <CustomChip label={label} status={label.toLowerCase()} />
+        ) : null;
       },
     }));
     columns = [...columns, ...months];
@@ -110,26 +107,22 @@ const SalaryReportTable = () => {
     <>
       <Paper sx={{ display: "flex", alignItems: "center" }}>
         <Typography
-          style={{
-            marginRight: "18px",
-            fontSize: "1.1rem",
-            fontWeight: "500",
-          }}
+          style={{ marginRight: "18px", fontSize: "1.1rem", fontWeight: "500" }}
         >
-          Generate Yearly Report :
+          Generate Yearly Report:
         </Typography>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
             required
             label="Select Year"
             views={["year"]}
-            value={!year ? null : dayjs(year)}
+            value={year ? dayjs(year) : null}
             onChange={handleYearChange}
           />
         </LocalizationProvider>
 
         <LoadingButton
-          onClick={fetchReport}
+          onClick={() => {}} // Remove redundant `fetchReport`
           endIcon={<SendIcon />}
           loading={loading}
           variant="outlined"
@@ -148,7 +141,7 @@ const SalaryReportTable = () => {
       <Paper>
         <CustomDataGrid
           columns={columns}
-          rows={data}
+          rows={data} // Ensure data is passed correctly
           disableColumnMenu
           disableColumnSorting
           rowHeight={80}
