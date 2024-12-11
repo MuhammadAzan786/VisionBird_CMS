@@ -1,29 +1,15 @@
 const Employee = require("../models/employeemodel");
 const leavesModel = require("../models/leavesModel");
 const notificationModel = require("../models/notificationModel");
-
 let ioInstance;
-
 module.exports = {
   setupIoInstance: (io) => {
     ioInstance = io;
   },
-
   createLeave: async (req, res) => {
     try {
       const leave = await leavesModel.create(req.body);
       const message = `New leave request from ${req.body.name}`;
-
-      const admin = await Employee.findOne({ role: "admin" });
-      console.log("Admin", admin);
-
-      const adminId = admin._id.toString();
-
-      console.log("Amind Id", adminId);
-
-      const employee = Employee.findById(req.body.from);
-      const employeeRole = employee.role;
-
       const notification = await notificationModel.create({
         for: req.body.for,
         message,
@@ -31,17 +17,14 @@ module.exports = {
       });
       const admin = await Employee.findOne({ role: "admin" });
       ioInstance.to(req.body.for.toString()).emit("notification", notification);
-
       ioInstance.to(req.body.from.toString()).emit("notification", notification);
       ioInstance.to(admin._id.toString()).emit("notification", notification);
-
       res.status(201).json("Leave request saved.");
     } catch (error) {
       console.error("Error saving leave: ", error);
       res.status(500).json({ error: "Error saving leave." });
     }
   },
-
   allLeaves: async (req, res) => {
     try {
       const all_leaves = await leavesModel
@@ -54,7 +37,6 @@ module.exports = {
       res.status(404).json({ error: "Leaves not found." });
     }
   },
-
   getLeave: async (req, res) => {
     console.log("inside leaves");
     try {
@@ -66,7 +48,6 @@ module.exports = {
       res.status(404).json({ error: "Leave not found." });
     }
   },
-
   myLeaves: async (req, res) => {
     try {
       const id = req.params.id;
@@ -80,7 +61,6 @@ module.exports = {
       res.status(404).json({ error: "Leaves not found." });
     }
   },
-
   employeeLeaves: async (req, res) => {
     try {
       const id = req.params.id;
@@ -94,7 +74,6 @@ module.exports = {
       res.status(404).json({ error: "Employees leaves not found." });
     }
   },
-
   changeStatus: async (req, res) => {
     try {
       const _id = req.params.id;
@@ -107,9 +86,7 @@ module.exports = {
       } else {
         message = `Leave request accepted by ${req.body.statusChangedBy}`;
       }
-
       await leavesModel.findByIdAndUpdate(_id, { status: statusForLeave });
-
       const notification = await notificationModel.create({
         for: req.body.for,
         message,
@@ -117,17 +94,13 @@ module.exports = {
       }); //For has user ID that has requested leave.
       const admin = await Employee.findOne({ role: "admin" });
       console.log("notification", notification);
-
       //Employeee, Manager (Dont try to understant,, u Cant)
       ioInstance.to(req.body.for.toString()).emit("notification", notification);
       console.log("bodyyyyy", req.body);
-
       //Manager, Admin  (Leaave it as it is , its working)
       ioInstance.to(req.body.statusChangedById.toString()).emit("notification", notification);
-
       //Admin (Dont remove this )
       ioInstance.to(admin._id.toString()).emit("notification", notification);
-
       res.status(200).json({ message: "Leave status changed successfully." });
     } catch (error) {
       console.error("Error changing leave status: ", error);
