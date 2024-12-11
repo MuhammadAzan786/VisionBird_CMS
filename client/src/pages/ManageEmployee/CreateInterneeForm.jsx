@@ -32,27 +32,39 @@ import { useQueryClient } from "@tanstack/react-query";
 const validationSchema = object().shape({
   firstName: string()
     .required("Required Name")
-    .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
+    .matches(
+      /^[a-zA-Z\s]+$/,
+      "Only alphabetic characters and spaces are allowed"
+    ),
   fatherName: string()
     .required("Required Name")
     .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters are allowed"),
   cnic: string()
     .required("Required CNIC")
-    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) => /^\d{5}-\d{7}-\d$/.test(value || "")),
+    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) =>
+      /^\d{5}-\d{7}-\d$/.test(value || "")
+    ),
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
   mobile: string()
     .required("Required Field")
-    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
+    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) =>
+      /^03\d{2}-\d{7}$/.test(value || "")
+    ),
   email: string().email().required("Required Email"),
   gender: string().required("Required Field"),
   maritalStatus: string().required("Required Field"),
   otherMobile: string()
     .required("Required Field")
-    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
+    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) =>
+      /^03\d{2}-\d{7}$/.test(value || "")
+    ),
   whosMobile: string()
     .required("Required Name")
-    .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
+    .matches(
+      /^[a-zA-Z\s]+$/,
+      "Only alphabetic characters and spaces are allowed"
+    ),
   qualification: string().required("Required Field"),
   rules: string().required("Required Field"),
   slack: string().required("Required Field"),
@@ -95,24 +107,24 @@ const CreateInterneeForm = () => {
       initialValues={{
         firstName: "",
         fatherName: "",
-        cnic: "34202-2866666-1",
+        cnic: "",
         dob: dayjs().format("YYYY-MM-DD"),
-        mailingAddress: "lalamusa",
-        mobile: "0331-6281670",
-        email: "alisahi@gmail.com",
-        gender: "male",
-        maritalStatus: "single",
-        otherMobile: "0331-6281670",
-        whosMobile: "personal",
-        qualification: "matriculation",
+        mailingAddress: "",
+        mobile: "",
+        email: "",
+        gender: "",
+        maritalStatus: "",
+        otherMobile: "",
+        whosMobile: "",
+        qualification: "",
 
-        rules: "no",
-        slack: "no",
+        rules: "",
+        slack: "",
 
         internshipFrom: dayjs().format("YYYY-MM-DD"),
         internshipTo: "",
         internId: "",
-        designation: "MERN",
+        designation: "",
 
         offered_By: "",
 
@@ -122,7 +134,7 @@ const CreateInterneeForm = () => {
         appointmentFile: [],
         experienceLetter: [],
 
-        disability: "no",
+        disability: "",
         //Ye field formik me nhi hai
         disabilityType: "",
       }}
@@ -185,7 +197,14 @@ const CreateInterneeForm = () => {
       {({ values, setFieldValue, errors, setTouched, handleSubmit }) => (
         <Box m={5}>
           <Form>
-            <Grid container spacing={2} component={Paper} elevation={2} borderRadius={"5px"} p={3}>
+            <Grid
+              container
+              spacing={2}
+              component={Paper}
+              elevation={2}
+              borderRadius={"5px"}
+              p={3}
+            >
               <Grid item xs={12}>
                 <Typography
                   sx={{
@@ -307,11 +326,20 @@ const CreateInterneeForm = () => {
                     }}
                   >
                     <InputLabel id="gender-label">Gender</InputLabel>
-                    <Field name="gender" as={Select} labelId="gender-label" label="Gender">
+                    <Field
+                      name="gender"
+                      as={Select}
+                      labelId="gender-label"
+                      label="Gender"
+                    >
                       <MenuItem value="male">Male</MenuItem>
                       <MenuItem value="female">Female</MenuItem>
                     </Field>
-                    <ErrorMessage name="gender" style={{ color: "red" }} component="div" />
+                    <ErrorMessage
+                      name="gender"
+                      style={{ color: "red" }}
+                      component="div"
+                    />
                   </FormControl>
                 </div>
               </Grid>
@@ -327,14 +355,25 @@ const CreateInterneeForm = () => {
                       },
                     }}
                   >
-                    <InputLabel id="maritalStatus-label">Marital Status</InputLabel>
-                    <Field name="maritalStatus" as={Select} labelId="maritalStatus-label" label="Marital Status">
+                    <InputLabel id="maritalStatus-label">
+                      Marital Status
+                    </InputLabel>
+                    <Field
+                      name="maritalStatus"
+                      as={Select}
+                      labelId="maritalStatus-label"
+                      label="Marital Status"
+                    >
                       <MenuItem value="single">Single</MenuItem>
                       <MenuItem value="married">Married</MenuItem>
                       <MenuItem value="divorced">Divorced</MenuItem>
                       <MenuItem value="widowed">Widowed</MenuItem>
                     </Field>
-                    <ErrorMessage name="maritalStatus" style={{ color: "red" }} component="div" />
+                    <ErrorMessage
+                      name="maritalStatus"
+                      style={{ color: "red" }}
+                      component="div"
+                    />
                   </FormControl>
                 </div>
               </Grid>
@@ -350,14 +389,25 @@ const CreateInterneeForm = () => {
                       },
                     }}
                   >
-                    <InputLabel id="qualification-label">Qualification</InputLabel>
-                    <Field name="qualification" as={Select} labelId="qualification-label" label="Qualification">
+                    <InputLabel id="qualification-label">
+                      Qualification
+                    </InputLabel>
+                    <Field
+                      name="qualification"
+                      as={Select}
+                      labelId="qualification-label"
+                      label="Qualification"
+                    >
                       <MenuItem value="matriculation">Matriculation</MenuItem>
                       <MenuItem value="intermediate">Intermediate</MenuItem>
                       <MenuItem value="bachelors">Bachelors</MenuItem>
                       <MenuItem value="masters">Masters</MenuItem>
                     </Field>
-                    <ErrorMessage name="qualification" style={{ color: "red" }} component="div" />
+                    <ErrorMessage
+                      name="qualification"
+                      style={{ color: "red" }}
+                      component="div"
+                    />
                   </FormControl>
                 </div>
               </Grid>
@@ -375,7 +425,9 @@ const CreateInterneeForm = () => {
                           },
                         }}
                       >
-                        <InputLabel id="disability-label">Disability</InputLabel>
+                        <InputLabel id="disability-label">
+                          Disability
+                        </InputLabel>
                         <Field
                           name="disability"
                           as={Select}
@@ -392,7 +444,11 @@ const CreateInterneeForm = () => {
                           <MenuItem value="yes">Yes</MenuItem>
                           <MenuItem value="no">No</MenuItem>
                         </Field>
-                        <ErrorMessage name="disability" style={{ color: "red" }} component="div" />
+                        <ErrorMessage
+                          name="disability"
+                          style={{ color: "red" }}
+                          component="div"
+                        />
                       </FormControl>
                     </div>
                   </Grid>
@@ -420,7 +476,15 @@ const CreateInterneeForm = () => {
               </Grid>
             </Grid>
 
-            <Grid container spacing={2} component={Paper} elevation={2} borderRadius={"5px"} mt={2} p={3}>
+            <Grid
+              container
+              spacing={2}
+              component={Paper}
+              elevation={2}
+              borderRadius={"5px"}
+              mt={2}
+              p={3}
+            >
               <Grid item xs={12}>
                 <Typography
                   sx={{
@@ -462,7 +526,10 @@ const CreateInterneeForm = () => {
                   onInput={(event) => {
                     const input = event.target.value;
                     const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                    const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
+                    const formattedmob = formattedInput.replace(
+                      /(.{4})(.?)/,
+                      "$1-$2"
+                    ); // Add dash after the fifth character
                     event.target.value = formattedmob;
                   }}
                 />
@@ -482,7 +549,10 @@ const CreateInterneeForm = () => {
                   onInput={(event) => {
                     const input = event.target.value;
                     const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                    const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
+                    const formattedmob = formattedInput.replace(
+                      /(.{4})(.?)/,
+                      "$1-$2"
+                    ); // Add dash after the fifth character
                     event.target.value = formattedmob;
                   }}
                 />
@@ -524,7 +594,15 @@ const CreateInterneeForm = () => {
               </Grid>
             </Grid>
 
-            <Grid container spacing={2} component={Paper} elevation={2} borderRadius={"5px"} mt={2} p={3}>
+            <Grid
+              container
+              spacing={2}
+              component={Paper}
+              elevation={2}
+              borderRadius={"5px"}
+              mt={2}
+              p={3}
+            >
               <Grid item xs={12}>
                 <Typography
                   sx={{
@@ -551,7 +629,9 @@ const CreateInterneeForm = () => {
                       },
                     }}
                   >
-                    <InputLabel id="my-radio-groupl">Rules and Regulation Signed</InputLabel>
+                    <InputLabel id="my-radio-groupl">
+                      Rules and Regulation Signed
+                    </InputLabel>
                     <Field
                       name="rules"
                       as={Select}
@@ -567,7 +647,11 @@ const CreateInterneeForm = () => {
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </Field>
-                    <ErrorMessage name="rules" style={{ color: "red" }} component="div" />
+                    <ErrorMessage
+                      name="rules"
+                      style={{ color: "red" }}
+                      component="div"
+                    />
                   </FormControl>
                 </div>
               </Grid>
@@ -600,13 +684,25 @@ const CreateInterneeForm = () => {
                       <MenuItem value="yes">Yes</MenuItem>
                       <MenuItem value="no">No</MenuItem>
                     </Field>
-                    <ErrorMessage name="slack" style={{ color: "red" }} component="div" />
+                    <ErrorMessage
+                      name="slack"
+                      style={{ color: "red" }}
+                      component="div"
+                    />
                   </FormControl>
                 </div>
               </Grid>
             </Grid>
 
-            <Grid container spacing={2} component={Paper} elevation={2} borderRadius={"5px"} mt={2} p={3}>
+            <Grid
+              container
+              spacing={2}
+              component={Paper}
+              elevation={2}
+              borderRadius={"5px"}
+              mt={2}
+              p={3}
+            >
               <Grid item xs={12}>
                 <Typography
                   sx={{
@@ -632,7 +728,9 @@ const CreateInterneeForm = () => {
                         },
                       }}
                     >
-                      <InputLabel id="offered _Type">Internship Type:</InputLabel>
+                      <InputLabel id="offered _Type">
+                        Internship Type:
+                      </InputLabel>
                       <Field
                         fullWidth
                         sx={{
@@ -649,7 +747,10 @@ const CreateInterneeForm = () => {
                         onChange={(e) => {
                           const selectedCompany = e.target.value;
                           let monthsToAdd = 0;
-                          if (selectedCompany === "Pasha" || selectedCompany === "PSEB") {
+                          if (
+                            selectedCompany === "Pasha" ||
+                            selectedCompany === "PSEB"
+                          ) {
                             monthsToAdd = 6;
                           } else if (selectedCompany === "VBT") {
                             monthsToAdd = 3;
@@ -657,7 +758,9 @@ const CreateInterneeForm = () => {
 
                           const toDate = new Date();
                           toDate.setMonth(toDate.getMonth() + monthsToAdd);
-                          const formattedDate = toDate.toISOString().substring(0, 10);
+                          const formattedDate = toDate
+                            .toISOString()
+                            .substring(0, 10);
                           const fromDate = new Date();
 
                           setFieldValue("offered_By", selectedCompany); // Corrected field name
@@ -665,20 +768,34 @@ const CreateInterneeForm = () => {
                           setFieldValue("internshipFrom", fromDate);
                         }}
                       >
-                        <MenuItem value="VBT">Unpaid 3 Months from VBT</MenuItem>
-                        <MenuItem value="Pasha">Paid 6 Months from PSEB</MenuItem>
-                        <MenuItem value="PSEB">Paid 6 Months from P@SHA</MenuItem>
+                        <MenuItem value="VBT">
+                          Unpaid 3 Months from VBT
+                        </MenuItem>
+                        <MenuItem value="Pasha">
+                          Paid 6 Months from PSEB
+                        </MenuItem>
+                        <MenuItem value="PSEB">
+                          Paid 6 Months from P@SHA
+                        </MenuItem>
                       </Field>
                     </FormControl>
 
-                    <ErrorMessage name="offered_By" style={{ color: "red" }} component="div" />
+                    <ErrorMessage
+                      name="offered_By"
+                      style={{ color: "red" }}
+                      component="div"
+                    />
                   </div>
                 </div>
 
-                {(values.offered_By === "VBT" || values.offered_By === "Pasha" || values.offered_By === "PSEB") && (
+                {(values.offered_By === "VBT" ||
+                  values.offered_By === "Pasha" ||
+                  values.offered_By === "PSEB") && (
                   <>
                     <div className="grid grid-col-2">
-                      <label className="text-left font-semibold">Internship</label>
+                      <label className="text-left font-semibold">
+                        Internship
+                      </label>
                     </div>
                     <div className="grid grid-cols-2 gap-5  my-4">
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -690,20 +807,29 @@ const CreateInterneeForm = () => {
                           value={dayjs(values.internshipFrom) || dayjs()}
                           onChange={(newValue) => {
                             const fromDate = dayjs(newValue);
-                            setFieldValue("internshipFrom", fromDate.format("YYYY-MM-DD"));
+                            setFieldValue(
+                              "internshipFrom",
+                              fromDate.format("YYYY-MM-DD")
+                            );
 
                             // Calculate new "To" date
                             const selectedCompany = values.offered_By;
                             let monthsToAdd = 0;
 
-                            if (selectedCompany === "Pasha" || selectedCompany === "PSEB") {
+                            if (
+                              selectedCompany === "Pasha" ||
+                              selectedCompany === "PSEB"
+                            ) {
                               monthsToAdd = 6;
                             } else if (selectedCompany === "VBT") {
                               monthsToAdd = 3;
                             }
 
                             const toDate = fromDate.add(monthsToAdd, "month");
-                            setFieldValue("internshipTo", toDate.format("YYYY-MM-DD"));
+                            setFieldValue(
+                              "internshipTo",
+                              toDate.format("YYYY-MM-DD")
+                            );
                           }}
                           slotProps={{
                             textField: {
@@ -791,7 +917,14 @@ const CreateInterneeForm = () => {
 
             {/* ============================================  Documents   ============================================== */}
 
-            <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+            <Grid
+              container
+              spacing={2}
+              component={Paper}
+              sx={{ borderRadius: "5px" }}
+              mt={2}
+              p={3}
+            >
               <Grid item xs={12}>
                 <Typography
                   sx={{
@@ -810,7 +943,9 @@ const CreateInterneeForm = () => {
                   tempFilesRef={tempFilesRef}
                   deletedFilesRef={deletedFilesRef}
                   parentFolder="Internee"
-                  folderName={`${values.firstName.replace(/\s+/g, "").trim()}_${values.internId}`}
+                  folderName={`${values.firstName.replace(/\s+/g, "").trim()}_${
+                    values.internId
+                  }`}
                 />
               </Grid>
             </Grid>
@@ -842,7 +977,10 @@ const CreateInterneeForm = () => {
             </div>
           </Form>
           {loading && (
-            <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+            <Backdrop
+              sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+              open={loading}
+            >
               <LoadingAnim />
             </Backdrop>
           )}
