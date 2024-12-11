@@ -1,9 +1,11 @@
 const salaryModel = require("../models/salarymodel");
 const employeeModel = require("../models/employeemodel");
 const loanModel = require("../models/loanModel");
+const leavesModel = require("../models/leavesModel");
 const advanceSalaryModel = require("../models/advance_salary_model");
 const functions = require("../controllers/functions");
 const db = require("../config/db_connection");
+const paid_unpaid_leaves = require("../utils/paid_unpaid_leaves");
 
 module.exports = {
   pay_salary: async (req, res) => {
@@ -386,26 +388,122 @@ module.exports = {
     }
   },
 
-  calculate_leaves: (req, res) => {
+  calculate_leaves: async (req, res) => {
+    const year = 2024; // Year to query
+    const month = 12; // Month to query (1-12)
+
+    const totalLeaves = await leavesModel.find({
+      $expr: {
+        $and: [{ $eq: [{ $year: "$selectedDate" }, year] }, { $eq: [{ $month: "$selectedDate" }, month] }],
+      },
+      // empId: specificId, // Replace `empId` with your actual field name for the ID
+    });
+
+    const leaves = [
+      {
+        id: "1",
+        type: "full",
+        category: "paid",
+      },
+      {
+        id: "1",
+        type: "full",
+        category: "paid",
+      },
+      {
+        id: "2",
+        type: "full",
+        category: "unpaid",
+      },
+      // =============Ye sb half & paid hain
+      {
+        id: "3",
+        type: "half",
+        category: "paid",
+      },
+      {
+        id: "3",
+        type: "half",
+        category: "paid",
+      },
+      {
+        id: "3",
+        type: "half",
+        category: "paid",
+      },
+      {
+        id: "3",
+        type: "half",
+        category: "paid",
+      },
+      {
+        id: "3",
+        type: "half",
+        category: "paid",
+      },
+      {
+        id: "3",
+        type: "half",
+        category: "paid",
+      },
+      // =============Ye sb half & unpaid hain
+      {
+        id: "4",
+        type: "half",
+        category: "unpaid",
+      },
+      {
+        id: "4",
+        type: "half",
+        category: "unpaid",
+      },
+      {
+        id: "4",
+        type: "half",
+        category: "unpaid",
+      },
+      {
+        id: "4",
+        type: "half",
+        category: "unpaid",
+      },
+      {
+        id: "4",
+        type: "half",
+        category: "unpaid",
+      },
+      {
+        id: "4",
+        type: "half",
+        category: "unpaid",
+      },
+    ];
+
+    const { paidLeavesCount, unpaidLeavesCount, halfLeavesPaidCount, halfLeavesUnpaidCount } =
+      paid_unpaid_leaves(leaves);
+
+    //half,
     try {
       console.log("Caclulate Leaves", req.body);
-
       //Total Salalry and per day salary
-      const totalDaysInMonth = 31;
-      salaryPerday = 31000 / totalDaysInMonth;
-      let totalSalary = 0;
+      const netPay = 30000;
+      const totalDaysInMonth = 30;
 
-      // leaves calculate
-      let fullLeaves = 0;
-      let halfLeaves = 0;
+      salaryPerday = netPay / totalDaysInMonth;
 
-      halfLeaves = 3;
+      let totalSalary = netPay - unpaidLeavesCount * salaryPerday;
 
-      if (halfLeaves === 3) {
-        fullLeaves += 1;
-      }
-
-      res.status(200).json({ message: "success", halfLeaves, fullLeaves, salaryPerday, totalDaysInMonth, totalSalary });
+      res.status(200).json({
+        message: "success",
+        paidLeavesCount,
+        unpaidLeavesCount,
+        salaryPerday,
+        totalDaysInMonth,
+        totalSalary,
+        halfLeavesPaidCount,
+        halfLeavesUnpaidCount,
+        totalLeaves,
+      });
     } catch (error) {
       res.status(501).json({ message: "error" });
     }

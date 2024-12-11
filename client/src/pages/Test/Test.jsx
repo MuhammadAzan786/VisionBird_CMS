@@ -1,6 +1,9 @@
-import { Paper, Typography } from "@mui/material";
+import { InfoOutlined } from "@mui/icons-material";
+import { Box, Button, Paper, Typography } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { customColors } from "../../theme/colors";
 
 const Test = () => {
   const [state, setState] = useState({});
@@ -31,13 +34,23 @@ const Test = () => {
         <Typography variant="h2">Test route</Typography>
         {JSON.stringify(state)}
       </Paper>
+
+      <Paper>{JSON.stringify(state.totalLeaves)}</Paper>
       <Paper>
         <Typography variant="h5" color="red">
-          halfLeaves: {state.halfLeaves}
+          halfLeavesPaidCount: {state.halfLeavesPaidCount}
+        </Typography>
+        <br />
+        <Typography variant="h5" color="red">
+          halfLeavesUnpaidCount: {state.halfLeavesUnpaidCount}
+        </Typography>
+        <br />
+        <Typography variant="h5" color="red">
+          paidLeaves: {state.paidLeavesCount}
         </Typography>
         <br />
         <Typography variant="h5" color="green">
-          fullLeaves: {state.fullLeaves}
+          unpaidLeaves: {state.unpaidLeavesCount}
         </Typography>
         <br />
         <Typography variant="h5" color="blue">
