@@ -19,12 +19,14 @@ module.exports = {
         message,
         leave_id: leave._id,
       });
-      const admin=await Employee.findOne({role:"admin"})
+      const admin = await Employee.findOne({ role: "admin" });
       ioInstance.to(req.body.for.toString()).emit("notification", notification);
-      
-      ioInstance.to(req.body.from.toString()).emit("notification", notification);
-       ioInstance.to(admin._id.toString()).emit("notification", notification);
-      
+
+      ioInstance
+        .to(req.body.from.toString())
+        .emit("notification", notification);
+      ioInstance.to(admin._id.toString()).emit("notification", notification);
+
       res.status(201).json("Leave request saved.");
     } catch (error) {
       console.error("Error saving leave: ", error);
@@ -89,10 +91,11 @@ module.exports = {
     try {
       const _id = req.params.id;
       const status = req.body.status;
-      const statusForLeave =
-        status == "Rejected"
-          ? `Rejected by ${req.body.statusChangedBy}`
-          : `Accepted by ${req.body.statusChangedBy}`;
+      const statusForLeave = status == "Rejected" ? "rejected" : "accepted";
+      // status == "Rejected"
+      //   ? `Rejected by ${req.body.statusChangedBy}`
+      //   : `Accepted by ${req.body.statusChangedBy}`;
+
       let message = "";
       if (status == "Rejected") {
         message = `Leave request rejected by ${req.body.statusChangedBy}`;
@@ -107,7 +110,7 @@ module.exports = {
         message,
         leave_id: _id,
       }); //For has user ID that has requested leave.
-      const admin=await Employee.findOne({role:"admin"})
+      const admin = await Employee.findOne({ role: "admin" });
       console.log("notification", notification);
 
       //Employeee, Manager (Dont try to understant,, u Cant)
@@ -118,10 +121,10 @@ module.exports = {
       ioInstance
         .to(req.body.statusChangedById.toString())
         .emit("notification", notification);
-      
+
       //Admin (Dont remove this )
-       ioInstance.to(admin._id.toString()).emit("notification", notification);
-      
+      ioInstance.to(admin._id.toString()).emit("notification", notification);
+
       res.status(200).json({ message: "Leave status changed successfully." });
     } catch (error) {
       console.error("Error changing leave status: ", error);

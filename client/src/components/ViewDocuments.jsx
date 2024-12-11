@@ -88,7 +88,10 @@ const ViewDocuments = ({ values }) => {
               }}
             />
           ) : (
-            <img style={{}} src={image?.secure_url} alt="Uploaded content" />
+              <img style={{
+                objectFit: 'contain',
+                height:"100%"
+            }} src={image?.secure_url} alt="Uploaded content" />
           )}
         </Box>
       </Grid>
