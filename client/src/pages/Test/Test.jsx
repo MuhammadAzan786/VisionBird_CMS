@@ -16,8 +16,9 @@ const Test = () => {
     const calculateLeaves = async () => {
       try {
         const res = await axios.post("/api/pay/calculate_leaves", {
-          date,
-          id: "6757f2719e6db7999c4d695e",
+          month: 12,
+          year: 2024,
+          userId: "6757f2719e6db7999c4d695e",
         });
         setState(res.data);
       } catch (error) {
@@ -32,10 +33,9 @@ const Test = () => {
     <>
       <Paper>
         <Typography variant="h2">Test route</Typography>
-        {JSON.stringify(state)}
+        {/* <Typography> {JSON.stringify(state)}</Typography> */}
       </Paper>
 
-      <Paper>{JSON.stringify(state.totalLeaves)}</Paper>
       <Paper>
         <Typography variant="h5" color="red">
           halfLeavesPaidCount: {state.halfLeavesPaidCount}
@@ -57,6 +57,10 @@ const Test = () => {
           Total Days IN Month: {state.totalDaysInMonth}
         </Typography>
         <br />
+        <Typography variant="h5" color="orange">
+          grossSalary: {state.grossSalary}
+        </Typography>
+        <br />
         <Typography variant="h5" color="purple">
           Salary Per Day: {state.salaryPerday}
         </Typography>
@@ -65,6 +69,15 @@ const Test = () => {
         <Typography variant="h5" color="grey">
           Total Salary: {state.totalSalary}
         </Typography>
+      </Paper>
+
+      <Paper>
+        {" "}
+        {state?.totalLeaves?.map((leave, index) => (
+          <div key={index}>
+            {JSON.stringify(leave, null, 2)} {/* Indentation of 2 spaces */}
+          </div>
+        ))}
       </Paper>
     </>
   );

@@ -6,23 +6,25 @@ const advanceSalaryModel = require("../models/advance_salary_model");
 const functions = require("../controllers/functions");
 const db = require("../config/db_connection");
 const paid_unpaid_leaves = require("../utils/paid_unpaid_leaves");
+const { default: mongoose } = require("mongoose");
+const colors = require("colors");
+const daysInMonth = require("../utils/date/daysInMonths");
 
 module.exports = {
   pay_salary: async (req, res) => {
+    //Months are comming 1-12 based
     try {
-      const { button } = req.body;
+      const { button, cheque_number, id: employee_id, salary_month, salary_year } = req.body;
 
       console.log("ye req ki body hai", req.body.paid_leaves);
 
       let basicpay, allowances, grossSalary, per_day_wage, per_hour_wage, num_of_month_salary_paid;
 
-      const cheque_number = req.body.cheque_number;
-      const employee_id = req.params.id;
-      const salary_month = req.body.salary_month;
-      const salary_year = req.body.salary_year;
       const incentive = Number(+req.body.incentive) || 0;
-      const daysInMonth = (salary_year, salary_month) => new Date(salary_year, salary_month, 0).getDate();
+      const bonus = Number(+req.body.extra_bonus) || 0;
       const employee = await employeeModel.findOne({ _id: employee_id });
+
+      // Leaves Calculations
       const paidLeaves = Number(+req.body.paid_leaves) || 0;
       const halfLeaves = Number(+req.body.Half_leaves) || 0;
       unpaid_fullday_leaves = Number(+req.body.unpaid_leaves) || 0;
@@ -30,19 +32,15 @@ module.exports = {
       unpaid_half_leaves = halfLeaves > 2 ? halfLeaves - 2 : 0;
       const total_unpaid_leaves = unpaid_fullday_leaves + unpaid_half_leaves;
 
-      const days = daysInMonth(salary_year, salary_month);
-
-      const bonus = Number(+req.body.extra_bonus) || 0;
-
       const leaves = total_unpaid_leaves + paidLeaves;
-      const num_sundays_saturdays = functions.countSundaysAndSaturdays(salary_year, salary_month);
-      const total_days_worked = days - (num_sundays_saturdays.saturdays + num_sundays_saturdays.sundays) - leaves;
-      const working_days_without_weekends = days - (num_sundays_saturdays.saturdays + num_sundays_saturdays.sundays);
+
+      //Check:
 
       if (employee.probationPeriod == "yes") {
         num_of_month_salary_paid = await salaryModel.countDocuments({
           employee_obj_id: employee_id,
         });
+
         total_salaries_paid = num_of_month_salary_paid + 1;
         if (total_salaries_paid <= employee.probationMonth) {
           basicpay = Number(employee.BasicPayInProbationPeriod);
@@ -58,13 +56,22 @@ module.exports = {
         allowances = Number(employee.AllowancesAfterProbationPeriod);
         grossSalary = basicpay + allowances + incentive;
       }
+
+      const days = daysInMonth(salary_year, salary_month);
       per_day_wage = grossSalary / days;
-      per_hour_wage = per_day_wage / 8;
       const amountDeducted = total_unpaid_leaves * per_day_wage;
-      console.log("Amount Deducted", amountDeducted);
       let net_salary = grossSalary + bonus - amountDeducted;
 
       console.log("Advance Payment se phly net ki value", net_salary);
+
+      //Isne bs display hona hai
+      ///
+      ////
+      ///
+
+      const num_sundays_saturdays = functions.countSundaysAndSaturdays(salary_year, salary_month);
+      const working_days_without_weekends = days - (num_sundays_saturdays.saturdays + num_sundays_saturdays.sundays);
+      const total_days_worked = days - (num_sundays_saturdays.saturdays + num_sundays_saturdays.sundays) - leaves;
 
       // ================= Advance Payment ===================== //
 
@@ -389,109 +396,41 @@ module.exports = {
   },
 
   calculate_leaves: async (req, res) => {
-    const year = 2024; // Year to query
-    const month = 12; // Month to query (1-12)
-
-    const totalLeaves = await leavesModel.find({
-      $expr: {
-        $and: [{ $eq: [{ $year: "$selectedDate" }, year] }, { $eq: [{ $month: "$selectedDate" }, month] }],
-      },
-      // empId: specificId, // Replace `empId` with your actual field name for the ID
-    });
-
-    const leaves = [
-      {
-        id: "1",
-        type: "full",
-        category: "paid",
-      },
-      {
-        id: "1",
-        type: "full",
-        category: "paid",
-      },
-      {
-        id: "2",
-        type: "full",
-        category: "unpaid",
-      },
-      // =============Ye sb half & paid hain
-      {
-        id: "3",
-        type: "half",
-        category: "paid",
-      },
-      {
-        id: "3",
-        type: "half",
-        category: "paid",
-      },
-      {
-        id: "3",
-        type: "half",
-        category: "paid",
-      },
-      {
-        id: "3",
-        type: "half",
-        category: "paid",
-      },
-      {
-        id: "3",
-        type: "half",
-        category: "paid",
-      },
-      {
-        id: "3",
-        type: "half",
-        category: "paid",
-      },
-      // =============Ye sb half & unpaid hain
-      {
-        id: "4",
-        type: "half",
-        category: "unpaid",
-      },
-      {
-        id: "4",
-        type: "half",
-        category: "unpaid",
-      },
-      {
-        id: "4",
-        type: "half",
-        category: "unpaid",
-      },
-      {
-        id: "4",
-        type: "half",
-        category: "unpaid",
-      },
-      {
-        id: "4",
-        type: "half",
-        category: "unpaid",
-      },
-      {
-        id: "4",
-        type: "half",
-        category: "unpaid",
-      },
-    ];
-
-    const { paidLeavesCount, unpaidLeavesCount, halfLeavesPaidCount, halfLeavesUnpaidCount } =
-      paid_unpaid_leaves(leaves);
+    console.log("********************** Calculate Leaves Controller Logged **********************".green);
+    console.log("Caclulate Leaves Data", req.body);
 
     //half,
     try {
-      console.log("Caclulate Leaves", req.body);
-      //Total Salalry and per day salary
-      const netPay = 30000;
-      const totalDaysInMonth = 30;
+      const { month, year, userId } = req.body;
 
-      salaryPerday = netPay / totalDaysInMonth;
+      // ================== Caclulating Leaves
+      const totalLeaves = await leavesModel.aggregate([
+        {
+          $match: {
+            from: new mongoose.Types.ObjectId(userId),
+            $expr: {
+              $and: [{ $eq: [{ $year: "$selectedDate" }, year] }, { $eq: [{ $month: "$selectedDate" }, month] }],
+            },
+          },
+        },
+      ]);
 
-      let totalSalary = netPay - unpaidLeavesCount * salaryPerday;
+      const { paidLeavesCount, unpaidLeavesCount, halfLeavesPaidCount, halfLeavesUnpaidCount } =
+        paid_unpaid_leaves(totalLeaves);
+
+      // ================== Caclulating Leaves
+
+      const { BasicPayAfterProbationPeriod, AllowancesAfterProbationPeriod } = await employeeModel.findById(userId, {
+        BasicPayAfterProbationPeriod: 1,
+        AllowancesAfterProbationPeriod: 1,
+        _id: 0,
+      });
+
+      const grossSalary = BasicPayAfterProbationPeriod + AllowancesAfterProbationPeriod;
+      const totalDaysInMonth = 31;
+      salaryPerday = Math.round(grossSalary / totalDaysInMonth);
+      const unpaidLeaveAmount = unpaidLeavesCount * salaryPerday;
+      let totalSalary = grossSalary - unpaidLeaveAmount;
 
       res.status(200).json({
         message: "success",
@@ -503,6 +442,7 @@ module.exports = {
         halfLeavesPaidCount,
         halfLeavesUnpaidCount,
         totalLeaves,
+        grossSalary,
       });
     } catch (error) {
       res.status(501).json({ message: "error" });
