@@ -47,18 +47,9 @@ const ViewDocuments = ({ values }) => {
   const handleTabValue = (event, newValue) => {
     setTabValue(newValue);
   };
-     const allowedFileTypes = [
-       "jpg",
-       "jpeg",
-       "png",
-       "gif",
-       "bmp",
-       "tiff",
-       "webp",
-     ];
+  const allowedFileTypes = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp"];
   return (
     <Grid container spacing={2}>
-      
       <Grid item xs={12} md={6} lg={5}>
         <Box
           sx={{
@@ -91,9 +82,9 @@ const ViewDocuments = ({ values }) => {
             }}
           >
             {/* If the image is a PDF */}
-            {
-               !allowedFileTypes.includes(
-              image?.original_file_name?.split(".").pop())? (
+            {!allowedFileTypes.includes(
+              image?.original_file_name?.split(".").pop()
+            ) ? (
               <DescriptionOutlined
                 sx={{
                   fontSize: "20rem",
@@ -112,7 +103,6 @@ const ViewDocuments = ({ values }) => {
                     .toLowerCase();
 
                   // Allowed file types for image
-               
 
                   if (!allowedFileTypes.includes(fileExtension)) {
                     const url = image.secure_url; // File URL
@@ -269,6 +259,7 @@ const ViewDocuments = ({ values }) => {
 };
 
 const MediaList = ({ data, handleDelete, setImage }) => {
+  const allowedFileTypes = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp"];
   return (
     <Box>
       <List>
@@ -286,7 +277,9 @@ const MediaList = ({ data, handleDelete, setImage }) => {
               mb: 2,
             }}
           >
-            {item.resource_type === "image" ? (
+            {allowedFileTypes.includes(
+              item?.original_file_name?.split(".").pop()
+            ) ? (
               <ListItemAvatar>
                 <Avatar
                   src={item.secure_url}

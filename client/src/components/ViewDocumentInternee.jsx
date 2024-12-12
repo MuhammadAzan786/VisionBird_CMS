@@ -14,7 +14,12 @@ import {
 import React, { useEffect, useState } from "react";
 import { customColors } from "../theme/colors";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Close, DescriptionOutlined, DownloadOutlined, InsertDriveFile } from "@mui/icons-material";
+import {
+  Close,
+  DescriptionOutlined,
+  DownloadOutlined,
+  InsertDriveFile,
+} from "@mui/icons-material";
 
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import toast from "react-hot-toast";
@@ -236,6 +241,7 @@ const ViewDocumentInternee = ({ values }) => {
 };
 
 const MediaList = ({ data, handleDelete, setImage }) => {
+  const allowedFileTypes = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp"];
   return (
     <Box sx={{ marginTop: "20px" }}>
       <List>
@@ -253,7 +259,9 @@ const MediaList = ({ data, handleDelete, setImage }) => {
               mb: 2,
             }}
           >
-            {item.resource_type === "image" ? (
+            {allowedFileTypes.includes(
+              item?.original_file_name?.split(".").pop()
+            ) ? (
               <ListItemAvatar>
                 <Avatar
                   src={item.secure_url}
