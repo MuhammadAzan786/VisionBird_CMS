@@ -14,7 +14,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { customColors } from "../theme/colors";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Close, DownloadOutlined, InsertDriveFile } from "@mui/icons-material";
+import { Close, DescriptionOutlined, DownloadOutlined, InsertDriveFile } from "@mui/icons-material";
 
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import toast from "react-hot-toast";
@@ -27,7 +27,7 @@ const ViewDocumentInternee = ({ values }) => {
   console.log(values.interneeProImage);
   const [tabValue, setTabValue] = useState("interneeProImage");
   const [image, setImage] = useState({});
-
+  const allowedFileTypes = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp"];
   useEffect(() => {
     setImage(values?.interneeProImage);
   }, [values]);
@@ -68,8 +68,11 @@ const ViewDocumentInternee = ({ values }) => {
             }}
           >
             {/* If the image is a PDF */}
-            {image?.original_file_name?.split(".").pop() === "pdf" ? (
-              <PictureAsPdfIcon
+
+            {!allowedFileTypes.includes(
+              image?.original_file_name?.split(".").pop()
+            ) ? (
+              <DescriptionOutlined
                 sx={{
                   fontSize: "20rem",
                   cursor: "pointer",
@@ -87,15 +90,6 @@ const ViewDocumentInternee = ({ values }) => {
                     .toLowerCase();
 
                   // Allowed file types for image
-                  const allowedFileTypes = [
-                    "jpg",
-                    "jpeg",
-                    "png",
-                    "gif",
-                    "bmp",
-                    "tiff",
-                    "webp",
-                  ];
 
                   if (!allowedFileTypes.includes(fileExtension)) {
                     const url = image.secure_url; // File URL

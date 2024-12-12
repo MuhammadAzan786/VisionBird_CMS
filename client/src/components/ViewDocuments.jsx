@@ -19,6 +19,8 @@ import { TabContext, TabList, TabPanel } from "@mui/lab";
 import {
   Close,
   DeleteOutline,
+  DescriptionOutlined,
+  DocumentScannerOutlined,
   DownloadOutlined,
   FolderZip,
   FolderZipOutlined,
@@ -45,6 +47,15 @@ const ViewDocuments = ({ values }) => {
   const handleTabValue = (event, newValue) => {
     setTabValue(newValue);
   };
+     const allowedFileTypes = [
+       "jpg",
+       "jpeg",
+       "png",
+       "gif",
+       "bmp",
+       "tiff",
+       "webp",
+     ];
   return (
     <Grid container spacing={2}>
       
@@ -80,8 +91,10 @@ const ViewDocuments = ({ values }) => {
             }}
           >
             {/* If the image is a PDF */}
-            {image?.original_file_name?.split(".").pop() === "pdf" ? (
-              <PictureAsPdfIcon
+            {
+               !allowedFileTypes.includes(
+              image?.original_file_name?.split(".").pop())? (
+              <DescriptionOutlined
                 sx={{
                   fontSize: "20rem",
                   cursor: "pointer",
@@ -99,15 +112,7 @@ const ViewDocuments = ({ values }) => {
                     .toLowerCase();
 
                   // Allowed file types for image
-                  const allowedFileTypes = [
-                    "jpg",
-                    "jpeg",
-                    "png",
-                    "gif",
-                    "bmp",
-                    "tiff",
-                    "webp",
-                  ];
+               
 
                   if (!allowedFileTypes.includes(fileExtension)) {
                     const url = image.secure_url; // File URL
