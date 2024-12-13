@@ -214,7 +214,6 @@ const UpdateInterneeForm = () => {
               container
               spacing={2}
               component={Paper}
-              elevation={2}
               borderRadius={"5px"}
               p={3}
             >
@@ -476,7 +475,6 @@ const UpdateInterneeForm = () => {
               container
               spacing={2}
               component={Paper}
-              elevation={2}
               borderRadius={"5px"}
               mt={2}
               p={3}
@@ -594,7 +592,6 @@ const UpdateInterneeForm = () => {
               container
               spacing={2}
               component={Paper}
-              elevation={2}
               borderRadius={"5px"}
               mt={2}
               p={3}
@@ -682,7 +679,6 @@ const UpdateInterneeForm = () => {
               container
               spacing={2}
               component={Paper}
-              elevation={2}
               borderRadius={"5px"}
               mt={2}
               p={3}
@@ -891,7 +887,7 @@ const UpdateInterneeForm = () => {
                     mb: 5,
                   }}
                 >
-                  Upload Documents
+                  Documents
                 </Typography>
 
                 <UploadFilesInternee
