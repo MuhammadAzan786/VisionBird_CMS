@@ -34,6 +34,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import ViewDocuments from "../../components/ViewDocuments";
 import ViewDocumentInternee from "../../components/ViewDocumentInternee";
 import toast from "react-hot-toast";
+import { saveAs } from "file-saver";
+import { FolderZipOutlined } from "@mui/icons-material";
+import JSZip from "jszip";
 
 const InterneeProfile = () => {
   const { currentUser } = useSelector((state) => state.user);
@@ -44,7 +47,136 @@ const InterneeProfile = () => {
   const navigate = useNavigate();
 
   const location = useLocation();
+  const downloadZip = async () => {
+    console.log("clicked", user);
+    console.log("clicked", user);
 
+    // Assuming `user` contains the arrays/objects like policeCertificateUpload[], cnicScanCopy[], etc.
+    const projects = [
+      ...user.appointmentFile, // Array of objects with secure_url
+      user.interneeProImage, // Object with secure_url (e.g., { secure_url: "..." })
+      ...user.experienceLetter, // Array of objects with secure_url
+      ...user.cnicFile, // Array of objects with secure_url
+    ];
+
+    // Create a new JSZip instance
+    const zip = new JSZip();
+    const folder = zip.folder(`${user.firstName}_Documents`);
+
+    // Function to handle file addition to the zip
+    const addFileToZip = async (fileUrl, fileName) => {
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+      folder.file(fileName, blob);
+    };
+
+    // Iterate through each project (either object with secure_url or array of objects with secure_url)
+    for (const project of projects) {
+      // If it's a single object (like employeeProImage) with a 'secure_url'
+      if (project?.secure_url) {
+        const fileName = project?.secure_url.split("/").pop();
+        await addFileToZip(project?.secure_url, fileName);
+      }
+      // If it's an array of objects (like policeCertificateUpload[], cnicScanCopy[], etc.)
+      else if (Array.isArray(project)) {
+        for (const item of project) {
+          if (item?.secure_url) {
+            const fileName = item?.secure_url.split("/").pop();
+            await addFileToZip(item?.secure_url, fileName);
+          }
+        }
+      }
+    }
+
+    // Generate the ZIP file and trigger the download
+    await zip.generateAsync({ type: "blob" }).then(function (blob) {
+      saveAs(blob, `${user.firstName}_Documents.zip`);
+    });
+    //  const projects= // policeCertificateUpload[] ,employeeProImage{secure_url },degreesScanCopy[], cnicScanCopy[]
+
+    //   const zip = new JSZip();
+    //   const folder = zip.folder("projects");
+    //   for (const project of projects) {
+    //     console.log("this is project ");
+    //     console.log(project);
+    //     const response = await fetch(project.project_images);
+    //     console.log("res", response);
+    //     const blob = await response.blob();
+
+    //     // Add each file to the folder inside the zip
+    //     for (const img of project.project_images) {
+    //       folder.file(img.split("/").pop(), blob);
+    //     }
+    //   }
+    //   await zip.generateAsync({ type: "blob" }).then(function (blob) {
+    //     saveAs(blob, `projects.zip`);
+    //   });
+  };
+  //  const downloadZip = async () => {
+  //    console.log("clicked", user);
+  //    console.log("clicked", user);
+
+  //    // Assuming `user` contains the arrays/objects like policeCertificateUpload[], cnicScanCopy[], etc.
+  //    const projects = [
+  //      ...user.policeCertificateUpload, // Array of objects with secure_url
+  //      user.employeeProImage, // Object with secure_url (e.g., { secure_url: "..." })
+  //      ...user.degreesScanCopy, // Array of objects with secure_url
+  //      ...user.cnicScanCopy, // Array of objects with secure_url
+  //    ];
+
+  //    // Create a new JSZip instance
+  //    const zip = new JSZip();
+  //    const folder = zip.folder("Employee Documents");
+
+  //    // Function to handle file addition to the zip
+  //    const addFileToZip = async (fileUrl, fileName) => {
+  //      const response = await fetch(fileUrl);
+  //      const blob = await response.blob();
+  //      folder.file(fileName, blob);
+  //    };
+
+  //    // Iterate through each project (either object with secure_url or array of objects with secure_url)
+  //    for (const project of projects) {
+  //      // If it's a single object (like employeeProImage) with a 'secure_url'
+  //      if (project?.secure_url) {
+  //        const fileName = project?.secure_url.split("/").pop();
+  //        await addFileToZip(project?.secure_url, fileName);
+  //      }
+  //      // If it's an array of objects (like policeCertificateUpload[], cnicScanCopy[], etc.)
+  //      else if (Array.isArray(project)) {
+  //        for (const item of project) {
+  //          if (item?.secure_url) {
+  //            const fileName = item?.secure_url.split("/").pop();
+  //            await addFileToZip(item?.secure_url, fileName);
+  //          }
+  //        }
+  //      }
+  //    }
+
+  //    // Generate the ZIP file and trigger the download
+  //    await zip.generateAsync({ type: "blob" }).then(function (blob) {
+  //      saveAs(blob, `Employee Documents.zip`);
+  //    });
+  //    //  const projects= // policeCertificateUpload[] ,employeeProImage{secure_url },degreesScanCopy[], cnicScanCopy[]
+
+  //    //   const zip = new JSZip();
+  //    //   const folder = zip.folder("projects");
+  //    //   for (const project of projects) {
+  //    //     console.log("this is project ");
+  //    //     console.log(project);
+  //    //     const response = await fetch(project.project_images);
+  //    //     console.log("res", response);
+  //    //     const blob = await response.blob();
+
+  //    //     // Add each file to the folder inside the zip
+  //    //     for (const img of project.project_images) {
+  //    //       folder.file(img.split("/").pop(), blob);
+  //    //     }
+  //    //   }
+  //    //   await zip.generateAsync({ type: "blob" }).then(function (blob) {
+  //    //     saveAs(blob, `projects.zip`);
+  //    //   });
+  //  };
   const isActive = (path) => location.pathname === path;
 
   const handleSuccess = () => {
@@ -677,7 +809,8 @@ const InterneeProfile = () => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid
+
+        {/* <Grid
           container
           spacing={2}
           component={Paper}
@@ -696,6 +829,42 @@ const InterneeProfile = () => {
             >
               Upload Documents
             </Typography>
+            {user && <ViewDocumentInternee values={user} />}
+          </Grid>
+        </Grid> */}
+        <Grid
+          container
+          spacing={2}
+          component={Paper}
+          sx={{ borderRadius: "5px" }}
+          mt={2}
+          p={3}
+        >
+          <Grid item xs={12}>
+            <Grid container>
+              <Grid item xs={6}>
+                <Typography
+                  sx={{
+                    fontWeight: "600",
+                    fontSize: "20px",
+                    color: "#3b4056",
+                    mb: 5,
+                  }}
+                >
+                  Upload Documents
+                </Typography>
+              </Grid>
+              <Grid item xs={6} sx={{ textAlign: "right" }}>
+                <Button
+                  variant="contained"
+                  endIcon={<FolderZipOutlined />}
+                  onClick={downloadZip}
+                >
+                  Download All
+                </Button>
+              </Grid>
+            </Grid>
+
             {user && <ViewDocumentInternee values={user} />}
           </Grid>
         </Grid>
