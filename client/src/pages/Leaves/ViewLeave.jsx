@@ -63,9 +63,15 @@ export default function ViewLeave() {
       socket.on("notification", () => {
         getLeaves();
       });
+      socket.on("leaveStatusChange", () => {
+        getLeaves();
+      });
       return () => {
         socket.off("notification", () => {
           // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
+        });
+        socket.off("leaveStatusChange", () => {
+          getLeaves();
         });
       };
     } else {

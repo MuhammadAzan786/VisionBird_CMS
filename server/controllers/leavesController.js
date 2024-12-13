@@ -24,8 +24,8 @@ module.exports = {
 
       ioInstance
         .to(req.body.from.toString())
-        .emit("notification", notification);
-      ioInstance.to(admin._id.toString()).emit("notification", notification);
+        .emit("leaveSent", notification);
+      ioInstance.to(admin._id.toString()).emit("leaveSent", notification);
 
       res.status(201).json("Leave request saved.");
     } catch (error) {
@@ -120,10 +120,12 @@ module.exports = {
       //Manager, Admin  (Leaave it as it is , its working)
       ioInstance
         .to(req.body.statusChangedById.toString())
-        .emit("notification", notification);
+        .emit("leaveStatusChanges", notification);
 
       //Admin (Dont remove this )
-      ioInstance.to(admin._id.toString()).emit("notification", notification);
+      ioInstance
+        .to(admin._id.toString())
+        .emit("leaveStatusChanges", notification);
 
       res.status(200).json({ message: "Leave status changed successfully." });
     } catch (error) {
