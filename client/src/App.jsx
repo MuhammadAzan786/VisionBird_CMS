@@ -60,7 +60,6 @@ import Unauthorized from "./pages/Unauthorized";
 import { clearSocket } from "./redux/socketSlice";
 import { signOut } from "./redux/user/userSlice";
 import Notifications from "./pages/Notifications/Notifications";
-import EmployeeLeaveHistory from "./pages/Leaves/EmployeeLeaveHistory";
 
 const App = () => {
   const socket = useSelector((state) => state.socket.socket);

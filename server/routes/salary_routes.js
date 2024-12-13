@@ -5,7 +5,8 @@ const salaryController = require("../controllers/salarycontroller");
 const auth = require("../Middlewares/auth");
 const authorizeRoles = require("../Middlewares/authorization");
 
-router.post("/pay_salary/:id", auth, authorizeRoles("admin", "manager"), salaryController.pay_salary);
+router.post("/view_salary", auth, authorizeRoles("admin", "manager"), salaryController.view_salary);
+router.post("/pay_salary", auth, authorizeRoles("admin", "manager"), salaryController.pay_salary);
 router.get("/get_salary/:id", auth, authorizeRoles("admin", "manager"), salaryController.getSingleSalary);
 router.get(
   "/monthly_salary_report",

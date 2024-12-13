@@ -1,207 +1,89 @@
 const salaryModel = require("../models/salarymodel");
 const employeeModel = require("../models/employeemodel");
-const loanModel = require("../models/loanModel");
-const leavesModel = require("../models/leavesModel");
-const advanceSalaryModel = require("../models/advance_salary_model");
-const functions = require("../controllers/functions");
-const db = require("../config/db_connection");
 const paid_unpaid_leaves = require("../utils/paid_unpaid_leaves");
-const { default: mongoose } = require("mongoose");
-const colors = require("colors");
+
 const daysInMonth = require("../utils/date/daysInMonths");
+const calculateGrossSalary = require("../utils/calculateGrossSalary");
 
 module.exports = {
-  pay_salary: async (req, res) => {
-    //Months are comming 1-12 based
+  //Months are comming 1-12 based
+  view_salary: async (req, res) => {
     try {
-      const { button, cheque_number, id: employee_id, salary_month, salary_year } = req.body;
+      const { salary_month, salary_year, incentive, extra_bonus, employeeDetails } = req.body;
 
-      console.log("ye req ki body hai", req.body.paid_leaves);
+      const { _id: employee_id } = employeeDetails;
 
-      let basicpay, allowances, grossSalary, per_day_wage, per_hour_wage, num_of_month_salary_paid;
-
-      const incentive = Number(+req.body.incentive) || 0;
-      const bonus = Number(+req.body.extra_bonus) || 0;
       const employee = await employeeModel.findOne({ _id: employee_id });
 
-      // Leaves Calculations
-      const paidLeaves = Number(+req.body.paid_leaves) || 0;
-      const halfLeaves = Number(+req.body.Half_leaves) || 0;
-      unpaid_fullday_leaves = Number(+req.body.unpaid_leaves) || 0;
-      let unpaid_half_leaves = 0;
-      unpaid_half_leaves = halfLeaves > 2 ? halfLeaves - 2 : 0;
-      const total_unpaid_leaves = unpaid_fullday_leaves + unpaid_half_leaves;
+      const leaves_data = await paid_unpaid_leaves(employee_id, Number(salary_month), Number(salary_year));
+      const { unpaidLeavesCount } = leaves_data;
 
-      const leaves = total_unpaid_leaves + paidLeaves;
+      const { gross_salary, basic_pay, allowances } = await calculateGrossSalary(employee);
 
-      //Check:
+      const number_of_days_in_month = daysInMonth(salary_year, salary_month);
+      const per_day_wage = gross_salary / number_of_days_in_month;
+      const unpaid_leave_amount = unpaidLeavesCount * per_day_wage;
 
-      if (employee.probationPeriod == "yes") {
-        num_of_month_salary_paid = await salaryModel.countDocuments({
-          employee_obj_id: employee_id,
-        });
+      let net_salary = gross_salary + Number(extra_bonus) + Number(incentive) - unpaid_leave_amount;
 
-        total_salaries_paid = num_of_month_salary_paid + 1;
-        if (total_salaries_paid <= employee.probationMonth) {
-          basicpay = Number(employee.BasicPayInProbationPeriod);
-          allowances = Number(employee.AllowancesInProbationPeriod);
-          grossSalary = basicpay + allowances + incentive;
-        } else if (total_salaries_paid >= employee.probationMonth) {
-          basicpay = Number(employee.BasicPayAfterProbationPeriod);
-          allowances = Number(employee.AllowancesAfterProbationPeriod);
-          grossSalary = basicpay + allowances + incentive;
-        }
-      } else if (employee.probationPeriod == "no") {
-        basicpay = Number(employee.BasicPayAfterProbationPeriod);
-        allowances = Number(employee.AllowancesAfterProbationPeriod);
-        grossSalary = basicpay + allowances + incentive;
-      }
+      const total_days_worked = 80; //TODO: Later remove hardcore
 
-      const days = daysInMonth(salary_year, salary_month);
-      per_day_wage = grossSalary / days;
-      const amountDeducted = total_unpaid_leaves * per_day_wage;
-      let net_salary = grossSalary + bonus - amountDeducted;
+      //Leavs ki info jaani hai
+      //Days worked
+      //basipay, allowances, grossSalary
+      //net_salary
 
-      console.log("Advance Payment se phly net ki value", net_salary);
-
-      //Isne bs display hona hai
-      ///
-      ////
-      ///
-
-      const num_sundays_saturdays = functions.countSundaysAndSaturdays(salary_year, salary_month);
-      const working_days_without_weekends = days - (num_sundays_saturdays.saturdays + num_sundays_saturdays.sundays);
-      const total_days_worked = days - (num_sundays_saturdays.saturdays + num_sundays_saturdays.sundays) - leaves;
-
-      // ================= Advance Payment ===================== //
-
-      const loan = await loanModel.findOne({
-        employee_obj_id: employee_id,
-        activity_status: "active",
-      });
-      const advanceSalary = await advanceSalaryModel.findOne({
-        employee_obj_id: employee_id,
-        activity_status: "active",
-      });
-
-      if (loan) {
-        loan.loan_deducted = Math.round(loan.loan_left / loan.installment_duration_months);
-        net_salary -= loan.loan_deducted;
-        loan.loan_left -= loan.loan_deducted;
-        loan.installment_duration_months = loan.installment_duration_months - 1;
-        console.log("if loan Salar", net_salary);
-      }
-
-      if (advanceSalary) {
-        advanceSalary.advance_salary_deducted = 1;
-        advanceSalary.advance_salary_left -= 1;
-
-        net_salary -= basicpay;
-        console.log("if Advance Salar", net_salary);
-      }
-
-      // ================= Advance Payment ===================== //
-
-      //button logic
-      if (button === "Show_Salary_Details") {
-        // console.group();
-        console.log("Generate Button Clicked !!!");
-        console.log("net_salary", net_salary);
-
-        return res.json({
-          basicPay: basicpay,
-          allowances: allowances,
-          bonus: bonus,
-          grossSalary: grossSalary,
-          days: days,
-          working_days_without_weekends: working_days_without_weekends,
-          per_day_wage: per_day_wage,
-          per_hour_wage: per_hour_wage,
-          num_sundays_saturdays: num_sundays_saturdays,
-          total_days_worked: total_days_worked,
-          leaves: leaves,
-          unpaid_fullday_leaves: unpaid_fullday_leaves,
-          paidLeaves: paidLeaves,
-          total_unpaid_leaves: total_unpaid_leaves,
-          unpaid_half_leaves: unpaid_half_leaves,
-          amountDeducted: amountDeducted,
+      res.json({
+        leaveDetails: leaves_data,
+        salaryDetails: {
+          basic_pay,
+          allowances,
+          gross_salary,
           net_salary,
-          probationPeriod: employee.probationPeriod,
-          probationMonth: employee.probationMonth,
-          loan,
-          advanceSalary,
-        });
-      } else if (button === "Post_Salary") {
-        // Stored salary data in a object for later modification.
-        console.log("Save Details Button Clicked !!!");
-        const salaryData = {
-          employee_obj_id: employee_id,
-          salary_month: salary_month,
-          salary_year: salary_year,
-          Half_leaves: halfLeaves,
-          Full_leaves: leaves,
-          paid_leaves: paidLeaves,
-          unpaid_leaves: total_unpaid_leaves,
-          incentive: incentive,
-          gross_salary: grossSalary,
-          net_salary: net_salary,
-          extra_bonus: bonus,
-          cheque_number,
-        };
-
-        //if both loan and advance salary dont exist simply save to salary.
-        if (!loan && !advanceSalary) {
-          await salaryModel.create(salaryData);
-        }
-
-        // if Loan Exist Save Loan detials and add to Salary Model .
-        if (loan) {
-          const salaryWithLoanData = {
-            ...salaryData,
-            loan_deduction_active: true,
-            loan_deduction_amount: loan.loan_deducted,
-            loan_remaining_amount: loan.loan_left,
-          };
-
-          await salaryModel.create(salaryWithLoanData);
-
-          await loanModel.findOneAndUpdate(
-            { employee_obj_id: employee_id, activity_status: "active" },
-            {
-              $set: {
-                loan_left: loan.loan_left,
-                loan_deducted: loan.loan_deducted,
-                installment_duration_months: loan.installment_duration_months,
-              },
-            },
-            { new: true, runValidators: true }
-          );
-        }
-
-        // if Advance Salary Exist Save Advance Salary Detail and add to Salary Model.
-        if (advanceSalary) {
-          const salaryWithAdvanceData = {
-            ...salaryData,
-            advance_salary_deduction_active: true,
-            advance_salary_deduction: advanceSalary.advance_salary_deducted,
-            advance_salary_reamining: advanceSalary.advance_salary_left,
-          };
-
-          await salaryModel.create(salaryWithAdvanceData);
-          await advanceSalaryModel.findOneAndUpdate(
-            { employee_obj_id: employee_id, activity_status: "active" },
-            {
-              $set: {
-                advance_salary_left: advanceSalary.advance_salary_left,
-                advance_salary_deducted: advanceSalary.advance_salary_deducted,
-              },
-            },
-            { new: true, runValidators: true }
-          );
-        }
-      }
+        },
+        workDetails: {
+          total_days_worked,
+        },
+      });
     } catch (error) {
+      console.log("Error View Salary", error);
       res.send(error);
+    }
+  },
+
+  pay_salary: async (req, res) => {
+    try {
+      console.log("Req agyi pay salary");
+
+      const { userId, salaryDetails, workDetails, leaveDetails } = req.body;
+
+      console.log(req.body);
+
+      const salaryData = {
+        employee_obj_id: userId,
+      };
+
+      // const salaryData = {
+      //   employee_obj_id: employee_id,
+      //   salary_month,
+      //   salary_year,
+      //   Half_leaves: 4,
+      //   Full_leaves: 4,
+      //   paid_leaves: 4,
+      //   unpaid_leaves: 4,
+      //   incentive: Number(incentive),
+      //   gross_salary,
+      //   net_salary,
+      //   extra_bonus: Number(extra_bonus),
+      //   cheque_number,
+      // };
+
+      // await salaryModel.create(salaryData);
+
+      res.status(200).json({ message: "Salary Generated" });
+    } catch (error) {
+      console.log("Error Generating Salary", error);
+      res.status(501).json({ message: "Error Generating Salary" });
     }
   },
 
@@ -395,57 +277,5 @@ module.exports = {
     }
   },
 
-  calculate_leaves: async (req, res) => {
-    console.log("********************** Calculate Leaves Controller Logged **********************".green);
-    console.log("Caclulate Leaves Data", req.body);
-
-    //half,
-    try {
-      const { month, year, userId } = req.body;
-
-      // ================== Caclulating Leaves
-      const totalLeaves = await leavesModel.aggregate([
-        {
-          $match: {
-            from: new mongoose.Types.ObjectId(userId),
-            $expr: {
-              $and: [{ $eq: [{ $year: "$selectedDate" }, year] }, { $eq: [{ $month: "$selectedDate" }, month] }],
-            },
-          },
-        },
-      ]);
-
-      const { paidLeavesCount, unpaidLeavesCount, halfLeavesPaidCount, halfLeavesUnpaidCount } =
-        paid_unpaid_leaves(totalLeaves);
-
-      // ================== Caclulating Leaves
-
-      const { BasicPayAfterProbationPeriod, AllowancesAfterProbationPeriod } = await employeeModel.findById(userId, {
-        BasicPayAfterProbationPeriod: 1,
-        AllowancesAfterProbationPeriod: 1,
-        _id: 0,
-      });
-
-      const grossSalary = BasicPayAfterProbationPeriod + AllowancesAfterProbationPeriod;
-      const totalDaysInMonth = 31;
-      salaryPerday = Math.round(grossSalary / totalDaysInMonth);
-      const unpaidLeaveAmount = unpaidLeavesCount * salaryPerday;
-      let totalSalary = grossSalary - unpaidLeaveAmount;
-
-      res.status(200).json({
-        message: "success",
-        paidLeavesCount,
-        unpaidLeavesCount,
-        salaryPerday,
-        totalDaysInMonth,
-        totalSalary,
-        halfLeavesPaidCount,
-        halfLeavesUnpaidCount,
-        totalLeaves,
-        grossSalary,
-      });
-    } catch (error) {
-      res.status(501).json({ message: "error" });
-    }
-  },
+  calculate_leaves: async (req, res) => {},
 };

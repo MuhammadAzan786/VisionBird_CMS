@@ -1,6 +1,6 @@
-import { Box, Button, Grid, Paper, Typography } from "@mui/material";
+import { Box, Button, Grid, Paper, styled, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { usePDF } from "react-to-pdf";
 import axios from "../../utils/axiosInterceptor";
 import dayjs from "dayjs";
@@ -9,54 +9,69 @@ import { getCurrentMonth } from "../../utils/common";
 const Salary = () => {
   const { toPDF, targetRef } = usePDF({ filename: "Salary.pdf" });
   const navigate = useNavigate();
-
-  const [salaryDetails, setSalaryDetails] = useState({});
-  const [employeeDetails, setEmployeeDetails] = useState({});
-
-  const { id } = useParams();
   const location = useLocation();
+  const { employeeDetails } = location.state || {};
 
   const queryParams = new URLSearchParams(location.search);
+  const queryParamsData = Object.fromEntries(queryParams.entries());
 
-  const queryParamsData = {
-    id,
-    incentive: queryParams.get("incentive"),
-    extraBonus: queryParams.get("extra_bonus_amount"),
-    extraAmountRemarks: queryParams.get("extra_amount_remarks"),
-    paymentMethod: queryParams.get("paymentMethod"),
-    chequeNumber: queryParams.get("chequeNumber"),
-    totalWorkingDays: queryParams.get("totalWorkingDays"),
-    paidDate: queryParams.get("paidDate"),
-    month: queryParams.get("month"),
-    year: queryParams.get("year"),
-  };
+  const {
+    extra_bonus_amount: extra_bonus,
+    extra_amount_remarks: extra_bonus_remarks,
+    incentive,
+    totalWorkingDays,
+    month: salary_month,
+    year: salary_year,
+    paymentMethod: payment_method,
+  } = queryParamsData;
 
-  const fetchEmployeeDetails = async () => {
-    await axios
-      .get(`/api/employee/get_employee/${id}`)
-      .then((response) => {
-        setEmployeeDetails(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching employee data:", error);
-      });
-  };
+  const [salaryDetails, setSalaryDetails] = useState({
+    incentive,
+    extra_bonus,
+    extra_bonus_remarks,
+    salary_month,
+    salary_year,
+    payment_method,
+  });
+  const [leaveDetails, setLeaveDetails] = useState({});
+  const [workDetails, setWorkDetails] = useState({ total_woking_days: totalWorkingDays });
+
+  //Working Days by Company:
+
+  // const queryParamsData = {
+  //   id,
+  //   incentive: queryParams.get("incentive"),
+  //   extraBonus: queryParams.get("extra_bonus_amount"),
+  //   extraAmountRemarks: queryParams.get("extra_amount_remarks"),
+  //   paymentMethod: queryParams.get("paymentMethod"),
+  //   chequeNumber: queryParams.get("chequeNumber"),
+  //   totalWorkingDays: queryParams.get("totalWorkingDays"),
+  //   paidDate: queryParams.get("paidDate"),
+  //   month: queryParams.get("month"),
+  //   year: queryParams.get("year"),
+  // };
 
   const fetchSalaryDetails = async () => {
     await axios
-      .post(`/api/pay/pay_salary/${id}`, {
-        button: "Show_Salary_Details",
+      .post(`/api/pay/view_salary`, {
         salary_month: queryParamsData.month,
         salary_year: queryParamsData.year,
-        Half_leaves: queryParamsData.halfLeaves,
-        Full_leaves: queryParamsData.fullLeaves,
-        paid_leaves: queryParamsData.paidLeaves,
-        unpaid_leaves: queryParamsData.unpaidLeaves,
         incentive: queryParamsData.incentive,
-        extra_bonus: queryParamsData.extraBonus,
+        extra_bonus: queryParamsData.extra_bonus_amount,
+        employeeDetails,
       })
       .then((response) => {
-        setSalaryDetails(response.data);
+        console.log("View Data", response.data);
+        setSalaryDetails((prev) => {
+          return {
+            ...prev,
+            ...response.data.salaryDetails,
+          };
+        });
+        setLeaveDetails(response.data.leaveDetails);
+        setWorkDetails((prev) => {
+          return { ...prev, ...response.data.workDetails };
+        });
       })
       .catch((error) => {
         console.error("Error fetching salary data:", error);
@@ -65,27 +80,19 @@ const Salary = () => {
 
   const saveSalaryDetails = async () => {
     await axios
-      .post(`/api/pay/pay_salary/${id}`, {
-        button: "Post_Salary",
-        salary_month: queryParamsData.month,
-        salary_year: queryParamsData.year,
-        incentive: queryParamsData.incentive,
-        extra_bonus: queryParamsData.extraBonus,
-        payment_method: queryParamsData.paymentMethod,
-        cheque_number: queryParamsData.chequeNumber,
-        extra_amount_remarks: queryParamsData.extraAmountRemarks,
+      .post(`/api/pay/pay_salary`, {
+        userId: employeeDetails._id,
+        salaryDetails,
+        workDetails,
+        leaveDetails,
       })
-      .then((response) => {
-        console.log(response);
-        console.log(response.data);
-      })
+      .then(() => {})
       .catch((error) => {
         console.error("Error fetching salary data:", error);
       });
   };
 
   useEffect(() => {
-    fetchEmployeeDetails();
     fetchSalaryDetails();
   }, []);
 
@@ -118,205 +125,91 @@ const Salary = () => {
 
         <Grid container spacing={1} style={{ marginTop: 5 }}>
           <Grid item xs={12}>
-            <div
-              style={{
-                marginBottom: 0,
-                backgroundColor: "#C00000",
+            <HeadingStyled
+              sx={{
+                padding: "8px",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                textAlign: "center",
-                padding: "8px",
+                backgroundColor: "#C00000",
+                color: "white",
               }}
             >
-              <Typography style={{ color: "white" }} variant={"h7"} fontWeight={700}>
+              <Typography variant={"h7"} fontWeight={700}>
                 Full & Final Settlement of Dues
               </Typography>
-              <Typography style={{ color: "white" }} variant={"h7"} fontWeight={700}>
+              <Typography variant={"h7"} fontWeight={700}>
                 For the Month of {getCurrentMonth(queryParamsData.month)}, {queryParamsData.year}
               </Typography>
-            </div>
+            </HeadingStyled>
           </Grid>
 
           <Grid item xs={12}>
             <Grid container spacing={1}>
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    // textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Employee / Internee Name:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{employeeDetails.employeeName}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Employee / Internee Name:</Typography>
+                  <Typography>{employeeDetails.employeeName}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Employee / Internee Code:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{employeeDetails.employeeID}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Employee / Internee Code:</Typography>
+                  <Typography>{employeeDetails.employeeID}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Designation:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{employeeDetails.employeeDesignation}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Designation:</Typography>
+                  <Typography>{employeeDetails.employeeDesignation}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Bank Account Number:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{employeeDetails.bankAccountNumber}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Bank Account Number:</Typography>
+                  <Typography>{employeeDetails.bankAccountNumber || "None"}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Date Join:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>
+                <DivStyled>
+                  <Typography fontWeight={700}>Date Join:</Typography>
+                  <Typography>
                     {/* {employeeDetails.dateOfJoining} */}
                     {dayjs(employeeDetails.dateOfJoining).format("DD/MM/YYYY")}
                   </Typography>
-                </div>
+                </DivStyled>
               </Grid>
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    CNIC #:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{employeeDetails.employeeCNIC}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>CNIC #:</Typography>
+                  <Typography>{employeeDetails.employeeCNIC}</Typography>
+                </DivStyled>
               </Grid>
 
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Cheque Number:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{queryParamsData.chequeNumber}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Cheque Number:</Typography>
+                  <Typography>{queryParamsData.chequeNumber || "None"}</Typography>
+                </DivStyled>
               </Grid>
 
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Payment Method:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{queryParamsData.paymentMethod}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Payment Method:</Typography>
+                  <Typography>{queryParamsData.paymentMethod}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Date of Birth:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {/* {employeeDetails.dateOfBirth} */}
-                    {dayjs(employeeDetails.dateOfBirth).format("DD/MM/YYYY")}
-                  </Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Date of Birth:</Typography>
+                  <Typography>{dayjs(employeeDetails.dateOfBirth).format("DD/MM/YYYY")}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Gender:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{employeeDetails.gender}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Gender:</Typography>
+                  <Typography sx={{ textTransform: "capitalize" }}>{employeeDetails.gender}</Typography>
+                </DivStyled>
               </Grid>
             </Grid>
           </Grid>
@@ -324,21 +217,10 @@ const Salary = () => {
           <Grid item xs={12}>
             <Grid container spacing={1}>
               <Grid item xs={12}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Address:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{employeeDetails.mailingAddress}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Address:</Typography>
+                  <Typography>{employeeDetails.mailingAddress}</Typography>
+                </DivStyled>
               </Grid>
             </Grid>
           </Grid>
@@ -346,57 +228,22 @@ const Salary = () => {
           <Grid item xs={12}>
             <Grid container spacing={1}>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Working Days by Company:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {salaryDetails.working_days_without_weekends}
-                  </Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Working Days by Company:</Typography>
+                  <Typography>{workDetails.total_woking_days}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Days Worked:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{salaryDetails.total_days_worked}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Days Worked:</Typography>
+                  <Typography>{workDetails.total_days_worked}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Incentive:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>PKR {queryParamsData.incentive}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Incentive:</Typography>
+                  <Typography>PKR {salaryDetails.incentive}</Typography>
+                </DivStyled>
               </Grid>
             </Grid>
           </Grid>
@@ -404,430 +251,134 @@ const Salary = () => {
           <Grid item xs={12}>
             <Grid container spacing={1}>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Basic Pay:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.basicPay}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Basic Pay:</Typography>
+                  <Typography>PKR {salaryDetails.basic_pay}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Allowences:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.allowances}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Allowences:</Typography>
+                  <Typography>PKR {salaryDetails.allowances}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Gross Salary:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.grossSalary}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Gross Salary:</Typography>
+                  <Typography>PKR {salaryDetails.gross_salary}</Typography>
+                </DivStyled>
               </Grid>
             </Grid>
           </Grid>
-
+          {/* =================================================Leaves =============================================== */}
           <Grid item xs={12}>
-            <div
-              style={{
-                marginTop: 20,
-                marginBottom: 0,
-                backgroundColor: "#145DA0",
-                textAlign: "center",
-                padding: "8px",
-              }}
-            >
+            <HeadingStyled bgColor="#145DA0">
               <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
                 Leave Information
               </Typography>
-            </div>
+            </HeadingStyled>
           </Grid>
 
           <Grid item xs={12}>
             <Grid container spacing={1}>
+              {/* ==================remove these later just for logging */}
+              <Grid item xs={6}>
+                <DivStyled>
+                  <Typography fontWeight={700}>Half Leaves Unpaid</Typography>
+                  <Typography>{leaveDetails.halfLeavesUnpaidCount}</Typography>
+                </DivStyled>
+              </Grid>
+
+              <Grid item xs={6}>
+                <DivStyled>
+                  <Typography fontWeight={700}>Half Laves Paid</Typography>
+                  <Typography>{leaveDetails.halfLeavesPaidCount}</Typography>
+                </DivStyled>
+              </Grid>
+
+              <Grid item xs={6}>
+                <DivStyled>
+                  <Typography fontWeight={700}>Full leaves Unpaid Before Adding Half leaves</Typography>
+                  <Typography>{leaveDetails.unpaidLeavesCountBefore}</Typography>
+                </DivStyled>
+              </Grid>
+
+              <Grid item xs={6}>
+                <DivStyled>
+                  <Typography fontWeight={700}>Full leaves Paid Before Adding Half leaves</Typography>
+                  <Typography>{leaveDetails.paidLeavesCountBefore}</Typography>
+                </DivStyled>
+              </Grid>
+              {/* =============================remove these later just for logging */}
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Short /Half Leave:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{salaryDetails.unpaid_half_leaves}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Short /Half Leave:</Typography>
+                  <Typography>{leaveDetails.halfLeaves}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Casual Leave:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>0</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Casual Leave:</Typography>
+                  <Typography sx={{ color: "red", fontWeight: 600 }}>TODO</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Sick Leave:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>0</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Sick Leave:</Typography>
+                  <Typography sx={{ color: "red", fontWeight: 600 }}>TODO</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Without Pay Leave:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{salaryDetails.unpaid_fullday_leaves}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Without Pay Leave:</Typography>
+                  <Typography>{leaveDetails.unpaidLeavesCount}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Cash Leave:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{salaryDetails.paidLeaves}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Cash Leave:</Typography>
+                  <Typography>{leaveDetails.paidLeavesCount}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Other/Yearly Leave:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>0</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Other/Yearly Leave:</Typography>
+                  <Typography sx={{ color: "red", fontWeight: 600 }}>TODO</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Net Salary:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.net_salary}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Net Salary:</Typography>
+                  <Typography>PKR {salaryDetails.net_salary}</Typography>
+                </DivStyled>
               </Grid>
             </Grid>
           </Grid>
 
           <Grid item xs={12}>
-            <div
-              style={{
-                marginTop: 10,
-                marginBottom: 0,
-                backgroundColor: "#145DA0",
-                textAlign: "center",
-                padding: "8px",
-              }}
-            >
+            <HeadingStyled bgColor="#145DA0">
               <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
                 Extra / Bonus
               </Typography>
-            </div>
+            </HeadingStyled>
           </Grid>
 
           <Grid item xs={12}>
             <Grid container spacing={1}>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Extra Bonus Amount:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>PKR {queryParamsData.extraBonus}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Extra Bonus Amount:</Typography>
+                  <Typography>PKR {salaryDetails.extra_bonus || 0}</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={8}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Extra Amount Remarks:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>{queryParamsData.extraAmountRemarks}</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Extra Amount Remarks:</Typography>
+                  <Typography>{salaryDetails.extra_bonus_remarks || "None"}</Typography>
+                </DivStyled>
               </Grid>
             </Grid>
           </Grid>
-
-          {/* ================================ Payment Information ================================ */}
-
-          {salaryDetails.loan && (
-            <>
-              <Grid item xs={12}>
-                <div
-                  style={{
-                    marginTop: 10,
-                    marginBottom: 0,
-                    backgroundColor: "#145DA0",
-                    textAlign: "center",
-                    padding: "8px",
-                  }}
-                >
-                  <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
-                    Advance Payment Information
-                  </Typography>
-                </div>
-              </Grid>
-              <Grid item xs={12}>
-                <Grid container spacing={1}>
-                  <Grid item xs={4}>
-                    <div
-                      style={{
-                        border: "1px solid #ccc",
-                        padding: "10px",
-                        textAlign: "center",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                        Loan Taken:
-                      </Typography>
-
-                      <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.loan.loan_amount}</Typography>
-                    </div>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <div
-                      style={{
-                        border: "1px solid #ccc",
-                        padding: "10px",
-                        textAlign: "center",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                        Loan Remaining:
-                      </Typography>
-                      <Typography style={{ display: "inline-block" }}>PKR {salaryDetails.loan.loan_left}</Typography>
-                    </div>
-                  </Grid>
-
-                  <Grid item xs={4}>
-                    <div
-                      style={{
-                        border: "1px solid #ccc",
-                        padding: "10px",
-                        textAlign: "center",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                        Loan Deducted:
-                      </Typography>
-                      <Typography
-                        style={{
-                          display: "inline-block",
-                          color: "red",
-                        }}
-                      >
-                        PKR {salaryDetails.loan.loan_deducted}
-                      </Typography>
-                    </div>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </>
-          )}
-
-          {salaryDetails.advanceSalary && (
-            <>
-              <Grid item xs={12}>
-                <div
-                  style={{
-                    marginTop: 10,
-                    marginBottom: 0,
-                    backgroundColor: "#145DA0",
-                    textAlign: "center",
-                    padding: "8px",
-                  }}
-                >
-                  <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
-                    Advance Payment Information
-                  </Typography>
-                </div>
-              </Grid>
-              <Grid item xs={12}>
-                <Grid container spacing={1}>
-                  <Grid item xs={4}>
-                    <div
-                      style={{
-                        border: "1px solid #ccc",
-                        padding: "10px",
-                        textAlign: "center",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                        Advance Salary Taken:
-                      </Typography>
-
-                      <Typography style={{ display: "inline-block" }}>
-                        {salaryDetails.advanceSalary.advance_salary_months}
-                        {salaryDetails.advanceSalary.advance_salary_months > 1 ? " Months" : " Month"}
-                      </Typography>
-                    </div>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <div
-                      style={{
-                        border: "1px solid #ccc",
-                        padding: "10px",
-                        textAlign: "center",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                        Advance Salary Remaining:
-                      </Typography>
-                      <Typography style={{ display: "inline-block" }}>
-                        {salaryDetails.advanceSalary.advance_salary_left}
-                        {salaryDetails.advanceSalary.advance_salary_left > 1 ? " Months" : " Month"}
-                      </Typography>
-                    </div>
-                  </Grid>
-
-                  <Grid item xs={4}>
-                    <div
-                      style={{
-                        border: "1px solid #ccc",
-                        padding: "10px",
-                        textAlign: "center",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                        Advance Salary Deducted:
-                      </Typography>
-                      <Typography
-                        style={{
-                          display: "inline-block",
-                          color: "red",
-                        }}
-                      >
-                        {salaryDetails.advanceSalary.advance_salary_deducted} Month
-                      </Typography>
-                    </div>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </>
-          )}
-          {/* ================================ Payment Information ================================ */}
 
           <Grid item xs={12}>
             <div
@@ -852,107 +403,47 @@ const Salary = () => {
           <Grid item xs={12}>
             <Grid container spacing={1}>
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Paid By:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>Irfan Mahmood (CEO)</Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Paid By:</Typography>
+                  <Typography>Irfan Mahmood (CEO)</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={6}>
-                <div
-                  style={{
-                    border: "1px solid #ccc",
-                    padding: "10px",
-                    textAlign: "center",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Paid Date:
-                  </Typography>
-                  <Typography style={{ display: "inline-block" }}>
-                    {dayjs(queryParamsData.paidDate).format("dddd, MMMM D, YYYY")}
-                  </Typography>
-                </div>
+                <DivStyled>
+                  <Typography fontWeight={700}>Paid Date:</Typography>
+                  <Typography>{dayjs(queryParamsData.paidDate).format("dddd, MMMM D, YYYY")}</Typography>
+                </DivStyled>
               </Grid>
             </Grid>
           </Grid>
 
           <Grid item xs={12}>
             <Grid item xs={12}>
-              <div
-                style={{
-                  borderBottom: "1px solid #ccc",
-                  padding: "3px",
-                  textAlign: "center",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography style={{}} variant="body2">
+              <DivStyled sx={{ padding: "3px", border: "none", borderBottom: "1px solid #ccc" }}>
+                <Typography variant="body2">
                   All Previous/Current dues cleared up to the date mentioned here. So this is Full and Final Payment
                   from Vision Bird Technologies, Gujrat.
                 </Typography>
-              </div>
+              </DivStyled>
             </Grid>
           </Grid>
 
           <Grid item xs={12} style={{ marginTop: 130 }}>
             <Grid container spacing={2}>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    borderTop: "1px solid #ccc",
-                    padding: "10px",
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Employee&apos;s/Internee&apos;s Signature
-                  </Typography>
-                </div>
+                <DivStyled sx={{ justifyContent: "center", border: "none", borderTop: "1px solid #ccc" }}>
+                  <Typography fontWeight={700}>Employee&apos;s/Internee&apos;s Signature</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    borderTop: "1px solid #ccc",
-                    padding: "10px",
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    Thumb Impression
-                  </Typography>
-                </div>
+                <DivStyled sx={{ justifyContent: "center", border: "none", borderTop: "1px solid #ccc" }}>
+                  <Typography fontWeight={700}>Thumb Impression</Typography>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    borderTop: "1px solid #ccc",
-                    padding: "10px",
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Typography style={{ display: "inline-block" }} fontWeight={700}>
-                    CEO Signature with Stamp
-                  </Typography>
-                </div>
+                <DivStyled sx={{ justifyContent: "center", border: "none", borderTop: "1px solid #ccc" }}>
+                  <Typography fontWeight={700}>CEO Signature with Stamp</Typography>
+                </DivStyled>
               </Grid>
             </Grid>
           </Grid>
@@ -961,5 +452,22 @@ const Salary = () => {
     </Box>
   );
 };
+
+const DivStyled = styled("div")(() => ({
+  border: "1px solid #ccc",
+  padding: "10px",
+  textAlign: "center",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+}));
+
+const HeadingStyled = styled("div")(({ bgColor }) => ({
+  marginTop: 10,
+  marginBottom: 0,
+  backgroundColor: bgColor || "#145DA0",
+  textAlign: "center",
+  padding: "8px",
+}));
 
 export default Salary;

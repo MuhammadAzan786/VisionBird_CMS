@@ -14,22 +14,6 @@ const salarySchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  Half_leaves: {
-    type: Number,
-    required: true,
-  },
-  Full_leaves: {
-    type: Number,
-    required: true,
-  },
-  paid_leaves: {
-    type: Number,
-    required: true,
-  },
-  unpaid_leaves: {
-    type: Number,
-    required: true,
-  },
   incentive: {
     type: Number,
     required: true,
@@ -46,10 +30,40 @@ const salarySchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  extra_bonus_remarks: {
+    type: Number,
+    required: true,
+  },
   cheque_number: {
     type: Number,
     default: undefined,
   },
+
+  Half_leaves: {
+    type: Number,
+    default: 5,
+  },
+  Full_leaves: {
+    type: Number,
+    default: 5,
+  },
+  paid_leaves: {
+    type: Number,
+    default: 5,
+  },
+  unpaid_leaves: {
+    type: Number,
+    default: 5,
+  },
+  total_woking_days: {
+    type: Number,
+    default: 0,
+  },
+  total_days_worked: {
+    type: Number,
+    default: 0,
+  },
+
   loan_deduction_active: {
     type: Boolean,
     default: false,
@@ -91,10 +105,7 @@ salarySchema.pre("save", function (next) {
   }
   next();
 });
-salarySchema.index(
-  { employee_obj_id: 1, salary_month: 1, salary_year: 1 },
-  { unique: true }
-);
+salarySchema.index({ employee_obj_id: 1, salary_month: 1, salary_year: 1 }, { unique: true });
 
 const Salary = mongoose.model("Salary", salarySchema);
 module.exports = Salary;

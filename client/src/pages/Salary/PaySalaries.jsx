@@ -42,6 +42,7 @@ const PaySalaries = () => {
   const [tabValue, setTabValue] = useState("all");
 
   const [selectedEmployeeId, setSelectedEmployeeId] = React.useState(null);
+  const [employeeDetails, setEmployeeDetails] = React.useState(null);
   const [paymentMethod, setPaymentMethod] = React.useState("Cash");
 
   const [salaryId, setSalaryId] = useState();
@@ -216,9 +217,11 @@ const PaySalaries = () => {
             variant="contained"
             size="small"
             startIcon={<ReceiptLongOutlined />}
-            // disabled={params.row.salary_status === "paid"}
             sx={{ borderRadius: "100px", fontFamily: "Poppins, sans-serif" }}
-            onClick={() => handleOpen(params.id)}
+            onClick={() => {
+              setEmployeeDetails(params.row);
+              handleOpen(params.id);
+            }}
           >
             Generate
           </Button>
@@ -375,53 +378,40 @@ const PaySalaries = () => {
             const formData = new FormData(event.currentTarget);
             const formJson = Object.fromEntries(formData.entries());
 
-            const {
-              incentive,
-              extra_bonus_amount,
-              extra_amount_remarks,
-              payment_method,
-              other_payment_method,
-              cheque_number,
-            } = formJson;
+            console.log("FORM DATA KA DATA", formJson);
 
-            let queryString = "";
+            let queryParams = {
+              ...Object.fromEntries(formData.entries()),
+              ...selectedDate,
+              totalWorkingDays,
+              paidDate,
+            };
+
+            const { payment_method, other_payment_method, cheque_number } = formJson;
 
             if (payment_method === "Other") {
-              queryString = new URLSearchParams({
-                incentive,
-                extra_bonus_amount,
-                extra_amount_remarks,
+              queryParams = {
+                ...queryParams,
                 paymentMethod: other_payment_method,
-                totalWorkingDays,
-                paidDate,
-
-                ...selectedDate,
-              }).toString();
+              };
             } else if (payment_method === "Cheque") {
-              queryString = new URLSearchParams({
-                incentive,
-                extra_bonus_amount,
-                extra_amount_remarks,
+              queryParams = {
+                ...queryParams,
                 paymentMethod: payment_method,
-                totalWorkingDays,
                 chequeNumber: cheque_number,
-                paidDate,
-                ...selectedDate,
-              }).toString();
+              };
             } else {
-              queryString = new URLSearchParams({
-                incentive,
-                extra_bonus_amount,
-                extra_amount_remarks,
+              queryParams = {
+                ...queryParams,
                 paymentMethod: payment_method,
-                totalWorkingDays,
-                paidDate,
-                ...selectedDate,
-              }).toString();
+              };
             }
+
+            const queryString = new URLSearchParams(queryParams).toString();
 
             navigate(`/salary/${selectedEmployeeId}?${queryString}`, {
               replace: false,
+              state: { employeeDetails },
             });
           },
         }}
