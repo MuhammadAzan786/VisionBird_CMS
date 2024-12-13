@@ -95,7 +95,7 @@ export default function ViewLeave() {
         <>
           <Toaster />
           <Box sx={{ width: "100%", padding: 3, paddingX: 6 }}>
-            <Box component={Paper} elevation={3} p={10}>
+            <Box component={Paper}  p={10}>
               <Box
                 display={"flex"}
                 flexDirection={"column"}
@@ -156,6 +156,7 @@ export default function ViewLeave() {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <TextField
+                    disabled
                     value={leaveFrom.employeeName}
                     label="Employee's Name"
                     variant="outlined"
@@ -165,6 +166,7 @@ export default function ViewLeave() {
                 </Grid>
                 <Grid item xs={5}>
                   <TextField
+                    disabled
                     value={leaveFrom.employeeID}
                     label="Employee's ID"
                     variant="outlined"
@@ -174,6 +176,7 @@ export default function ViewLeave() {
                 </Grid>
                 <Grid item xs={7}>
                   <TextField
+                    disabled
                     value={leaveFrom.employeeDesignation}
                     label="Designation"
                     variant="outlined"
@@ -183,6 +186,7 @@ export default function ViewLeave() {
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
+                    disabled
                     value={leave.reason}
                     label="Reason / Purpose of Leave"
                     rows={4}
@@ -196,6 +200,7 @@ export default function ViewLeave() {
                 <Grid spacing={2} container xs={12} item>
                   <Grid item xs={leave.leaveType == "Long Leaves" ? 6 : 3}>
                     <TextField
+                      disabled
                       value={leave.leaveType}
                       label="Leave type"
                       variant="outlined"
@@ -206,6 +211,7 @@ export default function ViewLeave() {
                   {leave.leaveType !== "Long Leaves" ? (
                     <Grid xs={5} item fullWidth>
                       <TextField
+                        disabled
                         value={dayjs(leave.selectedDate).format(
                           "dddd, MMMM D, YYYY"
                         )}
@@ -221,6 +227,7 @@ export default function ViewLeave() {
                     <>
                       <Grid xs={2} item>
                         <TextField
+                          disabled
                           value={formatTime(leave.fromTime)}
                           label="From"
                           variant="outlined"
@@ -230,6 +237,7 @@ export default function ViewLeave() {
                       </Grid>
                       <Grid xs={2} item>
                         <TextField
+                          disabled
                           value={formatTime(leave.toTime)}
                           label="To"
                           variant="outlined"
@@ -243,6 +251,7 @@ export default function ViewLeave() {
                     <>
                       <Grid xs={2} item>
                         <TextField
+                          disabled
                           value={formatTime(leave.fromTime)}
                           label="From"
                           variant="outlined"
@@ -252,6 +261,7 @@ export default function ViewLeave() {
                       </Grid>
                       <Grid xs={2} item>
                         <TextField
+                          disabled
                           value={formatTime(leave.toTime)}
                           label="To"
                           variant="outlined"
@@ -264,6 +274,7 @@ export default function ViewLeave() {
 
                   <Grid xs={leave.leaveType == "Long Leaves" ? 6 : 4} item>
                     <TextField
+                      disabled
                       value={leave.leaveCategory}
                       label="Leave Category"
                       variant="outlined"
@@ -275,6 +286,7 @@ export default function ViewLeave() {
                     <>
                       <Grid xs={6} item>
                         <TextField
+                          disabled
                           value={dayjs(leave.leavesStart).format(
                             "dddd, MMMM D, YYYY"
                           )}
@@ -286,6 +298,7 @@ export default function ViewLeave() {
                       </Grid>
                       <Grid xs={6} item>
                         <TextField
+                          disabled
                           value={dayjs(leave.leavesEnd).format(
                             "dddd, MMMM D, YYYY"
                           )}
@@ -307,6 +320,7 @@ export default function ViewLeave() {
                     item
                   >
                     <TextField
+                      disabled
                       value={leave.status}
                       label="Leave status"
                       variant="outlined"
