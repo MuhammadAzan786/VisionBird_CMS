@@ -43,7 +43,7 @@ router.get(
 );
 
 // // ! to show interview data
-// router.get("/", auth, authorizeRoles("admin", "manager"), viewData);
+router.get("/", auth, authorizeRoles("admin", "manager"), viewData);
 
 // ! to show interview data by a specific id
 router.get("/:id", auth, authorizeRoles("admin", "manager"), viewDataById);

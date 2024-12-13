@@ -12,6 +12,7 @@ const viewData = async (req, res) => {
     const search = req.query.search || "";
 
     const interviewData = await interview.find({
+      response: "appeared",
       $or: [
         { name: { $regex: search, $options: "i" } },
         { contact: { $regex: search, $options: "i" } },
@@ -89,7 +90,6 @@ const pending_Evaluations = async (req, res) => {
         { CNIC: { $regex: search, $options: "i" } },
       ],
     });
-    console.log("Interview data fetched successfully:", interviewData);
     res.status(200).json({
       message:
         interviewData.length === 0
@@ -114,7 +114,6 @@ const appeared_Evaluations = async (req, res) => {
         { CNIC: { $regex: search, $options: "i" } },
       ],
     });
-    console.log("Interview data fetched successfully:", interviewData);
     res.status(200).json({
       message:
         interviewData.length === 0
@@ -138,7 +137,6 @@ const not_appeared_Evaluations = async (req, res) => {
         { CNIC: { $regex: search, $options: "i" } },
       ],
     });
-    console.log("Interview data fetched successfully:", interviewData);
     res.status(200).json({
       message:
         interviewData.length === 0
@@ -176,8 +174,6 @@ const deleteData = async (req, res) => {
           segments.slice(7, segments.length - 1).join("/") +
           "/" +
           segments.pop().split(".")[0];
-
-        console.log("Public ID before deletion:", publicId);
 
         try {
           // Delete the file from Cloudinary

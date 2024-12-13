@@ -19,34 +19,84 @@ import {
   ListItemText,
   Chip,
   Select,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import EmployeeNameCell from "../../components/Grid Cells/EmployeeProfileCell";
 import { truncateText } from "../../utils/common";
 import AppearedFormDialog from "../../components/AppearedFormDialog";
 import RemarksDialog from "../../components/RemarksDialog";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast, { Toaster } from "react-hot-toast";
 
 const PendingEvaluations = ({ searchTerm }) => {
   const navigate = useNavigate();
-  const [data, setData] = useState([]);
-  console.log("data", data);
-  const [loading, setLoading] = useState(false);
+  const fetchData = async ({ queryKey }) => {
+    const [, searchTerm] = queryKey;
+    const response = await axios.get(
+      `/api/interview/pending_evaluations?search=${searchTerm || ""}`
+    );
+
+    return response.data.interviewData;
+  };
+
+  const downloadImage = (url) => {
+    saveAs(url, url.split("/").pop());
+  };
+
   const navigateTo = (data) => {
     navigate(`/evaluation-page/${data.id}`);
   };
-  const fetchData = async () => {
-    console.log("we are in the function");
-    await axios
-      .get(`/api/interview/pending_evaluations?search=${searchTerm || ""}`)
-      .then((response) => {
-        setData(response.data.interviewData);
-      })
-      .catch((error) => {
-        console.log("error fetching evaluations :", error);
-      });
-  };
-  useEffect(() => {
-    fetchData();
-  }, [searchTerm]);
+
+  const {
+    data: evaluations = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["pending_evaluations", searchTerm],
+    queryFn: fetchData,
+    enabled: true,
+  });
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "50vh",
+          gap: 2,
+        }}
+      >
+        <CircularProgress />
+        <Typography variant="h6" color="text.secondary">
+          Loading Employees...
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "50vh",
+          padding: 2,
+        }}
+      >
+        <Alert severity="error" sx={{ maxWidth: 400, textAlign: "center" }}>
+          <Typography variant="h6">Error</Typography>
+          <Typography>{error.message}</Typography>
+        </Alert>
+      </Box>
+    );
+  }
 
   const evaluation = [
     {
@@ -321,11 +371,12 @@ const PendingEvaluations = ({ searchTerm }) => {
             outline: "none",
           },
         }}
-        rows={data}
+        rows={evaluations}
         columns={evaluation}
         onRowDoubleClick={navigateTo}
         getRowId={(row) => row._id}
       />
+      <Toaster />
     </>
   );
 };
@@ -337,6 +388,7 @@ const ResponseCell = (props) => {
   const [open, setOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [remarksOpen, setRemarksOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleClose = () => {
     setOpen(false);
@@ -353,44 +405,118 @@ const ResponseCell = (props) => {
       setFormOpen(true); // Open the form dialog for 'Appeared'
     } else if (response === "notAppeared") {
       setRemarksOpen(true); // Open the remarks dialog for 'Not Appeared'
-    } else {
-      updateStatus(response);
     }
   };
 
-  const updateStatus = async (response, additionalData = {}) => {
+  const updateStatus = async (response, additionalData = {}, id, field) => {
     const rowId = apiRef.current.getCellParams(id, field).id;
+
+    const updatePayload = {
+      response,
+      ...additionalData,
+    };
+
     try {
       const res = await axios.put(
         `/api/interview/update_record_when_appeared/${rowId}`,
-        {
-          response,
-          ...additionalData,
-        }
+        updatePayload
       );
-      setOption(res.data.response);
-      toast.success(res.data.msg);
-     
-      // Refresh the data grid
-      apiRef.current.updateRows([{ id: rowId, ...res.data.updatedRow }]);
+      toast.success(`Status Updated to ${response}`);
     } catch (error) {
-      toast.error("Error updating response");
-      CheckAxiosError(error, "ERROR RESPONSE UPDATE REQUEST");
+      toast.error("Failed to update status. Please try again later.");
+      console.error("Error updating employee status:", error.message);
     }
   };
 
-  const handleFormSubmit = (additionalData) => {
-    if (additionalData) {
-      updateStatus("appeared", additionalData);
+  const AppearedMutation = useMutation({
+    mutationFn: ({ response, additionalData, id, field }) =>
+      updateStatus(response, additionalData, id, field),
+
+    onSuccess: () => {
+      setFormOpen(false);
+      queryClient
+        .invalidateQueries({
+          queryKey: ["pending_evaluations"],
+          exact: false,
+        })
+        .then(() => {
+          console.log("Query invalidation completed successfully.");
+        })
+        .catch((error) => {
+          console.error("Error invalidating queries:", error.message);
+        });
+    },
+
+    onError: (error) => {
+      toast.error("Failed to update status. Please try again later.");
+      console.error("Mutation error:", error.message);
+      setFormOpen(false);
+    },
+  });
+
+  const notAppearedUpdateStatus = async (
+    response,
+    additionalData = {},
+    id,
+    field
+  ) => {
+    const rowId = apiRef.current.getCellParams(id, field).id;
+
+    const updatePayload = {
+      response,
+      expectedSalary: 0,
+      testRating: 0,
+      interviewRating: 0,
+      ...additionalData,
+    };
+
+    try {
+      const res = await axios.put(
+        `/api/interview/update_record_when_appeared/${rowId}`,
+        updatePayload
+      );
+      toast.success(`Status Updated to ${response}`);
+    } catch (error) {
+      toast.error("Failed to update status. Please try again later.");
+      console.error("Error updating employee status:", error.message);
     }
-    setFormOpen(false);
   };
 
-  const handleRemarksSubmit = (additionalData) => {
+  const notAppearedMutation = useMutation({
+    mutationFn: ({ response, additionalData, id, field }) =>
+      notAppearedUpdateStatus(response, additionalData, id, field),
+    onSuccess: () => {
+      setFormOpen(false);
+      queryClient
+        .invalidateQueries({
+          queryKey: ["pending_evaluations"],
+          exact: false,
+        })
+        .then(() => {
+          console.log("Query invalidation completed successfully.");
+        })
+        .catch((error) => {
+          console.error("Error invalidating queries:", error.message);
+        });
+    },
+
+    onError: (error) => {
+      toast.error("Failed to update status. Please try again later.");
+      console.error("Mutation error:", error.message);
+      setFormOpen(false);
+    },
+  });
+
+  const handleFormSubmit = (response, additionalData) => {
     if (additionalData) {
-      updateStatus("notAppeared", additionalData);
+      AppearedMutation.mutate({ response, additionalData, id, field });
     }
-    setRemarksOpen(false);
+  };
+
+  const handleRemarksSubmit = (response, additionalData) => {
+    if (additionalData) {
+      notAppearedMutation.mutate({ response, additionalData, id, field });
+    }
   };
 
   return (
@@ -438,14 +564,18 @@ const ResponseCell = (props) => {
       <AppearedFormDialog
         open={formOpen}
         onClose={() => setFormOpen(false)}
-        onSubmit={handleFormSubmit}
+        onSubmit={(additionalData) =>
+          handleFormSubmit("appeared", additionalData)
+        }
       />
 
       {/* Dialog for remarks when 'Not Appeared' is selected */}
       <RemarksDialog
         open={remarksOpen}
         onClose={() => setRemarksOpen(false)}
-        onSubmit={handleRemarksSubmit}
+        onSubmit={(additionalData) =>
+          handleRemarksSubmit("notAppeared", additionalData)
+        }
       />
     </Box>
   );

@@ -2,6 +2,7 @@ import { ErrorMessage, Field, Form, Formik } from "formik";
 import { TextField } from "formik-material-ui";
 import { object, string } from "yup";
 import DomainVerificationIcon from "@mui/icons-material/DomainVerification";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   FormControl,
   InputLabel,
@@ -107,7 +108,8 @@ const InterviewEvalForm = () => {
   const [selectedValue, setSelectedValue] = useState("");
   const [applyForselectedValue, setapplyForselectedValue] = useState("");
   const POST_EVALUATION = "/api/interview/add_evaluation";
-  // console.log(value);
+  const queryClient = useQueryClient();
+
 
   const handleSuccess = () => {
     showMessage("success", "Evaluation Created successful!");
@@ -141,7 +143,6 @@ const InterviewEvalForm = () => {
       }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
-        console.log(values);
         setLoading(true);
         var formData = new FormData();
         const fieldMap = {
@@ -199,6 +200,17 @@ const InterviewEvalForm = () => {
           })
           .then(() => {
             setLoading(false);
+            queryClient
+              .invalidateQueries({
+                queryKey: ["pending_evaluations"],
+                exact: false,
+              })
+              .then(() => {
+                console.log("Query invalidation completed successfully.");
+              })
+              .catch((error) => {
+                console.error("Error invalidating queries:", error.message);
+              });
             navigate("/interview-evaluation");
             handleSuccess();
           })
@@ -210,7 +222,7 @@ const InterviewEvalForm = () => {
       }}
     >
       {({ values, setFieldValue }) => (
-        <Box p={0}>
+        <Box pt={2} sx={{height:"75vh"}}>
           <Link to={"/interview-evaluation"}>
             <Button startIcon={<KeyboardReturnIcon />}>Back</Button>
           </Link>
