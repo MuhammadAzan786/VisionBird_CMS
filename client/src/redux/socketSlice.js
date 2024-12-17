@@ -32,7 +32,7 @@ export const initializeSocket = (user) => (dispatch, getState) => {
       return;
     }
     const Backend_url =
-      import.meta.env.NODE_ENV === "production"
+      import.meta.env.VITE_NODE_ENV === "production"
         ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
         : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
     const socketInstance = io(Backend_url, {

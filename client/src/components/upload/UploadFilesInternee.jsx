@@ -245,6 +245,15 @@ const UploadFilesInternee = ({
 };
 
 const MediaList = ({ data, handleDelete }) => {
+    const allowedFileTypes = [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "bmp",
+      "tiff",
+      "webp",
+    ];
   return (
     <>
       {data.map((item, index) => (
@@ -257,14 +266,24 @@ const MediaList = ({ data, handleDelete }) => {
             mb: 2,
           }}
           secondaryAction={
-            <IconButton edge="end" sx={{ color: "red" }} onClick={() => handleDelete(item.public_id)}>
+            <IconButton
+              edge="end"
+              sx={{ color: "red" }}
+              onClick={() => handleDelete(item.public_id)}
+            >
               <Close />
             </IconButton>
           }
         >
-          {item.resource_type === "image" ? (
+          {allowedFileTypes.includes(
+            item?.original_file_name?.split(".").pop()
+          ) ? (
             <ListItemAvatar>
-              <Avatar src={item.secure_url} alt="asd" sx={{ borderRadius: 2 }} />
+              <Avatar
+                src={item.secure_url}
+                alt="asd"
+                sx={{ borderRadius: 2 }}
+              />
             </ListItemAvatar>
           ) : (
             <ListItemIcon>

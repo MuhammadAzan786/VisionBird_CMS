@@ -1,5 +1,12 @@
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
-import { Alert, Box, CircularProgress, MenuItem, Select, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  CircularProgress,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import PropTypes from "prop-types";
@@ -23,7 +30,9 @@ const EmployeesTable = ({ searchTerm }) => {
 
   const fetchEmployees = async ({ queryKey }) => {
     const [, searchTerm] = queryKey;
-    const response = await axios.get(`/api/employee/get_managers_employees?search=${searchTerm || ""}`);
+    const response = await axios.get(
+      `/api/employee/get_managers_employees?search=${searchTerm || ""}`
+    );
     return response.data;
   };
 
@@ -92,7 +101,13 @@ const EmployeesTable = ({ searchTerm }) => {
       field: "role",
       headerName: "Role",
       flex: 1,
-      renderCell: (params) => <CustomChip label={WordCaptitalize(params.value)} size="small" status={params.value} />,
+      renderCell: (params) => (
+        <CustomChip
+          label={WordCaptitalize(params.value)}
+          size="small"
+          status={params.value}
+        />
+      ),
     },
   ];
 

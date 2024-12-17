@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const Employee = require("../models/employeemodel");
 const leavesModel = require("../models/leavesModel");
 const notificationModel = require("../models/notificationModel");
@@ -17,8 +18,10 @@ module.exports = {
       });
       const admin = await Employee.findOne({ role: "admin" });
       ioInstance.to(req.body.for.toString()).emit("notification", notification);
-      ioInstance.to(req.body.from.toString()).emit("notification", notification);
-      ioInstance.to(admin._id.toString()).emit("notification", notification);
+
+      ioInstance.to(req.body.from.toString()).emit("leaveSent", notification);
+      ioInstance.to(admin._id.toString()).emit("leaveSent", notification);
+
       res.status(201).json("Leave request saved.");
     } catch (error) {
       console.error("Error saving leave: ", error);
@@ -51,11 +54,65 @@ module.exports = {
   myLeaves: async (req, res) => {
     try {
       const id = req.params.id;
-      const my_leaves = await leavesModel
-        .find({ from: id })
-        .sort({ _id: -1 })
-        .populate("from", "employeeName employeeProImage");
-      res.status(200).json(my_leaves);
+      console.log("dddddddddddddd", id);
+      const { month, year } = req.query;
+
+      // Ensure that the query parameters are valid
+      if (!month || !year) {
+        return res.status(400).json({ error: "Month and year are required." });
+      }
+
+      // Format the month to always have two digits (e.g., 01, 02, ..., 12)
+      const formattedMonth = month < 10 ? `0${month}` : `${year}`;
+
+      console.log(id, month, year);
+      const startOfMonth = new Date(year, month - 1, 1); // e.g., 2024-12-01
+      const endOfMonth = new Date(year, month, 0, 23, 59, 59, 999); // e.g., 2024-12-31 23:59:59
+
+      const totalLeaves = await leavesModel.aggregate([
+        {
+          $match: {
+            from: new mongoose.Types.ObjectId(id),
+            $or: [
+              // Match selectedDate within the month
+              { selectedDate: { $gte: startOfMonth, $lte: endOfMonth } },
+              // Match leavesStart within the month
+              { leavesStart: { $gte: startOfMonth, $lte: endOfMonth } },
+              // Match leavesEnd within the month
+              { leavesEnd: { $gte: startOfMonth, $lte: endOfMonth } },
+            ],
+          },
+        },
+      ]);
+      console.log(totalLeaves);
+
+      res.status(200).json(totalLeaves);
+
+      // Create the start and end dates based on the provided month and year
+      // const startDate = new Date(`${year}-${formattedMonth}-01T00:00:00.000Z`); // Start of the month
+      // const endDate = new Date(startDate);
+      // endDate.setMonth(startDate.getMonth() + 1); // Move to the next month
+      // endDate.setDate(0); // Set to the last day of the current month
+
+      // // Convert the dates to ISO string format for comparison
+      // const startDateString = startDate.toISOString();
+      // const endDateString = endDate.toISOString();
+
+      // // Query the leaves based on leavesStart, leavesEnd, or selectedDate as strings
+      // const my_leaves = await leavesModel
+      //   .find({
+      //     from: id,
+      //     $or: [
+      //       { leavesStart: { $gte: startDateString, $lte: endDateString } }, // Check if leavesStart is within the month
+      //       { leavesEnd: { $gte: startDateString, $lte: endDateString } }, // Check if leavesEnd is within the month
+      //       { selectedDate: { $gte: startDateString, $lte: endDateString } }, // Check if selectedDate is within the month
+      //     ],
+      //   })
+      //   .sort({ _id: -1 })
+      //   .populate("from", "employeeName employeeProImage");
+
+      // console.log(my_leaves);
+      // res.status(200).json(my_leaves);
     } catch (error) {
       console.error("Error fetching leaves: ", error);
       res.status(404).json({ error: "Leaves not found." });
@@ -78,8 +135,11 @@ module.exports = {
     try {
       const _id = req.params.id;
       const status = req.body.status;
-      const statusForLeave =
-        status == "Rejected" ? `Rejected by ${req.body.statusChangedBy}` : `Accepted by ${req.body.statusChangedBy}`;
+      const statusForLeave = status == "Rejected" ? "rejected" : "accepted";
+      // status == "Rejected"
+      //   ? `Rejected by ${req.body.statusChangedBy}`
+      //   : `Accepted by ${req.body.statusChangedBy}`;
+
       let message = "";
       if (status == "Rejected") {
         message = `Leave request rejected by ${req.body.statusChangedBy}`;
@@ -98,9 +158,11 @@ module.exports = {
       ioInstance.to(req.body.for.toString()).emit("notification", notification);
       console.log("bodyyyyy", req.body);
       //Manager, Admin  (Leaave it as it is , its working)
-      ioInstance.to(req.body.statusChangedById.toString()).emit("notification", notification);
+      ioInstance.to(req.body.statusChangedById.toString()).emit("leaveStatusChanges", notification);
+
       //Admin (Dont remove this )
-      ioInstance.to(admin._id.toString()).emit("notification", notification);
+      ioInstance.to(admin._id.toString()).emit("leaveStatusChanges", notification);
+
       res.status(200).json({ message: "Leave status changed successfully." });
     } catch (error) {
       console.error("Error changing leave status: ", error);

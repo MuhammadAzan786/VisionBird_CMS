@@ -12,15 +12,27 @@ export default function AllLeaves({ table }) {
   const currentUser = useSelector((state) => state.user);
   const quryClient = useQueryClient();
   const dispatch = useDispatch();
+
   useEffect(() => {
     if (socket) {
-      socket.on("notification", (data) => {
+      socket.on("notification", () => {
+        quryClient.invalidateQueries("All leaves");
+      });
+      socket.on("leaveStatusChanges", () => {
+        quryClient.invalidateQueries("All leaves");
+      });
+      socket.on("leaveSent", () => {
         quryClient.invalidateQueries("All leaves");
       });
 
+
       return () => {
-        socket.off("notification", (data) => {
+        socket.off("notification", () => {
           // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
+        });
+        socket.off("leaveStatusChanges", () => { });
+        socket.off("leaveSent", () => {
+          quryClient.invalidateQueries("All leaves");
         });
       };
     } else {

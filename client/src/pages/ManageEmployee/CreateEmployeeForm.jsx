@@ -108,29 +108,29 @@ function CreateEmployeeForm() {
       initialValues={{
         firstName: "",
         fatherName: "",
-        cnic: "34202-2866666-1",
+        cnic: "",
         dob: "",
-        mailingAddress: "lalamusa",
-        disability: "no",
+        mailingAddress: "",
+        disability: "",
         kindofdisability: "",
-        mobile: "0331-6281670",
-        email: "ali@gmail.com",
-        gender: "male",
-        maritalStatus: "single",
-        otherMobile: "0331-6281670",
-        whosMobile: "personal",
-        qualification: "matriculation",
+        mobile: "",
+        email: "",
+        gender: "",
+        maritalStatus: "",
+        otherMobile: "",
+        whosMobile: "",
+        qualification: "",
         startDate: new Date().toISOString().substr(0, 10),
         dateconfirmed: new Date().toISOString().substr(0, 10),
 
         empId: "",
-        designation: "Graphic Designer",
+        designation: "",
 
         userName: "",
         password: "",
-        role: "employee",
+        role: "",
 
-        probation: "no",
+        probation: "",
         probationMonths: "",
 
         BasicPayInProbationPeriod: 0,
@@ -138,20 +138,20 @@ function CreateEmployeeForm() {
         AllowancesInProbationPeriod: 0,
         AllowancesAfterProbationPeriod: 0,
 
-        bankAccount: "no",
+        bankAccount: "",
         accountNo: "",
 
         // Onboarding Questionnaire
-        policyBook: "no",
-        appointment: "no",
-        annualLeave: "no",
-        attendence: "no",
-        localServerAccount: "no",
-        rules: "no",
-        slack: "no",
-        superAdmin: "no",
-        whatsApp: "no",
-        empCard: "no",
+        policyBook: "",
+        appointment: "",
+        annualLeave: "",
+        attendence: "",
+        localServerAccount: "",
+        rules: "",
+        slack: "",
+        superAdmin: "",
+        whatsApp: "",
+        empCard: "",
 
         // Documents
         employeeProImage: {},
@@ -1138,7 +1138,7 @@ function CreateEmployeeForm() {
                       mb: 5,
                     }}
                   >
-                    Upload Documents
+                    Documents
                   </Typography>
 
                   <UploadFiles

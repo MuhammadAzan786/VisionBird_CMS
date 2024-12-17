@@ -18,6 +18,7 @@ import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { styled } from "@mui/material/styles";
 import DownloadIcon from "@mui/icons-material/Download";
 import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 const Portfolio = () => {
   const [projects, setProjects] = useState([]);
@@ -55,6 +56,7 @@ const Portfolio = () => {
       console.log("this is project ");
       console.log(project);
       const response = await fetch(project.project_images);
+      console.log('res',response);
       const blob = await response.blob();
 
       // Add each file to the folder inside the zip

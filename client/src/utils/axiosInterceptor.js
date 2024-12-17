@@ -5,6 +5,8 @@ axios.defaults.baseURL =
   import.meta.env.VITE_NODE_ENV === "production"
     ? import.meta.env.VITE_BACKEND_DOMAIN_NAME
     : import.meta.env.VITE_BACKEND_LOCAL_ADDRESS;
+
+console.log("Axios Base URL:", axios.defaults.baseURL);
 axios.defaults.withCredentials = true;
 
 // Adding the response interceptor globally to check for token expiration

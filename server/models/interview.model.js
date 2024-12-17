@@ -44,22 +44,27 @@ const interviewSchema = new mongoose.Schema(
     },
     response: {
       type: String,
+      enum: ["pending", "appeared", "notAppeared"],
+      default: "pending",
       required: true,
     },
     interviewRating: {
       type: Number,
       min: 0,
       max: 5,
+      default: 0,
     },
     testRating: {
       type: Number,
       min: 0,
       max: 5,
+      default: 0,
     },
     overallRating: {
       type: Number,
       min: 0,
       max: 5,
+      default: 0,
     },
     expectedSalary: {
       type: Number,

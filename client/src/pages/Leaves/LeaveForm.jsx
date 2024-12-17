@@ -180,19 +180,7 @@ function LeaveForm() {
   return (
     <>
       <Box sx={{ width: "100%", padding: 3, paddingX: 6 }}>
-        <Box
-          display={"flex"}
-          justifyContent={"right"}
-          alignItems={"center"}
-          mb={2}
-          mx={2}
-        >
-          <Button onClick={sendLeaveApplication} variant="contained">
-            Send Application
-          </Button>
-        </Box>
-
-        <Box component={Paper} elevation={3} p={10}>
+        <Box component={Paper} p={10}>
           <Box
             display={"flex"}
             flexDirection={"column"}
@@ -253,6 +241,7 @@ function LeaveForm() {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
+                disabled
                 value={name}
                 label="Employee's Name"
                 variant="outlined"
@@ -262,6 +251,7 @@ function LeaveForm() {
             </Grid>
             <Grid item xs={5}>
               <TextField
+                disabled
                 value={employeeID}
                 label="Employee's ID"
                 variant="outlined"
@@ -271,6 +261,7 @@ function LeaveForm() {
             </Grid>
             <Grid item xs={7}>
               <TextField
+                disabled
                 value={employeeDesignation}
                 label="Designation"
                 variant="outlined"
@@ -423,8 +414,7 @@ function LeaveForm() {
                                 // toast.error(
                                 //   "Short leave more than 4hrs will be considered Full leave."
                                 // );
-                              }
-                             else if (diffInMinutes > 120) {
+                              } else if (diffInMinutes > 120) {
                                 setLeaveType("Half Leave");
                                 toast(
                                   "Leave more than 2hrs will be considered Half leave.",
@@ -574,7 +564,7 @@ function LeaveForm() {
                                 // toast.error(
                                 //   "Half Leave less than 2hrs will be considered Short Leave."
                                 // );
-                              } 
+                              }
                             }
                           }}
                           renderInput={(params) => <TextField {...params} />}
@@ -604,7 +594,7 @@ function LeaveForm() {
                               const diffInMinutes =
                                 to.diff(from, "minute") ||
                                 from.diff(to, "minute");
-                               if (diffInMinutes > 240) {
+                              if (diffInMinutes > 240) {
                                 setLeaveType("Full Leave");
                                 toast(
                                   "Leave more than 4hrs will be considered Full Leave.",
@@ -615,8 +605,7 @@ function LeaveForm() {
                                 // toast.error(
                                 //   "Half Leave more than 4hrs will be considered Full Leave."
                                 // );
-                              }
-                             else if (diffInMinutes <= 120) {
+                              } else if (diffInMinutes <= 120) {
                                 setLeaveType("Short Leave");
                                 toast(
                                   "Leave less than 2hrs will be considered Short Leave.",
@@ -627,7 +616,7 @@ function LeaveForm() {
                                 // toast.error(
                                 //   "Half Leave less than 2hrs will be considered Short Leave."
                                 // );
-                              } 
+                              }
                             }
                           }}
                           renderInput={(params) => <TextField {...params} />}
@@ -694,27 +683,16 @@ function LeaveForm() {
             </Grid>
           </Grid>
 
-          {/* <Grid container spacing={10} mt={10} mb={10}>
-                    <Grid item xs={6}  display={'flex'} justifyContent={'center'} alignItems={'center'}>
-                        <Typography variant="body1">
-                            Signature Of Applicant:
-                        </Typography>
-                        <Divider sx={{ flexGrow: 1, borderBottomWidth: 1, borderColor: 'black', marginLeft: 2, maxWidth: 200 }} />
-
-                    </Grid>
-                    <Grid item xs={6}   display={'flex'}  justifyContent={'center'} alignItems={'center'} >
-                        <Typography variant="body1">
-                            Approved by:
-                        </Typography>
-                        <Divider sx={{ flexGrow: 1, borderBottomWidth: 1, borderColor: 'black', marginLeft: 2, maxWidth: 200 }} />
-                    </Grid>
-                    <Grid item xs={12}   display={'flex'}  justifyContent={'center'} alignItems={'center'} mt={20}>
-                        <Typography variant="body1">
-                            Authorization Signature (CEO):
-                        </Typography>
-                        <Divider sx={{ flexGrow: 1, borderBottomWidth: 1, borderColor: 'black', marginLeft: 2, maxWidth: 200 }} />
-                    </Grid>
-                </Grid> */}
+          <Box
+            display={"flex"}
+            justifyContent={"right"}
+            alignItems={"center"}
+            mt={5}
+          >
+            <Button onClick={sendLeaveApplication} variant="contained">
+              Send Application
+            </Button>
+          </Box>
         </Box>
       </Box>
     </>

@@ -10,6 +10,10 @@ const {
   updateResponse,
   updateRemarks,
   searchInterviews,
+  pending_Evaluations,
+  not_appeared_Evaluations,
+  appeared_Evaluations,
+  update_record_when_appeared,
 } = require("../controllers/interview.controller");
 const authorizeRoles = require("../Middlewares/authorization");
 const auth = require("../Middlewares/auth");
@@ -17,8 +21,29 @@ const auth = require("../Middlewares/auth");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// ! to show interview data
-router.get("/", auth, authorizeRoles("admin", "manager"), viewData);
+router.get(
+  "/pending_evaluations",
+  auth,
+  authorizeRoles("admin", "manager"),
+  pending_Evaluations
+);
+
+router.get(
+  "/appeared_evaluations",
+  auth,
+  authorizeRoles("admin", "manager"),
+  appeared_Evaluations
+);
+
+router.get(
+  "/not_appeared_evaluations",
+  auth,
+  authorizeRoles("admin", "manager"),
+  not_appeared_Evaluations
+);
+
+// // ! to show interview data
+// router.get("/", auth, authorizeRoles("admin", "manager"), viewData);
 
 // ! to show interview data by a specific id
 router.get("/:id", auth, authorizeRoles("admin", "manager"), viewDataById);
@@ -62,5 +87,7 @@ router.post(
   authorizeRoles("admin", "manager"),
   searchInterviews
 );
+
+router.put("/update_record_when_appeared/:id", update_record_when_appeared);
 
 module.exports = router;

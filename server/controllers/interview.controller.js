@@ -65,6 +65,7 @@ const addData = async (req, res) => {
     // Create new interview data with the uploaded CV URL
     const interviewdata = new interview({
       ...req.body,
+      response: "pending",
       CvUpload: uploadCV,
     });
 
@@ -74,6 +75,79 @@ const addData = async (req, res) => {
   } catch (err) {
     console.error("Error saving interview data:", err);
     res.status(500).json({ message: err.message });
+  }
+};
+
+const pending_Evaluations = async (req, res) => {
+  try {
+    const search = req.query.search || "";
+    const interviewData = await interview.find({
+      response: "pending",
+      $or: [
+        { name: { $regex: search, $options: "i" } },
+        { contact: { $regex: search, $options: "i" } },
+        { CNIC: { $regex: search, $options: "i" } },
+      ],
+    });
+    console.log("Interview data fetched successfully:", interviewData);
+    res.status(200).json({
+      message:
+        interviewData.length === 0
+          ? "No pending evaluations"
+          : "Pending evaluations found",
+      interviewData,
+    });
+  } catch (error) {
+    console.error("Error occurred:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const appeared_Evaluations = async (req, res) => {
+  try {
+    const search = req.query.search || "";
+    const interviewData = await interview.find({
+      response: "appeared",
+      $or: [
+        { name: { $regex: search, $options: "i" } },
+        { contact: { $regex: search, $options: "i" } },
+        { CNIC: { $regex: search, $options: "i" } },
+      ],
+    });
+    console.log("Interview data fetched successfully:", interviewData);
+    res.status(200).json({
+      message:
+        interviewData.length === 0
+          ? "No Appaered evaluations"
+          : "Pending evaluations found",
+      interviewData,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const not_appeared_Evaluations = async (req, res) => {
+  try {
+    const search = req.query.search || "";
+    const interviewData = await interview.find({
+      response: "notAppeared",
+      $or: [
+        { name: { $regex: search, $options: "i" } },
+        { contact: { $regex: search, $options: "i" } },
+        { CNIC: { $regex: search, $options: "i" } },
+      ],
+    });
+    console.log("Interview data fetched successfully:", interviewData);
+    res.status(200).json({
+      message:
+        interviewData.length === 0
+          ? "No not Appaered evaluations"
+          : "Pending evaluations found",
+      interviewData,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -254,6 +328,43 @@ const createFilterQuery = (queryParams) => {
   return filter;
 };
 
+// Update the Interview record with additional information
+const update_record_when_appeared = async (req, res) => {
+  const { id } = req.params; // Get the interview id from the URL parameters
+  const { expectedSalary, testRating, interviewRating, remarks, response } =
+    req.body;
+
+  try {
+    // Find the interview by ID and update the fields
+    const interviewRecord = await interview.findById(id); // Changed interview to interviewRecord
+
+    if (!interviewRecord) {
+      return res.status(404).json({ message: "Interview record not found" });
+    }
+
+    // Update the fields with new data
+    interviewRecord.response = response || interviewRecord.response; // Changed interview to interviewRecord
+    interviewRecord.expectedSalary =
+      expectedSalary || interviewRecord.expectedSalary; // Changed interview to interviewRecord
+    interviewRecord.testRating = testRating || interviewRecord.testRating; // Changed interview to interviewRecord
+    interviewRecord.interviewRating =
+      interviewRating || interviewRecord.interviewRating; // Changed interview to interviewRecord
+    interviewRecord.remarks = remarks || interviewRecord.remarks; // Changed interview to interviewRecord
+
+    // Save the updated interview
+    await interviewRecord.save(); // Changed interview to interviewRecord
+
+    // Respond with the updated record
+    res.status(200).json({
+      message: "Interview updated successfully",
+      interview: interviewRecord,
+    }); // Changed interview to interviewRecord
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error updating the interview", error });
+  }
+};
+
 module.exports = {
   viewData,
   viewDataById,
@@ -262,4 +373,8 @@ module.exports = {
   updateResponse,
   updateRemarks,
   searchInterviews,
+  pending_Evaluations,
+  appeared_Evaluations,
+  not_appeared_Evaluations,
+  update_record_when_appeared,
 };

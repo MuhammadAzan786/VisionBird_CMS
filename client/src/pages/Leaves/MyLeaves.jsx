@@ -34,13 +34,22 @@ export default function MyLeaves() {
   console.log("myy all", allLeaves);
   useEffect(() => {
     if (socket) {
-      socket.on("notification", (data) => {
+      socket.on("notification", () => {
         getLeaves();
       });
+       socket.on("leaveSent", () => {
+         getLeaves();
+       });
+
+   
       return () => {
-        socket.off("notification", (data) => {
+        socket.off("notification", () => {
           // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
         });
+         socket.off("leaveSent", () => {
+           getLeaves();
+         });
+
       };
     } else {
       dispatch(initializeSocket(currentUser));

@@ -74,38 +74,15 @@ const Manager = () => {
   };
 
   return (
-    <Box>
-      <Box
-        component={Paper}
-        sx={{
-          px: 2,
-          pb: 2,
-          pt: 1,
-          boxShadow: "-1px 2px 12px 0px rgba(0,0,0,0.15)",
-          borderRadius: "10px",
-        }}
-      >
-        <Box sx={{ width: "100%", typography: "body1", py: 2 }}>
-          <EmployeesTable />
-        </Box>
-      </Box>
+    <>
+      <Paper>
+        <EmployeesTable />
+      </Paper>
 
-      <Box
-        component={Paper}
-        sx={{
-          px: 2,
-          pb: 2,
-          pt: 1,
-          mt: 3,
-          boxShadow: "-1px 2px 12px 0px rgba(0,0,0,0.15)",
-          borderRadius: "10px",
-        }}
-      >
-        <Box sx={{ width: "100%", typography: "body1",py:2 }}>
-          <InterneeTable />
-        </Box>
-      </Box>
-    </Box>
+      <Paper>
+        <InterneeTable />
+      </Paper>
+    </>
   );
 };
 

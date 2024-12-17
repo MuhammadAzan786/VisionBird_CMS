@@ -26,7 +26,7 @@ const AllPortfolio = () => {
   const { showMessage } = useMessage();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   console.log("searchTerm", searchTerm);
