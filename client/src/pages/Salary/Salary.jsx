@@ -5,6 +5,7 @@ import { usePDF } from "react-to-pdf";
 import axios from "../../utils/axiosInterceptor";
 import dayjs from "dayjs";
 import { getCurrentMonth } from "../../utils/common";
+import toast from "react-hot-toast";
 
 const Salary = () => {
   const { toPDF, targetRef } = usePDF({ filename: "Salary.pdf" });
@@ -16,49 +17,49 @@ const Salary = () => {
   const queryParamsData = Object.fromEntries(queryParams.entries());
 
   const {
-    extra_bonus_amount: extra_bonus,
-    extra_amount_remarks: extra_bonus_remarks,
+    paidDate,
+    extraBonusAmount,
+    extraBonusRemarks,
     incentive,
     totalWorkingDays,
     month: salary_month,
     year: salary_year,
-    paymentMethod: payment_method,
+    paymentMethod,
+    chequeNumber = null,
+    otherDetails = null,
   } = queryParamsData;
 
   const [salaryDetails, setSalaryDetails] = useState({
     incentive,
-    extra_bonus,
-    extra_bonus_remarks,
-    salary_month,
-    salary_year,
-    payment_method,
+    paymentMethod,
+    paidDate,
   });
-  const [leaveDetails, setLeaveDetails] = useState({});
-  const [workDetails, setWorkDetails] = useState({ total_woking_days: totalWorkingDays });
 
-  //Working Days by Company:
+  const paymentDetails = {
+    paymentMethod,
+    ...(chequeNumber ? { chequeNumber } : {}),
+    ...(otherDetails ? { otherDetails } : {}),
+  };
 
-  // const queryParamsData = {
-  //   id,
-  //   incentive: queryParams.get("incentive"),
-  //   extraBonus: queryParams.get("extra_bonus_amount"),
-  //   extraAmountRemarks: queryParams.get("extra_amount_remarks"),
-  //   paymentMethod: queryParams.get("paymentMethod"),
-  //   chequeNumber: queryParams.get("chequeNumber"),
-  //   totalWorkingDays: queryParams.get("totalWorkingDays"),
-  //   paidDate: queryParams.get("paidDate"),
-  //   month: queryParams.get("month"),
-  //   year: queryParams.get("year"),
-  // };
+  const [leaveDetails, setLeaveDetails] = useState([]);
+  const [workDetails, setWorkDetails] = useState({ totalWorkingDays });
+
+  const bonusDetails = {
+    extraBonusAmount,
+    extraBonusRemarks,
+  };
+
+  const [netSalary, setNetSalary] = useState(0);
 
   const fetchSalaryDetails = async () => {
     await axios
       .post(`/api/pay/view_salary`, {
-        salary_month: queryParamsData.month,
-        salary_year: queryParamsData.year,
-        incentive: queryParamsData.incentive,
-        extra_bonus: queryParamsData.extra_bonus_amount,
+        salary_month,
+        salary_year,
+        incentive,
+        extraBonusAmount,
         employeeDetails,
+        totalWorkingDays,
       })
       .then((response) => {
         console.log("View Data", response.data);
@@ -72,6 +73,8 @@ const Salary = () => {
         setWorkDetails((prev) => {
           return { ...prev, ...response.data.workDetails };
         });
+
+        setNetSalary(response.data.netSalary);
       })
       .catch((error) => {
         console.error("Error fetching salary data:", error);
@@ -82,13 +85,20 @@ const Salary = () => {
     await axios
       .post(`/api/pay/pay_salary`, {
         userId: employeeDetails._id,
+        salary_month,
+        salary_year,
+        paidDate,
         salaryDetails,
+        paymentDetails,
         workDetails,
         leaveDetails,
+        bonusDetails,
+        netSalary,
       })
-      .then(() => {})
+      .then()
       .catch((error) => {
         console.error("Error fetching salary data:", error);
+        toast.error("Error Generating Salary");
       });
   };
 
@@ -104,7 +114,7 @@ const Salary = () => {
           onClick={() => {
             toPDF();
             saveSalaryDetails();
-            navigate("/pay-salaries");
+            // navigate("/pay-salaries");
           }}
         >
           Save Details & Download Slip
@@ -139,7 +149,7 @@ const Salary = () => {
                 Full & Final Settlement of Dues
               </Typography>
               <Typography variant={"h7"} fontWeight={700}>
-                For the Month of {getCurrentMonth(queryParamsData.month)}, {queryParamsData.year}
+                For the Month of {getCurrentMonth(salary_month)}, {salary_year}
               </Typography>
             </HeadingStyled>
           </Grid>
@@ -189,14 +199,14 @@ const Salary = () => {
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Cheque Number:</Typography>
-                  <Typography>{queryParamsData.chequeNumber || "None"}</Typography>
+                  <Typography>{paymentDetails.chequeNumber ?? "None"}</Typography>
                 </DivStyled>
               </Grid>
 
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Payment Method:</Typography>
-                  <Typography>{queryParamsData.paymentMethod}</Typography>
+                  <Typography sx={{ textTransform: "capitalize" }}>{paymentDetails.paymentMethod}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={6}>
@@ -230,13 +240,13 @@ const Salary = () => {
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Working Days by Company:</Typography>
-                  <Typography>{workDetails.total_woking_days}</Typography>
+                  <Typography>{workDetails.totalWorkingDays}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Days Worked:</Typography>
-                  <Typography>{workDetails.total_days_worked}</Typography>
+                  <Typography>{workDetails.daysWorked}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={4}>
@@ -253,7 +263,7 @@ const Salary = () => {
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Basic Pay:</Typography>
-                  <Typography>PKR {salaryDetails.basic_pay}</Typography>
+                  <Typography>PKR {salaryDetails.basicPay}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={4}>
@@ -265,7 +275,7 @@ const Salary = () => {
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Gross Salary:</Typography>
-                  <Typography>PKR {salaryDetails.gross_salary}</Typography>
+                  <Typography>PKR {salaryDetails.grossSalary}</Typography>
                 </DivStyled>
               </Grid>
             </Grid>
@@ -278,83 +288,22 @@ const Salary = () => {
               </Typography>
             </HeadingStyled>
           </Grid>
-
           <Grid item xs={12}>
             <Grid container spacing={1}>
-              {/* ==================remove these later just for logging */}
-              <Grid item xs={6}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Half Leaves Unpaid</Typography>
-                  <Typography>{leaveDetails.halfLeavesUnpaidCount}</Typography>
-                </DivStyled>
-              </Grid>
-
-              <Grid item xs={6}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Half Laves Paid</Typography>
-                  <Typography>{leaveDetails.halfLeavesPaidCount}</Typography>
-                </DivStyled>
-              </Grid>
-
-              <Grid item xs={6}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Full leaves Unpaid Before Adding Half leaves</Typography>
-                  <Typography>{leaveDetails.unpaidLeavesCountBefore}</Typography>
-                </DivStyled>
-              </Grid>
-
-              <Grid item xs={6}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Full leaves Paid Before Adding Half leaves</Typography>
-                  <Typography>{leaveDetails.paidLeavesCountBefore}</Typography>
-                </DivStyled>
-              </Grid>
-              {/* =============================remove these later just for logging */}
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Short /Half Leave:</Typography>
-                  <Typography>{leaveDetails.halfLeaves}</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Casual Leave:</Typography>
-                  <Typography sx={{ color: "red", fontWeight: 600 }}>TODO</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Sick Leave:</Typography>
-                  <Typography sx={{ color: "red", fontWeight: 600 }}>TODO</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Without Pay Leave:</Typography>
-                  <Typography>{leaveDetails.unpaidLeavesCount}</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Cash Leave:</Typography>
-                  <Typography>{leaveDetails.paidLeavesCount}</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Other/Yearly Leave:</Typography>
-                  <Typography sx={{ color: "red", fontWeight: 600 }}>TODO</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Net Salary:</Typography>
-                  <Typography>PKR {salaryDetails.net_salary}</Typography>
-                </DivStyled>
-              </Grid>
+              {leaveDetails?.map((item, index) => {
+                return (
+                  <Grid item xs={4} key={index}>
+                    <DivStyled>
+                      <Typography fontWeight={700}>{item.label}</Typography>
+                      <Typography> {item.value}</Typography>
+                    </DivStyled>
+                  </Grid>
+                );
+              })}
             </Grid>
           </Grid>
 
+          {/* ===========================leaves */}
           <Grid item xs={12}>
             <HeadingStyled bgColor="#145DA0">
               <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
@@ -368,13 +317,13 @@ const Salary = () => {
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Extra Bonus Amount:</Typography>
-                  <Typography>PKR {salaryDetails.extra_bonus || 0}</Typography>
+                  <Typography>PKR {bonusDetails.extraBonusAmount || 0}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={8}>
                 <DivStyled>
                   <Typography fontWeight={700}>Extra Amount Remarks:</Typography>
-                  <Typography>{salaryDetails.extra_bonus_remarks || "None"}</Typography>
+                  <Typography>{bonusDetails.extraBonusRemarks || "None"}</Typography>
                 </DivStyled>
               </Grid>
             </Grid>
@@ -395,7 +344,7 @@ const Salary = () => {
                 Net Amount Paid:
               </Typography>
               <Typography fontWeight={700} fontSize={23} style={{ color: "white", display: "inline-block" }}>
-                PKR {salaryDetails.net_salary}
+                PKR {netSalary}
               </Typography>
             </div>
           </Grid>
@@ -411,7 +360,7 @@ const Salary = () => {
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Paid Date:</Typography>
-                  <Typography>{dayjs(queryParamsData.paidDate).format("dddd, MMMM D, YYYY")}</Typography>
+                  <Typography>{dayjs(salaryDetails.paidDate).format("dddd, MMMM D, YYYY")}</Typography>
                 </DivStyled>
               </Grid>
             </Grid>

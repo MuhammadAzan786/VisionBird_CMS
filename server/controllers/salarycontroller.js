@@ -9,41 +9,43 @@ module.exports = {
   //Months are comming 1-12 based
   view_salary: async (req, res) => {
     try {
-      const { salary_month, salary_year, incentive, extra_bonus, employeeDetails } = req.body;
+      const { salary_month, salary_year, incentive, extraBonusAmount, employeeDetails, totalWorkingDays } = req.body;
 
       const { _id: employee_id } = employeeDetails;
 
       const employee = await employeeModel.findOne({ _id: employee_id });
+      const { grossSalary, basicPay, allowances } = await calculateGrossSalary(employee);
+      const leaveData = await paid_unpaid_leaves(employee_id, Number(salary_month), Number(salary_year));
 
-      const leaves_data = await paid_unpaid_leaves(employee_id, Number(salary_month), Number(salary_year));
-      const { unpaidLeavesCount } = leaves_data;
+      const { unpaidLeavesCount, leaveDetails } = leaveData;
 
-      const { gross_salary, basic_pay, allowances } = await calculateGrossSalary(employee);
+      const numberOfDaysInMonth = daysInMonth(salary_year, salary_month);
+      const perDayWage = grossSalary / numberOfDaysInMonth;
+      const unpaidLeavesAmount = unpaidLeavesCount * perDayWage;
 
-      const number_of_days_in_month = daysInMonth(salary_year, salary_month);
-      const per_day_wage = gross_salary / number_of_days_in_month;
-      const unpaid_leave_amount = unpaidLeavesCount * per_day_wage;
+      const daysWorked = totalWorkingDays - unpaidLeavesCount;
 
-      let net_salary = gross_salary + Number(extra_bonus) + Number(incentive) - unpaid_leave_amount;
+      const netSalaryWithLeaveCutting = grossSalary + Number(incentive) - unpaidLeavesAmount;
 
-      const total_days_worked = 80; //TODO: Later remove hardcore
+      leaveDetails.push({
+        key: "netSalaryWithLeaveCutting",
+        label: "Net Salary",
+        value: netSalaryWithLeaveCutting,
+      });
 
-      //Leavs ki info jaani hai
-      //Days worked
-      //basipay, allowances, grossSalary
-      //net_salary
+      const netSalary = netSalaryWithLeaveCutting + Number(extraBonusAmount);
 
       res.json({
-        leaveDetails: leaves_data,
         salaryDetails: {
-          basic_pay,
+          basicPay,
           allowances,
-          gross_salary,
-          net_salary,
+          grossSalary,
         },
+        leaveDetails,
         workDetails: {
-          total_days_worked,
+          daysWorked,
         },
+        netSalary,
       });
     } catch (error) {
       console.log("Error View Salary", error);
@@ -54,31 +56,47 @@ module.exports = {
   pay_salary: async (req, res) => {
     try {
       console.log("Req agyi pay salary");
-
-      const { userId, salaryDetails, workDetails, leaveDetails } = req.body;
-
       console.log(req.body);
+
+      let {
+        userId,
+        salary_month,
+        salary_year,
+        paidDate,
+
+        salaryDetails,
+        paymentDetails,
+        workDetails,
+        leaveDetails,
+        bonusDetails,
+
+        netSalary,
+      } = req.body;
+
+      //Mapping leaveDetail back to object form
+
+      leaveDetails = leaveDetails.reduce((acc, item) => {
+        const { key, value } = item;
+        acc[key] = value;
+        return acc;
+      }, {});
 
       const salaryData = {
         employee_obj_id: userId,
+        salary_month,
+        salary_year,
+        paidDate,
+
+        salaryDetails,
+        paymentDetails,
+        workDetails,
+        leaveDetails,
+        bonusDetails,
+
+        netSalary,
       };
 
-      // const salaryData = {
-      //   employee_obj_id: employee_id,
-      //   salary_month,
-      //   salary_year,
-      //   Half_leaves: 4,
-      //   Full_leaves: 4,
-      //   paid_leaves: 4,
-      //   unpaid_leaves: 4,
-      //   incentive: Number(incentive),
-      //   gross_salary,
-      //   net_salary,
-      //   extra_bonus: Number(extra_bonus),
-      //   cheque_number,
-      // };
-
-      // await salaryModel.create(salaryData);
+      await salaryModel.create(salaryData);
 
       res.status(200).json({ message: "Salary Generated" });
     } catch (error) {
@@ -276,6 +294,4 @@ module.exports = {
       res.status(500).json({ error: "Error executing query" });
     }
   },
-
-  calculate_leaves: async (req, res) => {},
 };

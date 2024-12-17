@@ -43,7 +43,7 @@ const PaySalaries = () => {
 
   const [selectedEmployeeId, setSelectedEmployeeId] = React.useState(null);
   const [employeeDetails, setEmployeeDetails] = React.useState(null);
-  const [paymentMethod, setPaymentMethod] = React.useState("Cash");
+  const [paymentMethod, setPaymentMethod] = React.useState("cash");
 
   const [salaryId, setSalaryId] = useState();
   const [viewModel, setViewModal] = useState(false);
@@ -381,29 +381,28 @@ const PaySalaries = () => {
             console.log("FORM DATA KA DATA", formJson);
 
             let queryParams = {
-              ...Object.fromEntries(formData.entries()),
+              ...formJson,
               ...selectedDate,
               totalWorkingDays,
               paidDate,
+              paymentMethod,
             };
 
-            const { payment_method, other_payment_method, cheque_number } = formJson;
+            const { chequeNumber, otherDetails } = formJson;
 
-            if (payment_method === "Other") {
+            if (paymentMethod === "other") {
               queryParams = {
                 ...queryParams,
-                paymentMethod: other_payment_method,
+                otherDetails,
               };
-            } else if (payment_method === "Cheque") {
+            } else if (paymentMethod === "cheque") {
               queryParams = {
                 ...queryParams,
-                paymentMethod: payment_method,
-                chequeNumber: cheque_number,
+                chequeNumber,
               };
             } else {
               queryParams = {
                 ...queryParams,
-                paymentMethod: payment_method,
               };
             }
 
@@ -436,8 +435,8 @@ const PaySalaries = () => {
           <TextField
             required
             margin="dense"
-            id="extra_bonus_amount"
-            name="extra_bonus_amount"
+            id="extraBonusAmount"
+            name="extraBonusAmount"
             label="Extra Bonus Amount"
             placeholder="PKR"
             type="number"
@@ -447,8 +446,8 @@ const PaySalaries = () => {
           <TextField
             required
             margin="dense"
-            id="extra_amount_remarks"
-            name="extra_amount_remarks"
+            id="extraBonusRemarks"
+            name="extraBonusRemarks"
             label="Extra Amount Remarks"
             type="text"
             fullWidth
@@ -467,18 +466,17 @@ const PaySalaries = () => {
               value={paymentMethod}
               onChange={handlePaymentMethodChange}
             >
-              <MenuItem value={"Cheque"}>Cheque</MenuItem>
-              <MenuItem value={"Cash"}>Cash</MenuItem>
-              <MenuItem value={"iNet Banking"}>iNet Banking</MenuItem>
-              <MenuItem value={"Other"}>Other</MenuItem>
+              <MenuItem value={"cheque"}>Cheque</MenuItem>
+              <MenuItem value={"cash"}>Cash</MenuItem>
+              <MenuItem value={"other"}>Other</MenuItem>
             </Select>
           </FormControl>
-          {paymentMethod === "Other" && (
+          {paymentMethod === "other" && (
             <TextField
               required
               margin="dense"
-              id="other_payment_method"
-              name="other_payment_method"
+              id="otherDetails"
+              name="otherDetails"
               label="Other Payment Method"
               type="text"
               fullWidth
@@ -486,12 +484,12 @@ const PaySalaries = () => {
             />
           )}
 
-          {paymentMethod === "Cheque" && (
+          {paymentMethod === "cheque" && (
             <TextField
               required
               margin="dense"
-              id="cheque_number"
-              name="cheque_number"
+              id="chequeNumber"
+              name="chequeNumber"
               label="Cheque Number"
               type="number"
               fullWidth

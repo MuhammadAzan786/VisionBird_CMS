@@ -1,8 +1,8 @@
 const salaryModel = require("../models/salarymodel");
 const calculateGrossSalary = async (employee) => {
-  let basic_pay = 0;
+  let basicPay = 0;
   let allowances = 0;
-  let gross_salary = 0;
+  let grossSalary = 0;
 
   try {
     if (employee.probationPeriod === "yes") {
@@ -13,20 +13,20 @@ const calculateGrossSalary = async (employee) => {
       const totalSalariesPaid = numOfMonthSalaryPaid + 1;
 
       if (totalSalariesPaid <= employee.probationMonth) {
-        basic_pay = Number(employee.BasicPayInProbationPeriod);
+        basicPay = Number(employee.BasicPayInProbationPeriod);
         allowances = Number(employee.AllowancesInProbationPeriod);
       } else {
-        basic_pay = Number(employee.BasicPayAfterProbationPeriod);
+        basicPay = Number(employee.BasicPayAfterProbationPeriod);
         allowances = Number(employee.AllowancesAfterProbationPeriod);
       }
     } else if (employee.probationPeriod === "no") {
-      basic_pay = Number(employee.BasicPayAfterProbationPeriod);
+      basicPay = Number(employee.BasicPayAfterProbationPeriod);
       allowances = Number(employee.AllowancesAfterProbationPeriod);
     }
 
-    gross_salary = basic_pay + allowances;
+    grossSalary = basicPay + allowances;
 
-    return { basic_pay, allowances, gross_salary };
+    return { basicPay, allowances, grossSalary };
   } catch (error) {
     console.log("ERROR CALCULATE GROSS SALARY", error);
   }
