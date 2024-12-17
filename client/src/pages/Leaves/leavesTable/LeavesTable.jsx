@@ -163,7 +163,6 @@ export default function LeavesTable({ allLeaves, pendingLeaves }) {
 
         {/* Tab panels */}
         <TabPanel value="all_leaves" sx={{ p: 0 }}>
-          {" "}
           <DataGrid
             rows={rows}
             columns={columns}
@@ -181,16 +180,5 @@ export default function LeavesTable({ allLeaves, pendingLeaves }) {
         </TabPanel>
       </TabContext>
     </Paper>
-    // <Paper>
-    //   <Typography variant="h6" marginBottom="30px">
-    //     Employee Leaves
-    //   </Typography>
-    //   <DataGrid
-    //     rows={rows}
-    //     columns={columns}
-    //     pageSize={10}
-    //     onRowClick={(params) => navigate(`/view-leave/${params.id}`)}
-    //   />
-    // </Paper>
   );
 }
