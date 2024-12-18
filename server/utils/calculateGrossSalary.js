@@ -20,11 +20,14 @@ const calculateGrossSalary = async (employee) => {
         allowances = Number(employee.AllowancesAfterProbationPeriod);
       }
     } else if (employee.probationPeriod === "no") {
+      console.log("Probabtion Period No");
+
       basicPay = Number(employee.BasicPayAfterProbationPeriod);
       allowances = Number(employee.AllowancesAfterProbationPeriod);
     }
 
     grossSalary = basicPay + allowances;
+    console.log("grosssssss", grossSalary);
 
     return { basicPay, allowances, grossSalary };
   } catch (error) {

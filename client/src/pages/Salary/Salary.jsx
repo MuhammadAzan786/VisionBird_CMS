@@ -49,6 +49,8 @@ const Salary = () => {
     extraBonusRemarks,
   };
 
+  const [netSalaryBeforeTax, setNetSalaryBeforeTax] = useState(0);
+
   const [netSalary, setNetSalary] = useState(0);
 
   const fetchSalaryDetails = async () => {
@@ -75,6 +77,8 @@ const Salary = () => {
         });
 
         setNetSalary(response.data.netSalary);
+
+        setNetSalaryBeforeTax(response.data.netSalaryBeforeTax);
       })
       .catch((error) => {
         console.error("Error fetching salary data:", error);
@@ -328,6 +332,28 @@ const Salary = () => {
               </Grid>
             </Grid>
           </Grid>
+          {/* ========================================check test */}
+          <Grid item xs={12}>
+            <div
+              style={{
+                marginTop: 10,
+                marginBottom: 0,
+                backgroundColor: "#C00000",
+                display: "flex",
+                justifyContent: "space-around",
+                padding: "10px",
+              }}
+            >
+              <Typography fontWeight={700} fontSize={23} style={{ color: "white", display: "inline-block" }}>
+                Net Amount Paid Before Tax:
+              </Typography>
+              <Typography fontWeight={700} fontSize={23} style={{ color: "white", display: "inline-block" }}>
+                PKR {netSalaryBeforeTax}
+              </Typography>
+            </div>
+          </Grid>
+
+          {/* ========================================check test */}
 
           <Grid item xs={12}>
             <div

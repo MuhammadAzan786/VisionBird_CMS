@@ -4,6 +4,7 @@ const paid_unpaid_leaves = require("../utils/paid_unpaid_leaves");
 
 const daysInMonth = require("../utils/date/daysInMonths");
 const calculateGrossSalary = require("../utils/calculateGrossSalary");
+const tax_calculator = require("../utils/taxCalculator");
 
 module.exports = {
   //Months are comming 1-12 based
@@ -33,7 +34,11 @@ module.exports = {
         value: netSalaryWithLeaveCutting,
       });
 
-      const netSalary = netSalaryWithLeaveCutting + Number(extraBonusAmount);
+      const netSalaryBeforeTax = netSalaryWithLeaveCutting + Number(extraBonusAmount);
+
+      const netSalary = tax_calculator(netSalaryBeforeTax);
+
+      // const netSalary = netSalaryWithLeaveCutting + Number(extraBonusAmount);
 
       res.json({
         salaryDetails: {
@@ -46,6 +51,7 @@ module.exports = {
           daysWorked,
         },
         netSalary,
+        netSalaryBeforeTax,
       });
     } catch (error) {
       console.log("Error View Salary", error);

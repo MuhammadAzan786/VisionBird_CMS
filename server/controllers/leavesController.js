@@ -54,7 +54,7 @@ module.exports = {
   myLeaves: async (req, res) => {
     try {
       const id = req.params.id;
-      console.log("dddddddddddddd", id);
+
       const { month, year } = req.query;
 
       // Ensure that the query parameters are valid

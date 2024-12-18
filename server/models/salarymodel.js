@@ -45,29 +45,29 @@ const workDetails = new mongoose.Schema(
 
 const leaveDetails = new mongoose.Schema(
   {
-    half_leaves: {
+    halfLeavesCount: {
       type: Number,
-      default: 5,
+      default: 0,
     },
     casualLeaves: {
       type: Number,
-      default: 5,
+      default: 0,
     },
     sickLeaves: {
       type: Number,
-      default: 5,
+      default: 0,
     },
-    unpaidLeaves: {
+    unpaidLeavesCount: {
       type: Number,
-      default: 5,
+      default: 0,
     },
-    paidLeaves: {
+    paidLeavesCount: {
       type: Number,
-      default: 5,
+      default: 0,
     },
-    yearlyLeaves: {
+    otherLeaves: {
       type: Number,
-      default: 5,
+      default: 0,
     },
     netSalaryWithLeaveCutting: {
       type: Number,
