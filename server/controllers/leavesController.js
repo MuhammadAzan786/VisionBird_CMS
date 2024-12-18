@@ -69,9 +69,6 @@ module.exports = {
         return res.status(400).json({ error: "Month and year are required." });
       }
 
-      // Format the month to always have two digits (e.g., 01, 02, ..., 12)
-      const formattedMonth = month < 10 ? `0${month}` : `${year}`;
-
       console.log(id, month, year);
       const startOfMonth = new Date(year, month - 1, 1); // e.g., 2024-12-01
       const endOfMonth = new Date(year, month, 0, 23, 59, 59, 999); // e.g., 2024-12-31 23:59:59
@@ -91,37 +88,22 @@ module.exports = {
           },
         },
       ]);
-      console.log(totalLeaves);
-
       res.status(200).json(totalLeaves);
-
-      // Create the start and end dates based on the provided month and year
-      // const startDate = new Date(`${year}-${formattedMonth}-01T00:00:00.000Z`); // Start of the month
-      // const endDate = new Date(startDate);
-      // endDate.setMonth(startDate.getMonth() + 1); // Move to the next month
-      // endDate.setDate(0); // Set to the last day of the current month
-
-      // // Convert the dates to ISO string format for comparison
-      // const startDateString = startDate.toISOString();
-      // const endDateString = endDate.toISOString();
-
-      // // Query the leaves based on leavesStart, leavesEnd, or selectedDate as strings
-      // const my_leaves = await leavesModel
-      //   .find({
-      //     from: id,
-      //     $or: [
-      //       { leavesStart: { $gte: startDateString, $lte: endDateString } }, // Check if leavesStart is within the month
-      //       { leavesEnd: { $gte: startDateString, $lte: endDateString } }, // Check if leavesEnd is within the month
-      //       { selectedDate: { $gte: startDateString, $lte: endDateString } }, // Check if selectedDate is within the month
-      //     ],
-      //   })
-      //   .sort({ _id: -1 })
-      //   .populate("from", "employeeName employeeProImage");
-
-      // console.log(my_leaves);
-      // res.status(200).json(my_leaves);
     } catch (error) {
       console.error("Error fetching leaves: ", error);
+      res.status(404).json({ error: "Leaves not found." });
+    }
+  },
+
+  my_all_leaves: async (req, res) => {
+    try {
+      const id = req.params.id;
+      const all_leaves = await leavesModel
+        .find({ from: id })
+        .populate("from", "employeeName employeeProImage role");
+      res.status(200).json(all_leaves);
+    } catch (error) {
+      console.error("Error getting leaves: ", error);
       res.status(404).json({ error: "Leaves not found." });
     }
   },

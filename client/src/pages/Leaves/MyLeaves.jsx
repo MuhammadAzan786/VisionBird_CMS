@@ -41,7 +41,7 @@ export default function MyLeaves() {
   const dispatch = useDispatch();
   const getLeaves = () => {
     axios
-      .get(`/api/leave/my-leaves/${id}`)
+      .get(`/api/leave/my-all-leaves/${id}`)
       .then((response) => {
         setAllLeaves(response.data);
         const pending = response.data.filter((item) => {
@@ -65,19 +65,17 @@ export default function MyLeaves() {
       socket.on("notification", () => {
         getLeaves();
       });
-       socket.on("leaveSent", () => {
-         getLeaves();
-       });
+      socket.on("leaveSent", () => {
+        getLeaves();
+      });
 
-   
       return () => {
         socket.off("notification", () => {
           // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
         });
-         socket.off("leaveSent", () => {
-           getLeaves();
-         });
-
+        socket.off("leaveSent", () => {
+          getLeaves();
+        });
       };
     } else {
       dispatch(initializeSocket(currentUser));
