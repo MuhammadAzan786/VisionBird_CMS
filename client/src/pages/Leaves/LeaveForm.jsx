@@ -119,15 +119,6 @@ function LeaveForm() {
         console.log(res);
         toast.success("Leave Request Submitted Successfully");
         navigate("/my-leaves");
-        // setReason("");
-        // setLeaveType("");
-        // setLeaveCategory("");
-        // setSelectedDate(null);
-        // setLeavesStart(null);
-        // setLeavesEnd(null);
-        // setFromTime(null);
-        // setToTime(null);
-        // setSelectedManager("");
       })
       .catch((error) => {
         toast.error("Error in Submitting Leave Request!!");

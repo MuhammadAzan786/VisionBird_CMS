@@ -11,6 +11,7 @@ module.exports = {
     try {
       const leave = await leavesModel.create(req.body);
       const message = `New leave request from ${req.body.name}`;
+
       const notification = await notificationModel.create({
         for: req.body.for,
         message,

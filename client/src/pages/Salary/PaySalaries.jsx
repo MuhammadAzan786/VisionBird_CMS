@@ -64,7 +64,10 @@ const PaySalaries = () => {
     month: dayjs().format("MM"),
     year: dayjs().format("YYYY"),
   });
-  const [paidDate, setPaidDate] = React.useState(dayjs());
+  const [paidDate, setPaidDate] = useState(dayjs());
+
+  console.log("paidDate", paidDate);
+
   const [totalWorkingDays, setTotalWorkingDays] = React.useState(
     getWorkingDays(Number(selectedDate.year), Number(selectedDate.month) - 1).toString()
   );
@@ -90,12 +93,6 @@ const PaySalaries = () => {
 
     //If year/month changes set paid date to 1 of that year/month
     setPaidDate(dayjs(new Date(selectedYear, selectedMonthName - 1, 1)));
-  };
-
-  const handlePaidDateChange = (date) => {
-    if (date) {
-      setPaidDate(dayjs(date));
-    }
   };
 
   const handleWorkingDaysChange = (event) => {
@@ -282,8 +279,11 @@ const PaySalaries = () => {
                 required
                 sx={{ width: "100%" }}
                 label="Select Paid Date *"
-                value={!paidDate ? null : dayjs(paidDate)}
-                onChange={handlePaidDateChange}
+                value={paidDate}
+                onChange={(date) => {
+                  console.log("onchange", date);
+                  setPaidDate(date);
+                }}
               />
             </LocalizationProvider>
           </Grid>

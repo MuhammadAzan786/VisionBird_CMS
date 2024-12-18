@@ -62,7 +62,7 @@ module.exports = {
   pay_salary: async (req, res) => {
     try {
       console.log("Req agyi pay salary");
-      console.log(req.body);
+      console.log("paidDate", req.body.paidDate);
 
       let {
         userId,

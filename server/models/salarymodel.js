@@ -95,7 +95,7 @@ const salarySchema = new mongoose.Schema({
   salary_month: { type: Number, required: true },
   salary_year: { type: Number, required: true },
 
-  paidDate: { type: String, required: true },
+  paidDate: { type: Date, required: true },
 
   salaryDetails,
   paymentDetails,
