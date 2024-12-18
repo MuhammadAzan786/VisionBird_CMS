@@ -47,9 +47,20 @@ export default function AllLeaves({ table }) {
       return response.data;
     },
   });
-  // console.log(query);
 
-  // Handle Loading and Error States
+  useEffect(() => {
+    if (socket) {
+      socket.on("notification", () => {
+        queryClient.invalidateQueries("All leaves");
+      });
+      return () => {
+        socket.off("notification", () => {});
+      };
+    } else {
+      dispatch(initializeSocket(currentUser));
+    }
+  }, [socket, dispatch, currentUser]);
+
   if (query.isLoading) {
     return <CustomOverlay open={true} />;
   }
@@ -81,16 +92,8 @@ export default function AllLeaves({ table }) {
   return (
     <>
       <LeavesTable
-        allLeaves={
-          table == "Employee-leavesHistory"
-            ? employeeAllLeave
-            : MannagerAllLeave || []
-        }
-        pendingLeaves={
-          table == "Employee-leavesHistory"
-            ? employeePendingLeaves
-            : ManagerPendingLeaves || []
-        }
+        allLeaves={table == "Employee-leavesHistory" ? employeeAllLeave : MannagerAllLeave || []}
+        pendingLeaves={table == "Employee-leavesHistory" ? employeePendingLeaves : ManagerPendingLeaves || []}
       />
     </>
   );

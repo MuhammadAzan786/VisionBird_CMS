@@ -1,15 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  TextField,
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-} from "@mui/material";
+import { TextField, Box, Grid, Paper, Typography, Button, FormControl, InputLabel, MenuItem } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -28,8 +18,8 @@ function LeaveForm() {
   const [reason, setReason] = useState("");
   const [leaveType, setLeaveType] = useState("");
   const [leaveCategory, setLeaveCategory] = useState("");
-  const [leavesStart, setLeavesStart] = useState(null);
-  const [leavesEnd, setLeavesEnd] = useState(null);
+  const [leavesStart, setLeavesStart] = useState(dayjs());
+  const [leavesEnd, setLeavesEnd] = useState(dayjs());
   const [selectedDate, setSelectedDate] = useState(null);
   const [fromTime, setFromTime] = useState(null);
   const [toTime, setToTime] = useState(null);
@@ -129,15 +119,6 @@ function LeaveForm() {
         console.log(res);
         toast.success("Leave Request Submitted Successfully");
         navigate("/my-leaves");
-        // setReason("");
-        // setLeaveType("");
-        // setLeaveCategory("");
-        // setSelectedDate(null);
-        // setLeavesStart(null);
-        // setLeavesEnd(null);
-        // setFromTime(null);
-        // setToTime(null);
-        // setSelectedManager("");
       })
       .catch((error) => {
         toast.error("Error in Submitting Leave Request!!");
@@ -181,45 +162,26 @@ function LeaveForm() {
     <>
       <Box sx={{ width: "100%", padding: 3, paddingX: 6 }}>
         <Box component={Paper} p={10}>
-          <Box
-            display={"flex"}
-            flexDirection={"column"}
-            justifyContent={"center"}
-            alignItems={"center"}
-            pt={5}
-            pb={3}
-          >
+          <Box display={"flex"} flexDirection={"column"} justifyContent={"center"} alignItems={"center"} pt={5} pb={3}>
             <Box pb={1}>
               <img src={bg} alt="" width={380} />
             </Box>
             <Typography variant="body2" textAlign={"center"}>
-              B-343, Pagganwala Street, Near Cheema Masjid, Shadman Colony,
-              Gujrat, Pakistan.
+              B-343, Pagganwala Street, Near Cheema Masjid, Shadman Colony, Gujrat, Pakistan.
             </Typography>
             <Typography variant="body2" textAlign={"center"}>
-              Mobile: 0322-5930603, 0346-5930603, Landline: 053-3709168,
-              053-3728469
+              Mobile: 0322-5930603, 0346-5930603, Landline: 053-3709168, 053-3728469
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Typography variant="body2">
                 URL:
-                <Link
-                  href="https://www.example.com"
-                  target="_blank"
-                  rel="noopener"
-                  sx={{ marginLeft: 1 }}
-                >
+                <Link href="https://www.example.com" target="_blank" rel="noopener" sx={{ marginLeft: 1 }}>
                   https://www.visionbird.com
                 </Link>
               </Typography>
               <Typography variant="body2" sx={{ paddingLeft: 1 }}>
                 Email:
-                <Link
-                  href="https://www.example.com"
-                  target="_blank"
-                  rel="noopener"
-                  sx={{ marginLeft: 1 }}
-                >
+                <Link href="https://www.example.com" target="_blank" rel="noopener" sx={{ marginLeft: 1 }}>
                   info@visionbird.com
                 </Link>
               </Typography>
@@ -273,10 +235,7 @@ function LeaveForm() {
             {role == "manager" ? null : (
               <Grid item xs={12}>
                 <FormControl fullWidth>
-                  <InputLabel
-                    id="demo-simple-select-label"
-                    sx={{ color: "grey" }}
-                  >
+                  <InputLabel id="demo-simple-select-label" sx={{ color: "grey" }}>
                     Select Manager
                   </InputLabel>
                   <Select
@@ -298,10 +257,7 @@ function LeaveForm() {
 
             <Grid item xs={6}>
               <FormControl fullWidth>
-                <InputLabel
-                  id="demo-simple-select-label"
-                  sx={{ color: "grey" }}
-                >
+                <InputLabel id="demo-simple-select-label" sx={{ color: "grey" }}>
                   Select Leave Type
                 </InputLabel>
                 <Select
@@ -315,29 +271,18 @@ function LeaveForm() {
                     setToTime(null);
                   }}
                 >
-                  <MenuItem value="Short Leave">
-                    Short Leave (less then 2 hours)
-                  </MenuItem>
+                  <MenuItem value="Short Leave">Short Leave (less then 2 hours)</MenuItem>
 
-                  <MenuItem value="Half Leave">
-                    Half Leave (2 to 4 hours)
-                  </MenuItem>
-                  <MenuItem value="Full Leave">
-                    Full Leave(1 day or More than 4 hours){" "}
-                  </MenuItem>
-                  <MenuItem value="Long Leaves">
-                    Long Leaves (More than 1 day)
-                  </MenuItem>
+                  <MenuItem value="Half Leave">Half Leave (2 to 4 hours)</MenuItem>
+                  <MenuItem value="Full Leave">Full Leave(1 day or More than 4 hours) </MenuItem>
+                  <MenuItem value="Long Leaves">Long Leaves (More than 1 day)</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
 
             <Grid item xs={6}>
               <FormControl fullWidth>
-                <InputLabel
-                  id="demo-simple-select-label"
-                  sx={{ color: "grey" }}
-                >
+                <InputLabel id="demo-simple-select-label" sx={{ color: "grey" }}>
                   Select Leave Category
                 </InputLabel>
                 <Select
@@ -380,18 +325,12 @@ function LeaveForm() {
                             seconds: renderTimeViewClock,
                           }}
                           label="From"
-                          value={
-                            fromTime ? dayjs(`2000-01-01T${fromTime}`) : null
-                          }
+                          value={fromTime ? dayjs(`2000-01-01T${fromTime}`) : null}
                           onChange={(newValue) => {
-                            const time = newValue
-                              ? newValue.format("HH:mm")
-                              : null;
+                            const time = newValue ? newValue.format("HH:mm") : null;
 
                             setFromTime(time);
-                            const toTime = newValue
-                              .add(2, "hour")
-                              .format("HH:mm");
+                            const toTime = newValue.add(2, "hour").format("HH:mm");
                             setToTime(toTime);
 
                             if (time && toTime) {
@@ -399,29 +338,21 @@ function LeaveForm() {
 
                               const from = dayjs(`2000-01-01T${time}`);
                               const to = dayjs(`2000-01-01T${toTime}`);
-                              const diffInMinutes =
-                                to.diff(from, "minute") ||
-                                from.diff(to, "minute");
+                              const diffInMinutes = to.diff(from, "minute") || from.diff(to, "minute");
                               if (diffInMinutes > 240) {
                                 console.log("120000000");
                                 setLeaveType("Full Leave");
-                                toast(
-                                  "Leave more than 4hrs will be considered Full leave.",
-                                  {
-                                    icon: "ℹ️",
-                                  }
-                                );
+                                toast("Leave more than 4hrs will be considered Full leave.", {
+                                  icon: "ℹ️",
+                                });
                                 // toast.error(
                                 //   "Short leave more than 4hrs will be considered Full leave."
                                 // );
                               } else if (diffInMinutes > 120) {
                                 setLeaveType("Half Leave");
-                                toast(
-                                  "Leave more than 2hrs will be considered Half leave.",
-                                  {
-                                    icon: "ℹ️",
-                                  }
-                                );
+                                toast("Leave more than 2hrs will be considered Half leave.", {
+                                  icon: "ℹ️",
+                                });
                                 // toast.error(
                                 //   "Short leave more than 4hrs will be considered Half leave."
                                 // );
@@ -451,37 +382,27 @@ function LeaveForm() {
                           label="To"
                           value={toTime ? dayjs(`2000-01-01T${toTime}`) : null}
                           onChange={(newValue) => {
-                            const time = newValue
-                              ? newValue.format("HH:mm")
-                              : null;
+                            const time = newValue ? newValue.format("HH:mm") : null;
                             setToTime(time);
 
                             if (time && fromTime) {
                               const from = dayjs(`2000-01-01T${fromTime}`);
                               const to = dayjs(`2000-01-01T${time}`);
-                              const diffInMinutes =
-                                to.diff(from, "minute") ||
-                                from.diff(to, "minute");
+                              const diffInMinutes = to.diff(from, "minute") || from.diff(to, "minute");
                               if (diffInMinutes > 240) {
                                 console.log("120000000");
                                 setLeaveType("Full Leave");
-                                toast(
-                                  "Leave more than 4hrs will be considered Full leave.",
-                                  {
-                                    icon: "ℹ️",
-                                  }
-                                );
+                                toast("Leave more than 4hrs will be considered Full leave.", {
+                                  icon: "ℹ️",
+                                });
                                 // toast.error(
                                 //   "Short leave more than 4hrs will be considered Full leave."
                                 // );
                               } else if (diffInMinutes > 120) {
                                 setLeaveType("Half Leave");
-                                toast(
-                                  "Leave more than 2hrs will be considered Half leave.",
-                                  {
-                                    icon: "ℹ️",
-                                  }
-                                );
+                                toast("Leave more than 2hrs will be considered Half leave.", {
+                                  icon: "ℹ️",
+                                });
                                 // toast.error(
                                 //   "Short leave more than 2hrs will be considered Half leave."
                                 // );
@@ -523,44 +444,30 @@ function LeaveForm() {
                             seconds: renderTimeViewClock,
                           }}
                           label="From"
-                          value={
-                            fromTime ? dayjs(`2000-01-01T${fromTime}`) : null
-                          }
+                          value={fromTime ? dayjs(`2000-01-01T${fromTime}`) : null}
                           onChange={(newValue) => {
-                            const time = newValue
-                              ? newValue.format("HH:mm")
-                              : null;
+                            const time = newValue ? newValue.format("HH:mm") : null;
                             setFromTime(time);
-                            const toTime = newValue
-                              .add(4, "hour")
-                              .format("HH:mm");
+                            const toTime = newValue.add(4, "hour").format("HH:mm");
                             setToTime(toTime);
 
                             if (time && toTime) {
                               const from = dayjs(`2000-01-01T${time}`);
                               const to = dayjs(`2000-01-01T${toTime}`);
-                              const diffInMinutes =
-                                to.diff(from, "minute") ||
-                                from.diff(to, "minute");
+                              const diffInMinutes = to.diff(from, "minute") || from.diff(to, "minute");
                               if (diffInMinutes > 240) {
                                 setLeaveType("Full Leave");
-                                toast(
-                                  "Leave more than 4hrs will be considered Full leave.",
-                                  {
-                                    icon: "ℹ️",
-                                  }
-                                );
+                                toast("Leave more than 4hrs will be considered Full leave.", {
+                                  icon: "ℹ️",
+                                });
                                 // toast.error(
                                 //   "Half leave more than 4hrs will be considered Full leave."
                                 // );
                               } else if (diffInMinutes <= 120) {
                                 setLeaveType("Short Leave");
-                                toast(
-                                  "Leave less than 2hrs will be considered Short Leave.",
-                                  {
-                                    icon: "ℹ️",
-                                  }
-                                );
+                                toast("Leave less than 2hrs will be considered Short Leave.", {
+                                  icon: "ℹ️",
+                                });
                                 // toast.error(
                                 //   "Half Leave less than 2hrs will be considered Short Leave."
                                 // );
@@ -583,36 +490,26 @@ function LeaveForm() {
                           label="To"
                           value={toTime ? dayjs(`2000-01-01T${toTime}`) : null}
                           onChange={(newValue) => {
-                            const time = newValue
-                              ? newValue.format("HH:mm")
-                              : null;
+                            const time = newValue ? newValue.format("HH:mm") : null;
                             setToTime(time);
 
                             if (time && fromTime) {
                               const from = dayjs(`2000-01-01T${fromTime}`);
                               const to = dayjs(`2000-01-01T${time}`);
-                              const diffInMinutes =
-                                to.diff(from, "minute") ||
-                                from.diff(to, "minute");
+                              const diffInMinutes = to.diff(from, "minute") || from.diff(to, "minute");
                               if (diffInMinutes > 240) {
                                 setLeaveType("Full Leave");
-                                toast(
-                                  "Leave more than 4hrs will be considered Full Leave.",
-                                  {
-                                    icon: "ℹ️",
-                                  }
-                                );
+                                toast("Leave more than 4hrs will be considered Full Leave.", {
+                                  icon: "ℹ️",
+                                });
                                 // toast.error(
                                 //   "Half Leave more than 4hrs will be considered Full Leave."
                                 // );
                               } else if (diffInMinutes <= 120) {
                                 setLeaveType("Short Leave");
-                                toast(
-                                  "Leave less than 2hrs will be considered Short Leave.",
-                                  {
-                                    icon: "ℹ️",
-                                  }
-                                );
+                                toast("Leave less than 2hrs will be considered Short Leave.", {
+                                  icon: "ℹ️",
+                                });
                                 // toast.error(
                                 //   "Half Leave less than 2hrs will be considered Short Leave."
                                 // );
@@ -647,7 +544,9 @@ function LeaveForm() {
                         label="Leaves Start"
                         format="dddd, DD MMMM, YYYY"
                         value={leavesStart}
-                        onChange={(newValue) => setLeavesStart(newValue)}
+                        onChange={(newValue) => {
+                          setLeavesStart(newValue);
+                        }}
                         minDate={dayjs(new Date())}
                       />
                     </Grid>
@@ -683,12 +582,7 @@ function LeaveForm() {
             </Grid>
           </Grid>
 
-          <Box
-            display={"flex"}
-            justifyContent={"right"}
-            alignItems={"center"}
-            mt={5}
-          >
+          <Box display={"flex"} justifyContent={"right"} alignItems={"center"} mt={5}>
             <Button onClick={sendLeaveApplication} variant="contained">
               Send Application
             </Button>

@@ -2,14 +2,11 @@ const { default: mongoose } = require("mongoose");
 const Employee = require("../models/employeemodel");
 const leavesModel = require("../models/leavesModel");
 const notificationModel = require("../models/notificationModel");
-
 let ioInstance;
-
 module.exports = {
   setupIoInstance: (io) => {
     ioInstance = io;
   },
-
   createLeave: async (req, res) => {
     try {
       const leave = await leavesModel.create(req.body);
@@ -32,7 +29,6 @@ module.exports = {
       res.status(500).json({ error: "Error saving leave." });
     }
   },
-
   allLeaves: async (req, res) => {
     try {
       const all_leaves = await leavesModel
@@ -45,7 +41,6 @@ module.exports = {
       res.status(404).json({ error: "Leaves not found." });
     }
   },
-
   getLeave: async (req, res) => {
     console.log("inside leaves");
     try {
@@ -57,11 +52,10 @@ module.exports = {
       res.status(404).json({ error: "Leave not found." });
     }
   },
-
   myLeaves: async (req, res) => {
     try {
       const id = req.params.id;
-      console.log("dddddddddddddd", id);
+
       const { month, year } = req.query;
 
       // Ensure that the query parameters are valid
@@ -121,7 +115,6 @@ module.exports = {
       res.status(404).json({ error: "Employees leaves not found." });
     }
   },
-
   changeStatus: async (req, res) => {
     try {
       const _id = req.params.id;
@@ -137,9 +130,7 @@ module.exports = {
       } else {
         message = `Leave request accepted by ${req.body.statusChangedBy}`;
       }
-
       await leavesModel.findByIdAndUpdate(_id, { status: statusForLeave });
-
       const notification = await notificationModel.create({
         for: req.body.for,
         message,
@@ -147,20 +138,14 @@ module.exports = {
       }); //For has user ID that has requested leave.
       const admin = await Employee.findOne({ role: "admin" });
       console.log("notification", notification);
-
       //Employeee, Manager (Dont try to understant,, u Cant)
       ioInstance.to(req.body.for.toString()).emit("notification", notification);
       console.log("bodyyyyy", req.body);
-
       //Manager, Admin  (Leaave it as it is , its working)
-      ioInstance
-        .to(req.body.statusChangedById.toString())
-        .emit("leaveStatusChanges", notification);
+      ioInstance.to(req.body.statusChangedById.toString()).emit("leaveStatusChanges", notification);
 
       //Admin (Dont remove this )
-      ioInstance
-        .to(admin._id.toString())
-        .emit("leaveStatusChanges", notification);
+      ioInstance.to(admin._id.toString()).emit("leaveStatusChanges", notification);
 
       res.status(200).json({ message: "Leave status changed successfully." });
     } catch (error) {

@@ -1,7 +1,6 @@
 import axios from "../../utils/axiosInterceptor";
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "react-datepicker/dist/react-datepicker.css";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -9,7 +8,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import "react-datepicker/dist/react-datepicker.css";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { ReceiptLongOutlined } from "@mui/icons-material";
+import { ReceiptLongOutlined, RemoveRedEye } from "@mui/icons-material";
 import { getWorkingDays, WordCaptitalize } from "../../utils/common";
 import { CustomChip } from "../../components/Styled/CustomChip";
 import { DataGrid } from "@mui/x-data-grid";
@@ -32,30 +31,43 @@ import {
   Tab,
   Stack,
   Paper,
+  Modal,
 } from "@mui/material";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import ViewSalary from "./ViewSalary";
+
 const PaySalaries = () => {
   const navigate = useNavigate();
 
   const [tabValue, setTabValue] = useState("all");
 
   const [selectedEmployeeId, setSelectedEmployeeId] = React.useState(null);
-  const [paymentMethod, setPaymentMethod] = React.useState("Cash");
+  const [employeeDetails, setEmployeeDetails] = React.useState(null);
+  const [paymentMethod, setPaymentMethod] = React.useState("cash");
+
+  const [salaryId, setSalaryId] = useState();
+  const [viewModel, setViewModal] = useState(false);
+
+  const toggleViewModal = async (id) => {
+    setSalaryId(id);
+    setViewModal(!viewModel);
+  };
+
+  const handleViewModalClose = () => {
+    setViewModal(false);
+  };
 
   const [errorText, setErrorText] = React.useState();
   const [open, setOpen] = React.useState(false);
 
   const [selectedDate, setSelectedDate] = React.useState({
-    month: dayjs().format("MM"), // Initialize with current month as a single-digit string
-    year: dayjs().format("YYYY"), // Initialize with current year as a string
+    month: dayjs().format("MM"),
+    year: dayjs().format("YYYY"),
   });
-  const [paidDate, setPaidDate] = React.useState(dayjs());
+  const [paidDate, setPaidDate] = useState(dayjs());
+
+  console.log("paidDate", paidDate);
+
   const [totalWorkingDays, setTotalWorkingDays] = React.useState(
     getWorkingDays(Number(selectedDate.year), Number(selectedDate.month) - 1).toString()
   );
@@ -83,48 +95,12 @@ const PaySalaries = () => {
     setPaidDate(dayjs(new Date(selectedYear, selectedMonthName - 1, 1)));
   };
 
-  const handlePaidDateChange = (date) => {
-    if (date) {
-      setPaidDate(dayjs(date));
-    }
-  };
-
   const handleWorkingDaysChange = (event) => {
     setTotalWorkingDays(event.target.value);
   };
 
-  //Get Paid & Unpaid empolyee details
-  // const fetchEmployees = async () => {
-  //   await axios
-  //     .post("/api/pay/paid_unpaid_salary_report", {
-  //       month: selectedDate.month,
-  //       year: selectedDate.year,
-  //     })
-  //     .then((response) => {
-  //       const { paidEmployees, unpaidEmployees, allEmployees } = response.data;
-
-  //       // Save the arrays separately
-  //       setPaidEmp(paidEmployees);
-  //       setUnpaidEmp(unpaidEmployees);
-  //       setallEmp(allEmployees);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching employee data:", error);
-  //     });
-  // };
-  // //Fetch Paid & Unpaid Employee if selectedDate Change
-  // useEffect(() => {
-  //   fetchEmployees();
-  // }, [selectedDate]);
-
-  const queryClient = useQueryClient();
-  const {
-    data: { paidEmployees = [], unpaidEmployees = [], allEmployees = [] } = {},
-    isError,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["salaries", selectedDate.month, selectedDate.year],
+  const { data: { paidEmployees = [], unpaidEmployees = [], allEmployees = [] } = {} } = useQuery({
+    queryKey: ["paysalary", selectedDate.month, selectedDate.year],
     queryFn: async () => {
       if (!selectedDate.month || !selectedDate.year) {
         throw new Error("Invalid date selected");
@@ -141,7 +117,6 @@ const PaySalaries = () => {
     enabled: !!selectedDate.month && !!selectedDate.year, // Prevent unnecessary queries
   });
 
- 
   //Show employee details when double clicked
   const navigateTo = (employee) => {
     navigate(`/employee-profile/${employee.id}`);
@@ -153,6 +128,7 @@ const PaySalaries = () => {
     setSelectedEmployeeId(employeeId);
     setOpen(true);
   };
+
   const handleClose = () => {
     setOpen(false);
   };
@@ -232,23 +208,41 @@ const PaySalaries = () => {
       headerName: "Action",
       width: 150,
       ...colStyle,
-      renderCell: (params) => (
-        <Button
-          variant="contained"
-          size="small"
-          startIcon={<ReceiptLongOutlined />}
-          disabled={params.row.salary_status === "paid"}
-          sx={{ borderRadius: "100px", fontFamily: "Poppins, sans-serif" }}
-          onClick={() => handleOpen(params.id)}
-        >
-          Generate
-        </Button>
-      ),
+      renderCell: (params) => {
+        return params.row.salary_status === "unpaid" ? (
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<ReceiptLongOutlined />}
+            sx={{ borderRadius: "100px", fontFamily: "Poppins, sans-serif" }}
+            onClick={() => {
+              setEmployeeDetails(params.row);
+              handleOpen(params.id);
+            }}
+          >
+            Generate
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<RemoveRedEye />}
+            sx={{ borderRadius: "100px", fontFamily: "Poppins, sans-serif" }}
+            onClick={() => toggleViewModal(params.row.salary_id)}
+          >
+            View
+          </Button>
+        );
+      },
     },
   ];
 
   return (
     <>
+      {/* <Paper>{JSON.stringify(paidEmployees)}</Paper> */}
+      <Modal open={viewModel} onClose={handleViewModalClose} sx={{ overflowY: "scroll", scrollbarWidth: "none" }}>
+        <ViewSalary salary_id={salaryId} />
+      </Modal>
       <Paper>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={4}>
@@ -285,8 +279,11 @@ const PaySalaries = () => {
                 required
                 sx={{ width: "100%" }}
                 label="Select Paid Date *"
-                value={!paidDate ? null : dayjs(paidDate)}
-                onChange={handlePaidDateChange}
+                value={paidDate}
+                onChange={(date) => {
+                  console.log("onchange", date);
+                  setPaidDate(date);
+                }}
               />
             </LocalizationProvider>
           </Grid>
@@ -381,53 +378,39 @@ const PaySalaries = () => {
             const formData = new FormData(event.currentTarget);
             const formJson = Object.fromEntries(formData.entries());
 
-            const {
-              incentive,
-              extra_bonus_amount,
-              extra_amount_remarks,
-              payment_method,
-              other_payment_method,
-              cheque_number,
-            } = formJson;
+            console.log("FORM DATA KA DATA", formJson);
 
-            let queryString = "";
+            let queryParams = {
+              ...formJson,
+              ...selectedDate,
+              totalWorkingDays,
+              paidDate,
+              paymentMethod,
+            };
 
-            if (payment_method === "Other") {
-              queryString = new URLSearchParams({
-                incentive,
-                extra_bonus_amount,
-                extra_amount_remarks,
-                paymentMethod: other_payment_method,
-                totalWorkingDays,
-                paidDate,
+            const { chequeNumber, otherDetails } = formJson;
 
-                ...selectedDate,
-              }).toString();
-            } else if (payment_method === "Cheque") {
-              queryString = new URLSearchParams({
-                incentive,
-                extra_bonus_amount,
-                extra_amount_remarks,
-                paymentMethod: payment_method,
-                totalWorkingDays,
-                chequeNumber: cheque_number,
-                paidDate,
-                ...selectedDate,
-              }).toString();
+            if (paymentMethod === "other") {
+              queryParams = {
+                ...queryParams,
+                otherDetails,
+              };
+            } else if (paymentMethod === "cheque") {
+              queryParams = {
+                ...queryParams,
+                chequeNumber,
+              };
             } else {
-              queryString = new URLSearchParams({
-                incentive,
-                extra_bonus_amount,
-                extra_amount_remarks,
-                paymentMethod: payment_method,
-                totalWorkingDays,
-                paidDate,
-                ...selectedDate,
-              }).toString();
+              queryParams = {
+                ...queryParams,
+              };
             }
+
+            const queryString = new URLSearchParams(queryParams).toString();
 
             navigate(`/salary/${selectedEmployeeId}?${queryString}`, {
               replace: false,
+              state: { employeeDetails },
             });
           },
         }}
@@ -452,8 +435,8 @@ const PaySalaries = () => {
           <TextField
             required
             margin="dense"
-            id="extra_bonus_amount"
-            name="extra_bonus_amount"
+            id="extraBonusAmount"
+            name="extraBonusAmount"
             label="Extra Bonus Amount"
             placeholder="PKR"
             type="number"
@@ -463,8 +446,8 @@ const PaySalaries = () => {
           <TextField
             required
             margin="dense"
-            id="extra_amount_remarks"
-            name="extra_amount_remarks"
+            id="extraBonusRemarks"
+            name="extraBonusRemarks"
             label="Extra Amount Remarks"
             type="text"
             fullWidth
@@ -483,18 +466,17 @@ const PaySalaries = () => {
               value={paymentMethod}
               onChange={handlePaymentMethodChange}
             >
-              <MenuItem value={"Cheque"}>Cheque</MenuItem>
-              <MenuItem value={"Cash"}>Cash</MenuItem>
-              <MenuItem value={"iNet Banking"}>iNet Banking</MenuItem>
-              <MenuItem value={"Other"}>Other</MenuItem>
+              <MenuItem value={"cheque"}>Cheque</MenuItem>
+              <MenuItem value={"cash"}>Cash</MenuItem>
+              <MenuItem value={"other"}>Other</MenuItem>
             </Select>
           </FormControl>
-          {paymentMethod === "Other" && (
+          {paymentMethod === "other" && (
             <TextField
               required
               margin="dense"
-              id="other_payment_method"
-              name="other_payment_method"
+              id="otherDetails"
+              name="otherDetails"
               label="Other Payment Method"
               type="text"
               fullWidth
@@ -502,12 +484,12 @@ const PaySalaries = () => {
             />
           )}
 
-          {paymentMethod === "Cheque" && (
+          {paymentMethod === "cheque" && (
             <TextField
               required
               margin="dense"
-              id="cheque_number"
-              name="cheque_number"
+              id="chequeNumber"
+              name="chequeNumber"
               label="Cheque Number"
               type="number"
               fullWidth

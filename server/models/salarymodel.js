@@ -1,100 +1,111 @@
 const mongoose = require("mongoose");
 
+const salaryDetails = new mongoose.Schema(
+  {
+    basicPay: { type: Number, required: true },
+    allowances: { type: Number, required: true },
+    incentive: { type: Number, required: true },
+    grossSalary: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
+const paymentDetails = new mongoose.Schema(
+  {
+    paymentMethod: { type: String, enum: ["cash", "cheque", "other"], required: true },
+    chequeNumber: {
+      type: String,
+      required: function () {
+        return this.paymentMethod === "cheque";
+      },
+    },
+    otherDetails: {
+      type: String,
+      required: function () {
+        return this.paymentMethod === "other";
+      },
+    },
+  },
+  { _id: false }
+);
+
+const workDetails = new mongoose.Schema(
+  {
+    totalWorkingDays: {
+      type: Number,
+      default: 0,
+    },
+    daysWorked: {
+      type: Number,
+      default: 0,
+    },
+  },
+  { _id: false }
+);
+
+const leaveDetails = new mongoose.Schema(
+  {
+    halfLeavesCount: {
+      type: Number,
+      default: 0,
+    },
+    casualLeaves: {
+      type: Number,
+      default: 0,
+    },
+    sickLeaves: {
+      type: Number,
+      default: 0,
+    },
+    unpaidLeavesCount: {
+      type: Number,
+      default: 0,
+    },
+    paidLeavesCount: {
+      type: Number,
+      default: 0,
+    },
+    otherLeaves: {
+      type: Number,
+      default: 0,
+    },
+    netSalaryWithLeaveCutting: {
+      type: Number,
+      default: 0,
+    },
+  },
+  { _id: false }
+);
+
+const bonusDetails = new mongoose.Schema(
+  {
+    extraBonusAmount: { type: Number, required: true },
+    extraBonusRemarks: { type: String, default: "none" },
+  },
+  { _id: false }
+);
+
 const salarySchema = new mongoose.Schema({
   employee_obj_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Employee",
     required: true,
   },
-  salary_month: {
-    type: Number,
-    required: true,
-  },
-  salary_year: {
-    type: Number,
-    required: true,
-  },
-  Half_leaves: {
-    type: Number,
-    required: true,
-  },
-  Full_leaves: {
-    type: Number,
-    required: true,
-  },
-  paid_leaves: {
-    type: Number,
-    required: true,
-  },
-  unpaid_leaves: {
-    type: Number,
-    required: true,
-  },
-  incentive: {
-    type: Number,
-    required: true,
-  },
-  gross_salary: {
-    type: Number,
-    required: true,
-  },
-  net_salary: {
-    type: Number,
-    required: true,
-  },
-  extra_bonus: {
-    type: Number,
-    required: true,
-  },
-  cheque_number: {
-    type: Number,
-    default: undefined,
-  },
-  loan_deduction_active: {
-    type: Boolean,
-    default: false,
-  },
-  loan_deduction_amount: {
-    type: Number,
-    required: function () {
-      return this.loan_deduction_active;
-    },
-  },
-  loan_remaining_amount: {
-    type: Number,
-    required: function () {
-      return this.loan_deduction_active;
-    },
-  },
 
-  advance_salary_deduction_active: {
-    type: Boolean,
-    default: false,
-  },
-  advance_salary_deduction: {
-    type: Number,
-    required: function () {
-      this.advance_salary_deduction_active;
-    },
-  },
-  advance_salary_reamining: {
-    type: Number,
-    required: function () {
-      this.advance_salary_deduction_active;
-    },
-  },
+  salary_month: { type: Number, required: true },
+  salary_year: { type: Number, required: true },
+
+  paidDate: { type: Date, required: true },
+
+  salaryDetails,
+  paymentDetails,
+  workDetails,
+  leaveDetails,
+  bonusDetails,
+
+  netSalary: { type: Number, required: true },
 });
 
-salarySchema.pre("save", function (next) {
-  if (this.cheque_number === null) {
-    this.cheque_number = undefined;
-  }
-  next();
-});
-salarySchema.index(
-  { employee_obj_id: 1, salary_month: 1, salary_year: 1 },
-  { unique: true }
-);
-
+salarySchema.index({ employee_obj_id: 1, salary_month: 1, salary_year: 1 }, { unique: true });
 const Salary = mongoose.model("Salary", salarySchema);
 module.exports = Salary;

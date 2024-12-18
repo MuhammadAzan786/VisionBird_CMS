@@ -363,9 +363,7 @@ module.exports = {
       res.json({ exists: !!userExists }); // Respond with true if user exists, otherwise false
     } catch (error) {
       console.error("Error checking username:", error);
-      res
-        .status(500)
-        .json({ message: "Server error. Please try again later." });
+      res.status(500).json({ message: "Server error. Please try again later." });
     }
   },
 };

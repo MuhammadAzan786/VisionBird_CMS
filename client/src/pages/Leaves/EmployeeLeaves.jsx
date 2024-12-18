@@ -13,9 +13,7 @@ export default function EmployeeLeaves() {
   const dispatch = useDispatch();
   const getLeaves = () => {
     axios
-      .get(`/api/leave/employee-leaves/${id}`, {
-        withCredentials: true,
-      })
+      .get(`/api/leave/employee-leaves/${id}`)
       .then((response) => {
         setEmployeeLeaves(response.data);
         const pending = response.data.filter((item) => {
@@ -26,7 +24,7 @@ export default function EmployeeLeaves() {
         setEmployeePendingLeaves(pending);
       })
       .catch((error) => {
-        console.error("Error fetching leave history:", error);
+        console.error("Error fetching Employee leave history:", error);
       });
   };
   useEffect(() => {
@@ -57,10 +55,7 @@ export default function EmployeeLeaves() {
     <>
       <>
         {/* <LeavesTable allLeaves={allLeaves} /> */}
-        <LeavesTable
-          allLeaves={employeeLeaves || []}
-          pendingLeaves={employeePendingLeaves || []}
-        />
+        <LeavesTable allLeaves={employeeLeaves || []} pendingLeaves={employeePendingLeaves || []} />
       </>
       {/* <LeavesTable allLeaves={employeeLeaves} /> */}
     </>

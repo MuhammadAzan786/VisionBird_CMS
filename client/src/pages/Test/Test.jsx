@@ -1,63 +1,51 @@
-import { Button, FormControl, InputLabel, MenuItem, Paper, Select, Typography } from "@mui/material";
-import { Field, Form, Formik } from "formik";
-import { TextField } from "formik-material-ui";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { object } from "yup";
-
-const validationSchema = object().shape({});
+import React, { useState } from "react";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { Paper, TextField, Toolbar } from "@mui/material";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 const Test = () => {
-  const [data, setData] = useState("");
-  console.log("testing condition", import.meta.env.VITE_NODE_ENV === "development");
+  // State to hold the selected date
+  const [selectedDate, setSelectedDate] = useState(dayjs());
 
-  localStorage.setItem("session", "ended");
-  const item = localStorage.getItem("session");
+  // console.log("log", selectedDate);
 
-  useEffect(() => {
-    if (item) {
-      toast.error("Your session has ended. Please log in again.");
-    }
-  }, [item]);
+  const simpleDate = new Date();
+  console.log("\n********************\n");
+
+  console.warn("SIMPLE DATE: ", simpleDate, typeof simpleDate);
+
+  // Handle date change
+  const handleDateChange = (newDate) => {
+    setSelectedDate(newDate); // Update the state with the selected date
+  };
 
   return (
-    <>
-      <Paper>
-        <Formik
-          initialValues={{
-            disability: "no",
-            kindofdisability: "",
-          }}
-          validationSchema={validationSchema}
-          onSubmit={(values) => {
-            setData(JSON.stringify(values));
-            console.log(values);
-          }}
-        >
-          {() => (
-            <Form>
-              <FormControl fullWidth variant="outlined">
-                <InputLabel id="disability">Disability</InputLabel>
-                <Field name="disability" as={Select} labelId="disability-label">
-                  <MenuItem value="yes">Yes</MenuItem>
-                  <MenuItem value="no">No</MenuItem>
-                </Field>
-              </FormControl>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <div>
+        <DatePicker
+          label="Select Date"
+          value={selectedDate}
+          onChange={handleDateChange}
+          renderInput={(params) => <TextField {...params} />}
+        />
+        <Toolbar />
+        {/* <Paper>
+          <h4>Selected Date (ISO format):</h4>
+          <p>{selectedDate ? selectedDate.toISOString() : "No date selected"}</p>
+        </Paper>
 
-              <Field label="What Kind of Disability?" name="kindofdisability" fullWidth component={TextField} />
+        <Paper>
+          <h4>Selected Date (DaysJs):</h4>
+          <p>{JSON.stringify(selectedDate)}</p>
+        </Paper> */}
 
-              <Button type="submit" variant="contained" sx={{ mt: 5 }}>
-                Submit
-              </Button>
-            </Form>
-          )}
-        </Formik>
-      </Paper>
-
-      <Paper>
-        <Typography>{data}</Typography>
-      </Paper>
-    </>
+        <Paper>
+          <h4>SSimple Date:</h4>
+          <p>{simpleDate.toString()}</p>
+        </Paper>
+      </div>
+    </LocalizationProvider>
   );
 };
 
