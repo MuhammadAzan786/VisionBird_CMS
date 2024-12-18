@@ -39,6 +39,7 @@ import toast from "react-hot-toast";
 import { FolderZipOutlined } from "@mui/icons-material";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { customColors } from "../../theme/colors";
 
 const EmployeeProfile = () => {
   const { showMessage } = useMessage();
@@ -393,15 +394,17 @@ const EmployeeProfile = () => {
                 p={2}
               >
                 <Button
-                  sx={{
-                    color: "white",
-                    backgroundColor: "#1976d2",
-                    marginRight: 2,
-                    ":hover": {
-                      color: "white",
-                      backgroundColor: "rgba(25, 118, 210, 0.5)",
-                    },
-                  }}
+                  // sx={{
+                  //   color: "white",
+                  //   backgroundColor: customColors.mainAlpha,
+                  //   marginRight: 2,
+                  //   ":hover": {
+                  //     color: "white",
+                  //     backgroundColor: customColors.main,
+                  //   },
+                  // }}
+                  variant="contained"
+                  sx={{ marginRight: 2 }}
                   component={RouterLink}
                   to={`/employee-profile/${id}`}
                 >
@@ -409,12 +412,19 @@ const EmployeeProfile = () => {
                 </Button>
 
                 <Button
+                  // sx={{
+                  //   color: "#5F6A6A",
+                  //   marginRight: 2,
+                  //   ":hover": {
+                  //     color: "white",
+                  //     backgroundColor: "rgba(25, 118, 210, 0.5)",
+                  //   },
+                  // }}
                   sx={{
-                    color: "#5F6A6A",
                     marginRight: 2,
                     ":hover": {
-                      color: "white",
-                      backgroundColor: "rgba(25, 118, 210, 0.5)",
+                      // color: "white",
+                      backgroundColor: customColors.mainAlpha,
                     },
                   }}
                   component={RouterLink}
@@ -427,13 +437,20 @@ const EmployeeProfile = () => {
                   Portfolio
                 </Button>
                 <Button
+                  // sx={{
+                  //   color: isActive(`/employeetaskboard/${id}`)
+                  //     ? "#1976d2"
+                  //     : "#5F6A6A",
+                  //   ":hover": {
+                  //     color: "white",
+                  //     backgroundColor: "rgba(25, 118, 210, 0.5)",
+                  //   },
+                  // }}
                   sx={{
-                    color: isActive(`/employeetaskboard/${id}`)
-                      ? "#1976d2"
-                      : "#5F6A6A",
+                    marginRight: 2,
                     ":hover": {
-                      color: "white",
-                      backgroundColor: "rgba(25, 118, 210, 0.5)",
+                      // color: "white",
+                      backgroundColor: customColors.mainAlpha,
                     },
                   }}
                   component={RouterLink}
@@ -1074,44 +1091,39 @@ const EmployeeProfile = () => {
                 </Grid>
               </Grid>
 
-              <Grid
-                container
-                spacing={2}
-                component={Paper}
-                sx={{ borderRadius: "5px" }}
-                mt={2}
-                p={3}
-              >
-                <Grid item xs={12}>
-                  <Grid container>
-                    <Grid item xs={6}>
-                      <Typography
-                        sx={{
-                          fontWeight: "600",
-                          fontSize: "20px",
-                          color: "#3b4056",
-                          mb: 5,
-                        }}
-                      >
-                        Upload Documents
-                      </Typography>
+              <Grid item xs={12}>
+                <Grid container gap={2} component={Paper} p={5} mt={2}>
+                  <Grid item xs={12}>
+                    <Grid container>
+                      <Grid item xs={6}>
+                        <Typography
+                          sx={{
+                            fontWeight: "600",
+
+                            color: "#3b4056",
+                            mb: 3,
+                          }}
+                          fontSize={20}
+                          color={"#BFC9CA "}
+                        >
+                          Documents
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6} sx={{ textAlign: "right" }}>
+                        <Button
+                          variant="contained"
+                          endIcon={<FolderZipOutlined />}
+                          onClick={downloadZip}
+                        >
+                          Download All
+                        </Button>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={6} sx={{ textAlign: "right" }}>
-                      <Button
-                        variant="contained"
-                        endIcon={<FolderZipOutlined />}
-                        onClick={downloadZip}
-                      >
-                        Download All
-                      </Button>
-                    </Grid>
+
+                    {user && <ViewDocuments values={user} />}
                   </Grid>
-
-                  {user && <ViewDocuments values={user} />}
                 </Grid>
-
               </Grid>
-
             </Grid>
           </Box>
           {loading && (

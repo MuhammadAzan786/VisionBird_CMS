@@ -1138,7 +1138,7 @@ function CreateEmployeeForm() {
                       mb: 5,
                     }}
                   >
-                    Upload Documents
+                    Documents
                   </Typography>
 
                   <UploadFiles

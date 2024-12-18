@@ -37,9 +37,16 @@ export default function EmployeeLeaves() {
       socket.on("notification", () => {
         getLeaves();
       });
+      socket.on("leaveStatusChanges", () => {
+        getLeaves();
+      });
       return () => {
         socket.off("notification", () => {
           // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
+        });
+
+        socket.off("leaveStatusChanges", () => {
+          getLeaves();
         });
       };
     } else {

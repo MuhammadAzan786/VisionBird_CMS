@@ -151,6 +151,10 @@ const Navbar = ({
           label: "Employee Leaves",
           path: "/Employee-leavesHistory",
         },
+        {
+          label: "Leave History",
+          path: "/leaveHistory",
+        },
       ],
     },
   ];
@@ -258,6 +262,10 @@ const Navbar = ({
         { label: "Apply For Leave", path: "/leave-form" },
         { label: "My Leaves", path: "/my-leaves" },
         { label: "Employee Leaves", path: "/employee-leaves" },
+        {
+          label: "Leave History",
+          path: "/leaveHistory",
+        },
       ],
     },
   ];
@@ -307,7 +315,11 @@ const Navbar = ({
       collapsable: true,
       children: [
         { label: "Apply For Leave", path: "/leave-form" },
-        { label: "Leave History", path: "/my-leaves" },
+        { label: "My Leaves", path: "/my-leaves" },
+        {
+          label: "Leave History",
+          path: "/leaveHistory",
+        },
       ],
     },
   ];

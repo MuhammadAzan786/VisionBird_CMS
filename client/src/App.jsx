@@ -64,6 +64,7 @@ import { clearSocket } from "./redux/socketSlice";
 import { signOut } from "./redux/user/userSlice";
 import Notifications from "./pages/Notifications/Notifications";
 import EmployeeLeaveHistory from "./pages/Leaves/EmployeeLeaveHistory";
+import LeaveHistory from "./pages/Leaves/LeaveHistory";
 
 const App = () => {
   const socket = useSelector((state) => state.socket.socket);
@@ -264,6 +265,10 @@ const App = () => {
             <Route
               path="/Employee-leavesHistory"
               element={<AllLeaves table="Employee-leavesHistory" />}
+            />
+            <Route
+              path="/leaveHistory"
+              element={< LeaveHistory/>}
             />
 
             <Route path="/view-leave/:id" element={<ViewLeave />} />

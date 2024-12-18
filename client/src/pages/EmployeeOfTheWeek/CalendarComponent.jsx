@@ -16,6 +16,7 @@ const CalendarComponent = ({ onSelectDate }) => {
   const highlightedDates = useSelector(
     (state) => state.reportDates?.dates || []
   );
+  console.log(highlightedDates);
 
   // Fetch dates from API and store them
   useEffect(() => {

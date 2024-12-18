@@ -246,7 +246,7 @@ function UpdateForm() {
           <Grid ml={2}>
             <Form className=" my-5 ">
               {/* //Personal info */}
-              <Grid container spacing={2} component={Paper} elevation={2} sx={{ borderRadius: "5px" }} p={3} mt={2}>
+              <Grid container spacing={2} component={Paper}sx={{ borderRadius: "5px" }} p={3} mt={2}>
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -474,7 +474,7 @@ function UpdateForm() {
                 </Grid>
               </Grid>
               {/*  contack info */}
-              <Grid container spacing={2} component={Paper} elevation={2} sx={{ borderRadius: "5px" }} p={3} mt={2}>
+              <Grid container spacing={2} component={Paper}sx={{ borderRadius: "5px" }} p={3} mt={2}>
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -584,7 +584,7 @@ function UpdateForm() {
               </Grid>
 
               {/* employee info */}
-              <Grid container spacing={2} component={Paper} elevation={2} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+              <Grid container spacing={2} component={Paper}sx={{ borderRadius: "5px" }} mt={2} p={3}>
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -928,7 +928,7 @@ function UpdateForm() {
                 </Grid>
               </Grid>
               {/* question  */}
-              <Grid container spacing={2} component={Paper} mt={2} elevation={2} sx={{ borderRadius: "5px" }} p={3}>
+              <Grid container spacing={2} component={Paper} mt={2}sx={{ borderRadius: "5px" }} p={3}>
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -1167,7 +1167,7 @@ function UpdateForm() {
                       mb: 5,
                     }}
                   >
-                    Upload Documents
+                     Documents
                   </Typography>
 
                   <UploadFiles
