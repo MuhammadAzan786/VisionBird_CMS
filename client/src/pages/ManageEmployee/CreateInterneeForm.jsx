@@ -39,11 +39,6 @@ const validationSchema = object().shape({
   fatherName: string()
     .required("Required Name")
     .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters are allowed"),
-  cnic: string().test(
-    "format",
-    "CNIC must be in the format XXXXX-XXXXXXX-X",
-    (value) => /^\d{5}-\d{7}-\d$/.test(value || "")
-  ),
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
   mobile: string()
@@ -107,7 +102,7 @@ const CreateInterneeForm = () => {
       initialValues={{
         firstName: "",
         fatherName: "",
-        cnic: "00000-0000000-0",
+        cnic: "",
         dob: dayjs().format("YYYY-MM-DD"),
         mailingAddress: "",
         mobile: "",

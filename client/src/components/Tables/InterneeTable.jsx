@@ -1,7 +1,14 @@
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "../../utils/axiosInterceptor";
 import { useNavigate } from "react-router-dom";
-import { Alert, Box, CircularProgress, MenuItem, Select, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  CircularProgress,
+  MenuItem,
+  Select,
+  Typography,
+} from "@mui/material";
 import dayjs from "dayjs";
 import EmployeeNameCell from "../Grid Cells/EmployeeProfileCell";
 import PropTypes from "prop-types";
@@ -22,7 +29,9 @@ const InterneeTable = ({ searchTerm }) => {
 
   const fetchInternees = async ({ queryKey }) => {
     const [, searchTerm] = queryKey;
-    const response = await axios.get(`/api/internee/get_internees?search=${searchTerm || ""}`);
+    const response = await axios.get(
+      `/api/internee/get_internees?search=${searchTerm || ""}`
+    );
     return response.data;
   };
 
@@ -84,7 +93,9 @@ const InterneeTable = ({ searchTerm }) => {
       headerName: "Internship From",
       width: 200,
       renderCell: (params) => (
-        <Typography variant="inherit">{dayjs(params.row.internshipFrom).format("MMMM D, YYYY")}</Typography>
+        <Typography variant="inherit">
+          {dayjs(params.row.internshipFrom).format("MMMM D, YYYY")}
+        </Typography>
       ),
     },
     {
@@ -92,7 +103,9 @@ const InterneeTable = ({ searchTerm }) => {
       headerName: "Internship To",
       width: 200,
       renderCell: (params) => (
-        <Typography variant="inherit">{dayjs(params.row.internshipTo).format("MMMM D, YYYY")}</Typography>
+        <Typography variant="inherit">
+          {dayjs(params.row.internshipTo).format("MMMM D, YYYY")}
+        </Typography>
       ),
     },
 
@@ -193,11 +206,11 @@ const InterneeTable = ({ searchTerm }) => {
           id: internee._id,
         }))}
         columns={interneeColumns}
-        pageSize={5}
         rowsPerPageOptions={[5, 10, 20]}
+        // pageSizeOptions= {[5, 10, 20, 50]}
         onRowDoubleClick={navigateTo}
         pagination
-        autoPageSize
+        // autoPageSize
         sx={{ cursor: "pointer" }}
       />
       <Toaster position="top-center" reverseOrder={false} />

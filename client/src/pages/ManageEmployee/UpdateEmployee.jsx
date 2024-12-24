@@ -164,6 +164,7 @@ function UpdateForm() {
         // ======= Documents
         employeeProImage: user.employeeProImage || {},
         degreesScanCopy: user.degreesScanCopy || [],
+        employeeCv: user.employeeCv || [],
         cnicScanCopy: user.cnicScanCopy || [],
         policeCertificateUpload: user.policeCertificateUpload || [],
       }}

@@ -123,9 +123,10 @@ export const MuiDataGrid = {
         fontWeight: 500,
       },
 
-      "& .MuiDataGrid-columnHeaders, & .MuiDataGrid-filler,.MuiDataGrid-filler div, .MuiDataGrid-footerContainer": {
-        border: "none !important",
-      },
+      "& .MuiDataGrid-columnHeaders, & .MuiDataGrid-filler,.MuiDataGrid-filler div, .MuiDataGrid-footerContainer":
+        {
+          border: "none !important",
+        },
       "& .MuiDataGrid-columnSeparator": {
         display: "none",
       },
@@ -136,14 +137,15 @@ export const MuiDataGrid = {
         width: 10,
       },
       "& ::-webkit-scrollbar-track": {
-        boxShadow: "inset 0 0 6px rgba(0,0,0,0.3)",
-        borderRadius: "10px",
-        backgroundColor: "#F5F5F5",
+        // boxShadow: "inset 0 0 6px rgba(0,0,0,0.1)",
+        // borderRadius: "10px",
+        // backgroundColor: "#fafafa",
       },
       "& ::-webkit-scrollbar-thumb": {
-        borderRadius: "10px",
-        boxShadow: "inset 0 0 6px rgba(0,0,0,.3)",
-        backgroundColor: `${palette.primary.main}`,
+        borderRadius: "3px",
+        // boxShadow: "inset 0 0 6px rgba(0,0,0,.3)",
+        // backgroundColor: `${palette.primary.main}`,
+        backgroundColor: "#EEF3F6",
         width: "0px",
       },
     },

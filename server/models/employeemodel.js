@@ -11,7 +11,8 @@ const EmployeeSchema = new mongoose.Schema({
   },
   employeeCNIC: {
     type: String,
-    required: true,
+    default: "00000-0000000-0",
+    set: (value) => (value && value.trim() !== "" ? value : "00000-0000000-0"),
   },
   dateOfBirth: {
     type: Date,
@@ -192,6 +193,15 @@ const EmployeeSchema = new mongoose.Schema({
     resource_type: { type: String },
   },
   cnicScanCopy: {
+    type: [Object], // Changed from [String] to [Object]
+    required: false,
+    default: [],
+    public_id: { type: String },
+    secure_url: { type: String },
+    original_file_name: { type: String },
+    resource_type: { type: String },
+  },
+  employeeCv: {
     type: [Object], // Changed from [String] to [Object]
     required: false,
     default: [],

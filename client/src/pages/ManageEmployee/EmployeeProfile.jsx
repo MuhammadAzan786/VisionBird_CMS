@@ -59,10 +59,11 @@ const EmployeeProfile = () => {
 
     // Assuming `user` contains the arrays/objects like policeCertificateUpload[], cnicScanCopy[], etc.
     const projects = [
-      ...user.policeCertificateUpload, // Array of objects with secure_url
-      user.employeeProImage, // Object with secure_url (e.g., { secure_url: "..." })
-      ...user.degreesScanCopy, // Array of objects with secure_url
-      ...user.cnicScanCopy, // Array of objects with secure_url
+      ...user.policeCertificateUpload,
+      user.employeeProImage,
+      ...user.degreesScanCopy,
+      ...user.cnicScanCopy,
+      ...user.employeeCv,
     ];
 
     // Create a new JSZip instance
@@ -98,25 +99,7 @@ const EmployeeProfile = () => {
     await zip.generateAsync({ type: "blob" }).then(function (blob) {
       saveAs(blob, `${user.employeeName}_Documents.zip`);
     });
-    //  const projects= // policeCertificateUpload[] ,employeeProImage{secure_url },degreesScanCopy[], cnicScanCopy[]
-
-    //   const zip = new JSZip();
-    //   const folder = zip.folder("projects");
-    //   for (const project of projects) {
-    //     console.log("this is project ");
-    //     console.log(project);
-    //     const response = await fetch(project.project_images);
-    //     console.log("res", response);
-    //     const blob = await response.blob();
-
-    //     // Add each file to the folder inside the zip
-    //     for (const img of project.project_images) {
-    //       folder.file(img.split("/").pop(), blob);
-    //     }
-    //   }
-    //   await zip.generateAsync({ type: "blob" }).then(function (blob) {
-    //     saveAs(blob, `projects.zip`);
-    //   });
+  
   };
   const handleSuccess = () => {
     showMessage("success", "Employee Deleted successful!");

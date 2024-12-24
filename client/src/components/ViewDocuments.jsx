@@ -192,6 +192,7 @@ const ViewDocuments = ({ values }) => {
                 value="cnicScanCopy"
                 sx={{ letterSpacing: 1 }}
               />
+              <Tab label="CV" value="employeeCv" sx={{ letterSpacing: 1 }} />
               <Tab
                 label="Police Certificate"
                 value="policeCertificateUpload"
@@ -224,33 +225,25 @@ const ViewDocuments = ({ values }) => {
             value="cnicScanCopy"
             sx={{ padding: "0", height: "100%" }}
           >
-            {/* {values.cnicScanCopy.length > 0 && ( */}
-            <MediaList
-              data={values.cnicScanCopy}
-              setImage={setImage}
-              // handleDelete={handleDelete}
-            />
-            {/* )} */}
+            <MediaList data={values.cnicScanCopy} setImage={setImage} />
+          </CustomTabPanel>
+
+          <CustomTabPanel
+            value="employeeCv"
+            sx={{ padding: "0", height: "100%" }}
+          >
+            <MediaList data={values.employeeCv} setImage={setImage} />
           </CustomTabPanel>
 
           <CustomTabPanel value="policeCertificateUpload" sx={{ padding: "0" }}>
-            {/* {values.policeCertificateUpload.length > 0 && ( */}
             <MediaList
               data={values.policeCertificateUpload}
               setImage={setImage}
-              // handleDelete={handleDelete}
             />
-            {/* )} */}
           </CustomTabPanel>
 
           <CustomTabPanel value="degreesScanCopy" sx={{ padding: "0" }}>
-            {/* {values.degreesScanCopy.length > 0 && ( */}
-            <MediaList
-              data={values.degreesScanCopy}
-              setImage={setImage}
-              // handleDelete={handleDelete}
-            />
-            {/* )} */}
+            <MediaList data={values.degreesScanCopy} setImage={setImage} />
           </CustomTabPanel>
         </TabContext>
       </Grid>
