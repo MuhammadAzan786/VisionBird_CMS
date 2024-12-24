@@ -144,6 +144,7 @@ const UploadFiles = ({
             multiple={tabValue !== "employeeProImage"}
             onChange={(event) => {
               sendtoCloudinary(event.target.files);
+              event.target.value = null;
             }}
             style={{
               position: "absolute",

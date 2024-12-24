@@ -32,30 +32,42 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 const validationSchema = object().shape({
   firstName: string()
     .required("Required Name")
-    .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
+    .matches(
+      /^[a-zA-Z\s]+$/,
+      "Only alphabetic characters and spaces are allowed"
+    ),
 
   fatherName: string()
     .required("Required Name")
     .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters are allowed"),
   cnic: string()
     .required("Required CNIC")
-    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) => /^\d{5}-\d{7}-\d$/.test(value || "")),
+    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) =>
+      /^\d{5}-\d{7}-\d$/.test(value || "")
+    ),
 
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
 
   mobile: string()
     .required("Required Field")
-    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
+    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) =>
+      /^03\d{2}-\d{7}$/.test(value || "")
+    ),
   email: string().email().required("Required Email"),
   gender: string().required("Required Field"),
   maritalStatus: string().required("Required Field"),
   otherMobile: string()
     .required("Required Field")
-    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) => /^03\d{2}-\d{7}$/.test(value || "")),
+    .test("format", "Mobile must be in the format 03XX-XXXXXXX", (value) =>
+      /^03\d{2}-\d{7}$/.test(value || "")
+    ),
   whosMobile: string()
     .required("Required Name")
-    .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters and spaces are allowed"),
+    .matches(
+      /^[a-zA-Z\s]+$/,
+      "Only alphabetic characters and spaces are allowed"
+    ),
   qualification: string().required("Required Field"),
   startDate: string().required("Date Required"),
   probation: string().required("Please select "),
@@ -157,7 +169,8 @@ function UpdateForm() {
         BasicPayInProbationPeriod: user.BasicPayInProbationPeriod || 0,
         BasicPayAfterProbationPeriod: user.BasicPayAfterProbationPeriod || 0,
         AllowancesInProbationPeriod: user.AllowancesInProbationPeriod || 0,
-        AllowancesAfterProbationPeriod: user.AllowancesAfterProbationPeriod || 0,
+        AllowancesAfterProbationPeriod:
+          user.AllowancesAfterProbationPeriod || 0,
         userName: user.employeeUsername || "",
         password: user.employeePassword || "",
         role: user.role || "",
@@ -207,16 +220,23 @@ function UpdateForm() {
           employeeID: values.empId,
           employeeDesignation: values.designation,
           BasicPayInProbationPeriod:
-            values.probation === "yes" ? values.BasicPayInProbationPeriod || 0 : user.BasicPayInProbationPeriod,
-          BasicPayAfterProbationPeriod: values.BasicPayAfterProbationPeriod || 0,
+            values.probation === "yes"
+              ? values.BasicPayInProbationPeriod || 0
+              : user.BasicPayInProbationPeriod,
+          BasicPayAfterProbationPeriod:
+            values.BasicPayAfterProbationPeriod || 0,
           AllowancesInProbationPeriod:
-            values.probation === "yes" ? values.AllowancesInProbationPeriod || 0 : user.AllowancesInProbationPeriod,
-          AllowancesAfterProbationPeriod: values.AllowancesAfterProbationPeriod || 0,
+            values.probation === "yes"
+              ? values.AllowancesInProbationPeriod || 0
+              : user.AllowancesInProbationPeriod,
+          AllowancesAfterProbationPeriod:
+            values.AllowancesAfterProbationPeriod || 0,
           employeeUsername: values.userName,
           employeePassword: values.password,
 
           // ======= Documents
           employeeProImage: values.employeeProImage,
+          employeeCv: values.employeeCv,
           cnicScanCopy: values.cnicScanCopy,
           policeCertificateUpload: values.policeCertificateUpload,
           degreesScanCopy: values.degreesScanCopy,
@@ -247,7 +267,14 @@ function UpdateForm() {
           <Grid ml={2}>
             <Form className=" my-5 ">
               {/* //Personal info */}
-              <Grid container spacing={2} component={Paper}sx={{ borderRadius: "5px" }} p={3} mt={2}>
+              <Grid
+                container
+                spacing={2}
+                component={Paper}
+                sx={{ borderRadius: "5px" }}
+                p={3}
+                mt={2}
+              >
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -367,7 +394,11 @@ function UpdateForm() {
                       <MenuItem value="male">Male</MenuItem>
                       <MenuItem value="female">Female</MenuItem>
                     </Field>
-                    <ErrorMessage name="gender" component="div" style={{ color: "red" }} />
+                    <ErrorMessage
+                      name="gender"
+                      component="div"
+                      style={{ color: "red" }}
+                    />
                   </FormControl>
                 </Grid>
 
@@ -382,14 +413,26 @@ function UpdateForm() {
                         },
                       }}
                     >
-                      <InputLabel id="marital_status">Marital Status</InputLabel>
-                      <Field fullWidth name="maritalStatus" label="Marital Status" labelId="marital_status" as={Select}>
+                      <InputLabel id="marital_status">
+                        Marital Status
+                      </InputLabel>
+                      <Field
+                        fullWidth
+                        name="maritalStatus"
+                        label="Marital Status"
+                        labelId="marital_status"
+                        as={Select}
+                      >
                         <MenuItem value="single">Single</MenuItem>
                         <MenuItem value="married">Married</MenuItem>
                         <MenuItem value="divorced">Divorced</MenuItem>
                         <MenuItem value="widowed">Widowed</MenuItem>
                       </Field>
-                      <ErrorMessage name="maritalStatus" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="maritalStatus"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -405,14 +448,25 @@ function UpdateForm() {
                         },
                       }}
                     >
-                      <InputLabel id="qualification-label">Qualification</InputLabel>
-                      <Field name="qualification" as={Select} labelId="qualification-label" label="Qualification">
+                      <InputLabel id="qualification-label">
+                        Qualification
+                      </InputLabel>
+                      <Field
+                        name="qualification"
+                        as={Select}
+                        labelId="qualification-label"
+                        label="Qualification"
+                      >
                         <MenuItem value="matriculation">Matriculation</MenuItem>
                         <MenuItem value="intermediate">Intermediate</MenuItem>
                         <MenuItem value="graduation">Graduation</MenuItem>
                         <MenuItem value="masters">Masters</MenuItem>
                       </Field>
-                      <ErrorMessage name="qualification" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="qualification"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -430,7 +484,9 @@ function UpdateForm() {
                             },
                           }}
                         >
-                          <InputLabel id="disability-label">Disability</InputLabel>
+                          <InputLabel id="disability-label">
+                            Disability
+                          </InputLabel>
                           <Field
                             name="disability"
                             as={Select}
@@ -447,7 +503,11 @@ function UpdateForm() {
                             <MenuItem value="yes">Yes</MenuItem>
                             <MenuItem value="no">No</MenuItem>
                           </Field>
-                          <ErrorMessage name="disability" style={{ color: "red" }} component="div" />
+                          <ErrorMessage
+                            name="disability"
+                            style={{ color: "red" }}
+                            component="div"
+                          />
                         </FormControl>
                       </div>
                     </Grid>
@@ -475,7 +535,14 @@ function UpdateForm() {
                 </Grid>
               </Grid>
               {/*  contack info */}
-              <Grid container spacing={2} component={Paper}sx={{ borderRadius: "5px" }} p={3} mt={2}>
+              <Grid
+                container
+                spacing={2}
+                component={Paper}
+                sx={{ borderRadius: "5px" }}
+                p={3}
+                mt={2}
+              >
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -519,7 +586,10 @@ function UpdateForm() {
                     onInput={(event) => {
                       const input = event.target.value;
                       const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                      const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
+                      const formattedmob = formattedInput.replace(
+                        /(.{4})(.?)/,
+                        "$1-$2"
+                      ); // Add dash after the fifth character
                       event.target.value = formattedmob;
                     }}
                   />
@@ -540,7 +610,10 @@ function UpdateForm() {
                     onInput={(event) => {
                       const input = event.target.value;
                       const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
-                      const formattedmob = formattedInput.replace(/(.{4})(.?)/, "$1-$2"); // Add dash after the fifth character
+                      const formattedmob = formattedInput.replace(
+                        /(.{4})(.?)/,
+                        "$1-$2"
+                      ); // Add dash after the fifth character
                       event.target.value = formattedmob;
                     }}
                   />
@@ -585,7 +658,14 @@ function UpdateForm() {
               </Grid>
 
               {/* employee info */}
-              <Grid container spacing={2} component={Paper}sx={{ borderRadius: "5px" }} mt={2} p={3}>
+              <Grid
+                container
+                spacing={2}
+                component={Paper}
+                sx={{ borderRadius: "5px" }}
+                mt={2}
+                p={3}
+              >
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -666,7 +746,10 @@ function UpdateForm() {
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                          >
                             {showPassword ? <Visibility /> : <VisibilityOff />}
                           </IconButton>
                         </InputAdornment>
@@ -687,13 +770,24 @@ function UpdateForm() {
                             },
                           }}
                         >
-                          <InputLabel id="bankAccount-label">Bank Account</InputLabel>
-                          <Field name="bankAccount" as={Select} labelId="bankAccount-label" label="BankAccount">
+                          <InputLabel id="bankAccount-label">
+                            Bank Account
+                          </InputLabel>
+                          <Field
+                            name="bankAccount"
+                            as={Select}
+                            labelId="bankAccount-label"
+                            label="BankAccount"
+                          >
                             <MenuItem value="yes">Yes</MenuItem>
                             <MenuItem value="no">No</MenuItem>
                           </Field>
 
-                          <ErrorMessage name="bankAccount" style={{ color: "red" }} component="div" />
+                          <ErrorMessage
+                            name="bankAccount"
+                            style={{ color: "red" }}
+                            component="div"
+                          />
                         </FormControl>
                       </div>
                     </Grid>
@@ -727,12 +821,23 @@ function UpdateForm() {
                             },
                           }}
                         >
-                          <InputLabel id="probation-label">Probation</InputLabel>
-                          <Field name="probation" as={Select} labelId="probation-label" label="Probation">
+                          <InputLabel id="probation-label">
+                            Probation
+                          </InputLabel>
+                          <Field
+                            name="probation"
+                            as={Select}
+                            labelId="probation-label"
+                            label="Probation"
+                          >
                             <MenuItem value="yes">Yes</MenuItem>
                             <MenuItem value="no">No</MenuItem>
                           </Field>
-                          <ErrorMessage name="probation" style={{ color: "red" }} component="div" />
+                          <ErrorMessage
+                            name="probation"
+                            style={{ color: "red" }}
+                            component="div"
+                          />
                         </FormControl>
                       </div>
                     </Grid>
@@ -769,7 +874,11 @@ function UpdateForm() {
                         <option value="5">5 Months</option>
                         <option value="6">6 Months</option>
                       </Field>
-                      <ErrorMessage name="probationMonths" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="probationMonths"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </Grid>
                   </Grid>
                 </Grid>
@@ -925,11 +1034,22 @@ function UpdateForm() {
                     <option value="manager">Manager</option>
                     <option value="employee">Employee</option>
                   </Field>
-                  <ErrorMessage name="maritalStatus" style={{ color: "red" }} component="div" />
+                  <ErrorMessage
+                    name="maritalStatus"
+                    style={{ color: "red" }}
+                    component="div"
+                  />
                 </Grid>
               </Grid>
               {/* question  */}
-              <Grid container spacing={2} component={Paper} mt={2}sx={{ borderRadius: "5px" }} p={3}>
+              <Grid
+                container
+                spacing={2}
+                component={Paper}
+                mt={2}
+                sx={{ borderRadius: "5px" }}
+                p={3}
+              >
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -955,12 +1075,23 @@ function UpdateForm() {
                         },
                       }}
                     >
-                      <InputLabel id="policyBook-label">Policy Book Signed</InputLabel>
-                      <Field name="policyBook" as={Select} labelId="policyBook-label" label="Policy Book Signed">
+                      <InputLabel id="policyBook-label">
+                        Policy Book Signed
+                      </InputLabel>
+                      <Field
+                        name="policyBook"
+                        as={Select}
+                        labelId="policyBook-label"
+                        label="Policy Book Signed"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Field>
-                      <ErrorMessage name="policyBook" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="policyBook"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -975,7 +1106,9 @@ function UpdateForm() {
                         },
                       }}
                     >
-                      <InputLabel id="appointment-label">Appointment Letter Given</InputLabel>
+                      <InputLabel id="appointment-label">
+                        Appointment Letter Given
+                      </InputLabel>
                       <Field
                         name="appointment"
                         as={Select}
@@ -985,7 +1118,11 @@ function UpdateForm() {
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Field>
-                      <ErrorMessage name="appointment" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="appointment"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1000,12 +1137,23 @@ function UpdateForm() {
                         },
                       }}
                     >
-                      <InputLabel id="annualLeave-label">Annual Leaves Signed</InputLabel>
-                      <Field name="annualLeave" as={Select} labelId="annualLeave-label" label="Annual Leaves Signed">
+                      <InputLabel id="annualLeave-label">
+                        Annual Leaves Signed
+                      </InputLabel>
+                      <Field
+                        name="annualLeave"
+                        as={Select}
+                        labelId="annualLeave-label"
+                        label="Annual Leaves Signed"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Field>
-                      <ErrorMessage name="annualLeave" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="annualLeave"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1020,12 +1168,23 @@ function UpdateForm() {
                         },
                       }}
                     >
-                      <InputLabel id="rules-label">Rules and Regulation Signed</InputLabel>
-                      <Field name="rules" as={Select} labelId="rules-label" label="Rules and Regulation Signed">
+                      <InputLabel id="rules-label">
+                        Rules and Regulation Signed
+                      </InputLabel>
+                      <Field
+                        name="rules"
+                        as={Select}
+                        labelId="rules-label"
+                        label="Rules and Regulation Signed"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Field>
-                      <ErrorMessage name="rules" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="rules"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1040,12 +1199,23 @@ function UpdateForm() {
                         },
                       }}
                     >
-                      <InputLabel id="attendence-label">Attendance Biometric</InputLabel>
-                      <Field name="attendence" as={Select} labelId="attendence-label" label="Attendance Biometric">
+                      <InputLabel id="attendence-label">
+                        Attendance Biometric
+                      </InputLabel>
+                      <Field
+                        name="attendence"
+                        as={Select}
+                        labelId="attendence-label"
+                        label="Attendance Biometric"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Field>
-                      <ErrorMessage name="attendence" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="attendence"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1060,7 +1230,9 @@ function UpdateForm() {
                         },
                       }}
                     >
-                      <InputLabel id="localServerAccount-label">Local Server Account Created</InputLabel>
+                      <InputLabel id="localServerAccount-label">
+                        Local Server Account Created
+                      </InputLabel>
                       <Field
                         name="localServerAccount"
                         as={Select}
@@ -1070,7 +1242,11 @@ function UpdateForm() {
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Field>
-                      <ErrorMessage name="localServerAccount" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="localServerAccount"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1086,11 +1262,20 @@ function UpdateForm() {
                       }}
                     >
                       <InputLabel id="slack-label">Added in Slack</InputLabel>
-                      <Field name="slack" as={Select} labelId="slack-label" label="Added in Slack">
+                      <Field
+                        name="slack"
+                        as={Select}
+                        labelId="slack-label"
+                        label="Added in Slack"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Field>
-                      <ErrorMessage name="slack" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="slack"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1106,11 +1291,20 @@ function UpdateForm() {
                       }}
                     >
                       <InputLabel id="superAdmin-label">Super Admin</InputLabel>
-                      <Field name="superAdmin" as={Select} labelId="superAdmin-label" label="Super Admin">
+                      <Field
+                        name="superAdmin"
+                        as={Select}
+                        labelId="superAdmin-label"
+                        label="Super Admin"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Field>
-                      <ErrorMessage name="superAdmin" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="superAdmin"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1125,12 +1319,23 @@ function UpdateForm() {
                         },
                       }}
                     >
-                      <InputLabel id="whatsApp-label">Added in Whatsapp</InputLabel>
-                      <Field name="whatsApp" as={Select} labelId="whatsApp-label" label="Added in Whatsapp">
+                      <InputLabel id="whatsApp-label">
+                        Added in Whatsapp
+                      </InputLabel>
+                      <Field
+                        name="whatsApp"
+                        as={Select}
+                        labelId="whatsApp-label"
+                        label="Added in Whatsapp"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Field>
-                      <ErrorMessage name="whatsApp" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="whatsApp"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1146,11 +1351,20 @@ function UpdateForm() {
                       }}
                     >
                       <InputLabel id="empCard-label">Employee Card</InputLabel>
-                      <Field name="empCard" as={Select} labelId="empCard-label" label="Employee Card">
+                      <Field
+                        name="empCard"
+                        as={Select}
+                        labelId="empCard-label"
+                        label="Employee Card"
+                      >
                         <MenuItem value="yes">Yes</MenuItem>
                         <MenuItem value="no">No</MenuItem>
                       </Field>
-                      <ErrorMessage name="empCard" style={{ color: "red" }} component="div" />
+                      <ErrorMessage
+                        name="empCard"
+                        style={{ color: "red" }}
+                        component="div"
+                      />
                     </FormControl>
                   </div>
                 </Grid>
@@ -1158,7 +1372,14 @@ function UpdateForm() {
 
               {/* ===================================== Documents ======================================== */}
 
-              <Grid container spacing={2} component={Paper} sx={{ borderRadius: "5px" }} mt={2} p={3}>
+              <Grid
+                container
+                spacing={2}
+                component={Paper}
+                sx={{ borderRadius: "5px" }}
+                mt={2}
+                p={3}
+              >
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -1168,7 +1389,7 @@ function UpdateForm() {
                       mb: 5,
                     }}
                   >
-                     Documents
+                    Documents
                   </Typography>
 
                   <UploadFiles
@@ -1211,7 +1432,10 @@ function UpdateForm() {
             </Form>
           </Grid>
           {loading && (
-            <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loading}>
+            <Backdrop
+              sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+              open={loading}
+            >
               <LoadingAnim />
             </Backdrop>
           )}
