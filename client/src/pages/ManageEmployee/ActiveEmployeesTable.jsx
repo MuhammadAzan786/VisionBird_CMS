@@ -111,7 +111,6 @@ const ActiveEmployeesTable = ({ searchTerm }) => {
       columns={employeeColumns}
       onRowDoubleClick={navigateTo}
       pagination
-      autoPageSize
       sx={{
         cursor: "pointer",
       }}

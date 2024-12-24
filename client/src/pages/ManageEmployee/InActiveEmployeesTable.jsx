@@ -16,7 +16,9 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
 
   const fetchEmployees = async ({ queryKey }) => {
     const [, searchTerm] = queryKey;
-    const response = await axios.get(`/api/employee/get_inactive_employees?search=${searchTerm || ""}`);
+    const response = await axios.get(
+      `/api/employee/get_inactive_employees?search=${searchTerm || ""}`
+    );
     return response.data;
   };
 
@@ -37,7 +39,11 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
       headerName: "Employee",
       flex: 1,
       renderCell: ({ row }) => (
-        <EmployeeNameCell src={row.employeeProImage?.secure_url} userId={row.employeeID} name={row.employeeName} />
+        <EmployeeNameCell
+          src={row.employeeProImage?.secure_url}
+          userId={row.employeeID}
+          name={row.employeeName}
+        />
       ),
     },
     {
@@ -60,7 +66,13 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
       field: "role",
       headerName: "Role",
       flex: 1,
-      renderCell: (params) => <CustomChip label={WordCaptitalize(params.value)} size="small" status={params.value} />,
+      renderCell: (params) => (
+        <CustomChip
+          label={WordCaptitalize(params.value)}
+          size="small"
+          status={params.value}
+        />
+      ),
     },
   ];
 
@@ -112,7 +124,6 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
       columns={employeeColumns}
       onRowDoubleClick={navigateTo}
       pagination
-      autoPageSize
       sx={{
         cursor: "pointer",
       }}
