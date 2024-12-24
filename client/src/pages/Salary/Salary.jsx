@@ -49,6 +49,8 @@ const Salary = () => {
     extraBonusRemarks,
   };
 
+  const [loanDetails, setLoanDetails] = useState({ isLoanActive: false });
+
   const [netSalaryBeforeTax, setNetSalaryBeforeTax] = useState(0);
 
   const [netSalary, setNetSalary] = useState(0);
@@ -78,6 +80,8 @@ const Salary = () => {
 
         setNetSalary(response.data.netSalary);
 
+        setLoanDetails(response.data.loanDetails);
+
         setNetSalaryBeforeTax(response.data.netSalaryBeforeTax);
       })
       .catch((error) => {
@@ -97,6 +101,7 @@ const Salary = () => {
         workDetails,
         leaveDetails,
         bonusDetails,
+        loanDetails,
         netSalary,
       })
       .then()
@@ -332,6 +337,34 @@ const Salary = () => {
               </Grid>
             </Grid>
           </Grid>
+
+          {/* =====================================loan============================================ */}
+
+          <Grid item xs={12}>
+            <HeadingStyled bgColor="#145DA0">
+              <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
+                Loan Information / Advance Salary
+              </Typography>
+            </HeadingStyled>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Grid container spacing={1}>
+              <Grid item xs={4}>
+                <DivStyled>
+                  <Typography fontWeight={700}>Loan/Advance Salary Amount:</Typography>
+                  <Typography>PKR {loanDetails.isLoanActive ? loanDetails.loanAmount : 0}</Typography>
+                </DivStyled>
+              </Grid>
+              <Grid item xs={8}>
+                <DivStyled>
+                  <Typography fontWeight={700}>Loan / Advance Salary Amount Returned from Salary:</Typography>
+                  <Typography>PKR {loanDetails.isLoanActive ? loanDetails.amountPerInstallment : 0}</Typography>
+                </DivStyled>
+              </Grid>
+            </Grid>
+          </Grid>
+          {/* =====================================loan============================================ */}
           {/* ========================================check test */}
           <Grid item xs={12}>
             <div
@@ -356,23 +389,21 @@ const Salary = () => {
           {/* ========================================check test */}
 
           <Grid item xs={12}>
-            <div
-              style={{
-                marginTop: 10,
-                marginBottom: 0,
+            <DivStyled
+              sx={{
+                marginTop: "10px",
+                marginBottom: "10px",
                 backgroundColor: "#C00000",
-                display: "flex",
                 justifyContent: "space-around",
-                padding: "10px",
               }}
             >
-              <Typography fontWeight={700} fontSize={23} style={{ color: "white", display: "inline-block" }}>
+              <Typography fontWeight={700} fontSize={23} color={"white"}>
                 Net Amount Paid:
               </Typography>
-              <Typography fontWeight={700} fontSize={23} style={{ color: "white", display: "inline-block" }}>
+              <Typography fontWeight={700} fontSize={23} color={"white"}>
                 PKR {netSalary}
               </Typography>
-            </div>
+            </DivStyled>
           </Grid>
 
           <Grid item xs={12}>

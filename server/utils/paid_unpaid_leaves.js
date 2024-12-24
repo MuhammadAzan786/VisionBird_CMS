@@ -104,14 +104,14 @@ const paid_unpaid_leaves = async (userId, month, year) => {
     [[], []]
   );
 
-  console.log("Unpaid long", longLeaveUnapaid);
-  console.log("paid long", longLeavePaid);
+  // console.log("Unpaid long", longLeaveUnapaid);
+  // console.log("paid long", longLeavePaid);
 
   const longLeaveUnapaidCount = longLeaveUnapaid.reduce((acc, value) => {
     acc += LongLeaveCalculation(value);
     return acc;
   }, 0);
-  console.log("Long Leaves result", longLeaveUnapaidCount);
+  // console.log("Long Leaves result", longLeaveUnapaidCount);
 
   const longLeavePaidCount = longLeavePaid.reduce((acc, value) => {
     acc += LongLeaveCalculation(value);
@@ -154,15 +154,15 @@ const LongLeaveCalculation = (longLeave) => {
     year: longLeave.leavesEnd.getFullYear(),
   };
 
-  console.log("leaveStart", leaveStart);
-  console.log("leavesEnd", leavesEnd);
+  // console.log("leaveStart", leaveStart);
+  // console.log("leavesEnd", leavesEnd);
 
   //   First Case if month is same
   if (leaveStart.month === leavesEnd.month) {
     const filteredLeaves = filteredWeekendsLeaves(leaveStart, leavesEnd);
 
-    console.warn("1st condition, Month is same");
-    console.log("filtered leaves", filteredLeaves);
+    // console.warn("1st condition, Month is same");
+    // console.log("filtered leaves", filteredLeaves);
 
     return filteredLeaves.length;
   }
@@ -175,10 +175,10 @@ const LongLeaveCalculation = (longLeave) => {
 
     const filteredLeaves = filteredWeekendsLeaves(leaveCurrentStartDate, leaveCurrentEndDate);
 
-    console.warn("2nd condition, Diff Month but current is eq to start");
-    console.log("leaveCurrentStartDate", leaveCurrentStartDate);
-    console.log("leaveCurrentEndDate", leaveCurrentEndDate);
-    console.log("filtered leaves", filteredLeaves);
+    // console.warn("2nd condition, Diff Month but current is eq to start");
+    // console.log("leaveCurrentStartDate", leaveCurrentStartDate);
+    // console.log("leaveCurrentEndDate", leaveCurrentEndDate);
+    // console.log("filtered leaves", filteredLeaves);
     return filteredLeaves.length;
   }
 
@@ -189,10 +189,10 @@ const LongLeaveCalculation = (longLeave) => {
     const { leaveCurrentStartDate, leaveCurrentEndDate } = extractMonthDatesStartToEnd(leavesEnd);
     const filteredLeaves = filteredWeekendsLeaves(leaveCurrentStartDate, leaveCurrentEndDate);
 
-    console.warn("3rd condition, Diff Month but current is eq to end");
-    console.log("leaveCurrentStartDate", leaveCurrentStartDate);
-    console.log("leaveCurrentEndDate", leaveCurrentEndDate);
-    console.log("filtered leaves", filteredLeaves);
+    // console.warn("3rd condition, Diff Month but current is eq to end");
+    // console.log("leaveCurrentStartDate", leaveCurrentStartDate);
+    // console.log("leaveCurrentEndDate", leaveCurrentEndDate);
+    // console.log("filtered leaves", filteredLeaves);
 
     return filteredLeaves.length;
   }
@@ -200,7 +200,7 @@ const LongLeaveCalculation = (longLeave) => {
 
 const filteredWeekendsLeaves = (leaveStart, leavesEnd) => {
   const weekendDates = getWeekDates(leaveStart.month, leaveStart.year);
-  console.log("Weekend Dates", weekendDates);
+  // console.log("Weekend Dates", weekendDates);
   // console.log("Weekends Length", weekendDates.length);
 
   const monthLeaveDates = Array.from(
@@ -208,7 +208,7 @@ const filteredWeekendsLeaves = (leaveStart, leavesEnd) => {
     (_, index) => leaveStart.date + index
   );
 
-  console.log("Month Leave Dates", monthLeaveDates);
+  // console.log("Month Leave Dates", monthLeaveDates);
 
   const filteredWeekendsLeaves = monthLeaveDates.filter((item) => {
     return !weekendDates.includes(item);

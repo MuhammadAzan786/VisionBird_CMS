@@ -7,20 +7,18 @@ import {
   RadioGroup,
   Stack,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import axios from "../../../../utils/axiosInterceptor";
 import { Field, Form, Formik } from "formik";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import * as Yup from "yup";
+import { InfoOutlined } from "@mui/icons-material";
 
 const validationSchema = Yup.object().shape({
-  loanAmount: Yup.number()
-    .min(1000, "loan cannot be less then 1000")
-    .required("this field is required"),
-  loanPayback: Yup.string()
-    .oneOf(["full", "installments"])
-    .required("this field is required"),
+  loanAmount: Yup.number().min(1000, "loan cannot be less then 1000").required("this field is required"),
+  loanPayback: Yup.string().oneOf(["full", "installments"]).required("this field is required"),
   loanReason: Yup.string().required("this field is required"),
 });
 
@@ -53,11 +51,7 @@ const LoanComponent = () => {
     installmentDuration: 0,
   };
   return (
-    <Formik
-      initialValues={initialValues}
-      onSubmit={handleSubmit}
-      validationSchema={validationSchema}
-    >
+    <Formik initialValues={initialValues} onSubmit={handleSubmit} validationSchema={validationSchema}>
       {({ isSubmitting, values }) => (
         <Form>
           <Stack spacing={3}>
@@ -69,9 +63,7 @@ const LoanComponent = () => {
                   fullWidth
                   {...field}
                   error={Boolean(meta.error)}
-                  helperText={
-                    meta.error ? meta.error : "Specify your loan amount?"
-                  }
+                  helperText={meta.error ? meta.error : "Specify your loan amount?"}
                 />
               )}
             </Field>
@@ -79,18 +71,14 @@ const LoanComponent = () => {
             <FormControl component="fieldset">
               <FormLabel component="legend">
                 How would you like to payback the loan?
+                <Tooltip title="ali">
+                  <InfoOutlined style={{ color: "gray", cursor: "pointer", marginLeft: "10px" }} />
+                </Tooltip>
               </FormLabel>
+
               <Field as={RadioGroup} name="loanPayback" row>
-                <FormControlLabel
-                  value="full"
-                  control={<Radio />}
-                  label="Full Payback"
-                />
-                <FormControlLabel
-                  value="installments"
-                  control={<Radio />}
-                  label="Installments"
-                />
+                <FormControlLabel value="full" control={<Radio />} label="Full Payback" />
+                <FormControlLabel value="installments" control={<Radio />} label="Installments" />
               </Field>
             </FormControl>
 
@@ -104,9 +92,7 @@ const LoanComponent = () => {
                     {...field}
                     error={Boolean(meta.error)}
                     helperText={
-                      meta.error
-                        ? meta.error
-                        : "In how many installments you would like to payback the loan?"
+                      meta.error ? meta.error : "In how many installments you would like to payback the loan?"
                     }
                   />
                 )}
@@ -122,11 +108,7 @@ const LoanComponent = () => {
                   fullWidth
                   {...field}
                   error={Boolean(meta.error)}
-                  helperText={
-                    meta.error
-                      ? "this field is required"
-                      : "Why do you want to apply for the loan?"
-                  }
+                  helperText={meta.error ? "this field is required" : "Why do you want to apply for the loan?"}
                 />
               )}
             </Field>

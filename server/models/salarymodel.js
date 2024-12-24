@@ -85,6 +85,24 @@ const bonusDetails = new mongoose.Schema(
   { _id: false }
 );
 
+const loanDetails = new mongoose.Schema(
+  {
+    isLoanActive: {
+      type: Boolean,
+      default: false,
+    },
+
+    loanId: {
+      type: mongoose.Types.ObjectId,
+      ref: "Loan_Advance_Salary_Model",
+      required: function () {
+        return this.isLoanActive === true;
+      },
+    },
+  },
+  { _id: false }
+);
+
 const salarySchema = new mongoose.Schema({
   employee_obj_id: {
     type: mongoose.Schema.Types.ObjectId,
@@ -102,6 +120,8 @@ const salarySchema = new mongoose.Schema({
   workDetails,
   leaveDetails,
   bonusDetails,
+
+  loanDetails,
 
   netSalary: { type: Number, required: true },
 });

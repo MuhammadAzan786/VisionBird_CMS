@@ -6,6 +6,10 @@ const daysInMonth = require("../utils/date/daysInMonths");
 const calculateGrossSalary = require("../utils/calculateGrossSalary");
 const tax_calculator = require("../utils/taxCalculator");
 
+const advance_payments_calculation = require("../utils/salary/advance_payments_calculation");
+
+const Loan_Advance_Salary_Model = require("../models/loan_advance_salary_model");
+
 module.exports = {
   //Months are comming 1-12 based
   view_salary: async (req, res) => {
@@ -34,7 +38,17 @@ module.exports = {
         value: netSalaryWithLeaveCutting,
       });
 
-      const netSalaryBeforeTax = netSalaryWithLeaveCutting + Number(extraBonusAmount);
+      // Loan Calculation Perform
+
+      let netSalaryBeforeTax = 0;
+
+      netSalaryBeforeTax = netSalaryWithLeaveCutting + Number(extraBonusAmount);
+      const loan = await advance_payments_calculation("active", employee_id);
+      console.log("data loan me return hua", loan);
+      if (loan.isLoanActive) {
+        netSalaryBeforeTax -= loan.amountPerInstallment;
+        console.log("Loan Nikal Dya hai");
+      }
 
       const netSalary = tax_calculator(netSalaryBeforeTax);
 
@@ -46,12 +60,17 @@ module.exports = {
           allowances,
           grossSalary,
         },
+
         leaveDetails,
+
         workDetails: {
           daysWorked,
         },
-        netSalary,
+
+        loanDetails: loan,
+
         netSalaryBeforeTax,
+        netSalary,
       });
     } catch (error) {
       console.log("Error View Salary", error);
@@ -76,8 +95,29 @@ module.exports = {
         leaveDetails,
         bonusDetails,
 
+        loanDetails,
+
         netSalary,
       } = req.body;
+
+      const { isLoanActive, loanId, loanAmount, amountPerInstallment } = loanDetails;
+
+      if (isLoanActive) {
+        const updateLoan = await Loan_Advance_Salary_Model.findByIdAndUpdate(loanId, {
+          $push: {
+            transactionHistory: {
+              paidDate: new Date(),
+              loanAmountRemaning: loanAmount - amountPerInstallment,
+              installmentRemaning: 4,
+            },
+          },
+        });
+      }
+
+      loanDetails = {
+        isLoanActive,
+        ...(isLoanActive ? { loanId } : {}),
+      };
 
       //Mapping leaveDetail back to object form
 
@@ -98,7 +138,7 @@ module.exports = {
         workDetails,
         leaveDetails,
         bonusDetails,
-
+        loanDetails,
         netSalary,
       };
 

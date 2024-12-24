@@ -1,7 +1,7 @@
 const advanceSalaryModel = require("../models/advance_salary_model");
 const loanModel = require("../models/loanModel");
 const advance_notification_model = require("../models/advance_notification_model");
-
+const Loan_Advance_Salary_Model = require("../models/loan_advance_salary_model");
 let ioInstance;
 
 module.exports = {
@@ -9,17 +9,34 @@ module.exports = {
     ioInstance = io;
   },
 
+  // =================advance new
+
+  loan_advance_request: async (req, res) => {
+    console.log("LOAN ADVANCE REQUEST CONTROLLER", req.body);
+    console.log("PARAMS", req.params);
+    try {
+      const { values } = req.body;
+      const { id } = req.params;
+      const loanApplication = await Loan_Advance_Salary_Model.create({
+        employeeId: id,
+        ...values,
+      });
+
+      res.status(200).json({ message: "Loan Request Sent", loanApplication });
+    } catch (error) {
+      console.log("LOAN ERROR", error);
+      res.status(501).json({ message: "Erro Creating Loan Request" });
+    }
+  },
+
   // =============== Employee Advance Salary Request Controller ================ //
   advance_salary_request: async (req, res) => {
     try {
-      const { advanceSalaryMonths, advanceSalaryReason, currentUser } =
-        req.body;
+      const { advanceSalaryMonths, advanceSalaryReason, currentUser } = req.body;
 
       if (currentUser.probationPeriod === "yes") {
         // checking user probation period
-        return res
-          .status(500)
-          .json({ msg: "Advance salary not allowed during probation." });
+        return res.status(500).json({ msg: "Advance salary not allowed during probation." });
       }
       // ==================== Checking Advance salary or Loan is Active or Pending ========== //
 
@@ -68,9 +85,7 @@ module.exports = {
 
       advanceSalaryRequest.save();
 
-      res
-        .status(200)
-        .json({ msg: "Advance Salary request is pending for approval." });
+      res.status(200).json({ msg: "Advance Salary request is pending for approval." });
     } catch (error) {
       res.status(500).json({
         error: "An error occurred while requesting for advance salary",
@@ -83,19 +98,11 @@ module.exports = {
 
   loan_request: async (req, res) => {
     try {
-      const {
-        loanAmount,
-        loanPayback,
-        loanReason,
-        installmentDuration,
-        currentUser,
-      } = req.body;
+      const { loanAmount, loanPayback, loanReason, installmentDuration, currentUser } = req.body;
 
       if (currentUser.probationPeriod === "yes") {
         // checking user probation period
-        return res
-          .status(500)
-          .json({ msg: "Loan not allowed during probation." });
+        return res.status(500).json({ msg: "Loan not allowed during probation." });
       }
 
       // ==================== Checking Advance salary or Loan is Active or Pending ========== //
@@ -213,18 +220,13 @@ module.exports = {
 
   fetch_all_advance_salary_requests: async (req, res) => {
     if (!req.body.currentUser || req.body.currentUser.role !== "admin") {
-      return res
-        .status(403)
-        .send("You do not have permission to access this resource.");
+      return res.status(403).send("You do not have permission to access this resource.");
     }
 
     try {
       const salaryApplications = await advanceSalaryModel
         .find({})
-        .populate(
-          "employee_obj_id",
-          "employeeProImage employeeName employeeID BasicPayAfterProbationPeriod"
-        )
+        .populate("employee_obj_id", "employeeProImage employeeName employeeID BasicPayAfterProbationPeriod")
         .sort({ createdAt: -1 });
       res.status(200).json(salaryApplications);
     } catch (error) {
@@ -239,17 +241,12 @@ module.exports = {
 
   fetch_all_loan_applications: async (req, res) => {
     if (!req.body.currentUser || req.body.currentUser.role !== "admin") {
-      return res
-        .status(403)
-        .send("You do not have permission to access this resource.");
+      return res.status(403).send("You do not have permission to access this resource.");
     }
     try {
       const loanApplications = await loanModel
         .find({})
-        .populate(
-          "employee_obj_id",
-          "employeeProImage employeeName employeeID BasicPayAfterProbationPeriod"
-        )
+        .populate("employee_obj_id", "employeeProImage employeeName employeeID BasicPayAfterProbationPeriod")
         .sort({ createdAt: -1 });
       res.status(200).json(loanApplications);
     } catch (error) {
@@ -264,18 +261,11 @@ module.exports = {
 
   modify_advance_payments_application_status: async (req, res) => {
     if (req.body.currentUser.role !== "admin") {
-      return res
-        .status(403)
-        .send("You do not have permission to access this resource.");
+      return res.status(403).send("You do not have permission to access this resource.");
     }
 
-    if (
-      req.body.activity_status !== null &&
-      req.body.activity_status === "active"
-    ) {
-      res
-        .status(500)
-        .json({ msg: "active application status is not allowed to modify" });
+    if (req.body.activity_status !== null && req.body.activity_status === "active") {
+      res.status(500).json({ msg: "active application status is not allowed to modify" });
     }
 
     let modified_application;
@@ -339,9 +329,7 @@ module.exports = {
 
       res.status(200).json(modified_application);
     } catch (error) {
-      return res
-        .status(500)
-        .send("there is an error changing status of this application");
+      return res.status(500).send("there is an error changing status of this application");
     }
   },
 };
