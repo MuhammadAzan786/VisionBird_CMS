@@ -149,6 +149,7 @@ const UpdateInterneeForm = () => {
         experienceLetter: user.experienceLetter || "",
         offered_By: user.offered_By || "",
         interneeProImage: user.interneeProImage || "",
+        interneeCv: user.interneeCv || "",
         disability: user.disability || "no",
         kindofdisability: user.disabilityType || "",
       }}
@@ -180,7 +181,7 @@ const UpdateInterneeForm = () => {
           appointmentFile: values.appointmentFile,
           cnicFile: values.cnicFile,
           experienceLetter: values.experienceLetter,
-
+          interneeCv: values.interneeCv,
           interneeProImage: values.interneeProImage,
           disability: values.disability,
           disabilityType: values.kindofdisability,

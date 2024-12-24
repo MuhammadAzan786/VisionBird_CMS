@@ -179,6 +179,7 @@ const ViewDocumentInternee = ({ values }) => {
 
             <TabList onChange={handleTabValue}>
               <Tab label="Profile image" value="interneeProImage" />
+              <Tab label="CV" value="interneeCv" sx={{ letterSpacing: 1 }} />
               <Tab label="CNIC" value="cnicFile" sx={{ letterSpacing: 1 }} />
               <Tab
                 label="Experience Letter"
@@ -206,34 +207,21 @@ const ViewDocumentInternee = ({ values }) => {
           </CustomTabPanel>
 
           <CustomTabPanel value="cnicFile">
-            {/* {values.cnicFile.length > 0 && ( */}
-            <MediaList
-              data={values.cnicFile}
-              setImage={setImage}
-              // handleDelete={handleDelete}
-            />
-            {/* )} */}
+            <MediaList data={values.cnicFile} setImage={setImage} />
+          </CustomTabPanel>
+
+          <CustomTabPanel value="interneeCv">
+            <MediaList data={values.interneeCv} setImage={setImage} />
           </CustomTabPanel>
 
           <CustomTabPanel value="experienceLetter">
-            {/* {values.experienceLetter.length > 0 && ( */}
-            <MediaList
-              data={values.experienceLetter}
-              setImage={setImage}
-              // handleDelete={handleDelete}
-            />
-            {/* )} */}
+            <MediaList data={values.experienceLetter} setImage={setImage} />
           </CustomTabPanel>
 
           <CustomTabPanel value="appointmentFile">
-            {/* {values.appointmentFile.length > 0 && ( */}
-            <MediaList
-              data={values.appointmentFile}
-              setImage={setImage}
-              // handleDelete={handleDelete}
-            />
-            {/* )} */}
+            <MediaList data={values.appointmentFile} setImage={setImage} />
           </CustomTabPanel>
+          
         </TabContext>
       </Grid>
     </Grid>

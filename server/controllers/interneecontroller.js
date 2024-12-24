@@ -7,6 +7,7 @@ module.exports = {
     try {
       console.log("Add_Internee Request Recieved");
       const { updateData, deletedFiles } = req.body;
+      
       console.log("Deleted Files List: ", deletedFiles);
 
       // for deleting files on cloudinary

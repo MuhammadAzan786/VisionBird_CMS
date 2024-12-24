@@ -84,6 +84,15 @@ const interneeSchema = new Schema({
     original_file_name: { type: String },
     resource_type: { type: String },
   },
+  interneeCv: {
+    type: [Object],
+    required: false,
+    default: [],
+    public_id: { type: String },
+    secure_url: { type: String },
+    original_file_name: { type: String },
+    resource_type: { type: String },
+  },
 });
 
 const Internee = mongoose.model("Internee", interneeSchema);

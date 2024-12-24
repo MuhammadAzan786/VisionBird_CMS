@@ -6,7 +6,6 @@ import Grid from "@mui/material/Grid";
 import { usePDF } from "react-to-pdf";
 import { useMessage } from "../../components/MessageContext";
 import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
-import { Link as RouterLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
@@ -19,20 +18,13 @@ import ContactMailOutlinedIcon from "@mui/icons-material/ContactMailOutlined";
 import SmartphoneOutlinedIcon from "@mui/icons-material/SmartphoneOutlined";
 import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import CreditScoreOutlinedIcon from "@mui/icons-material/CreditScoreOutlined";
-import LocalPoliceOutlinedIcon from "@mui/icons-material/LocalPoliceOutlined";
-import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
 import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
-import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
-import CurrencyExchangeOutlinedIcon from "@mui/icons-material/CurrencyExchangeOutlined";
-import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { useQueryClient } from "@tanstack/react-query";
-import ViewDocuments from "../../components/ViewDocuments";
+import PsychologyIcon from "@mui/icons-material/Psychology";
 import ViewDocumentInternee from "../../components/ViewDocumentInternee";
+import AccessibleIcon from "@mui/icons-material/Accessible";
 import toast from "react-hot-toast";
 import { saveAs } from "file-saver";
 import { FolderZipOutlined } from "@mui/icons-material";
@@ -51,12 +43,12 @@ const InterneeProfile = () => {
     console.log("clicked", user);
     console.log("clicked", user);
 
-    // Assuming `user` contains the arrays/objects like policeCertificateUpload[], cnicScanCopy[], etc.
     const projects = [
-      ...user.appointmentFile, // Array of objects with secure_url
-      user.interneeProImage, // Object with secure_url (e.g., { secure_url: "..." })
-      ...user.experienceLetter, // Array of objects with secure_url
-      ...user.cnicFile, // Array of objects with secure_url
+      ...user.appointmentFile,
+      user.interneeProImage,
+      ...user.experienceLetter,
+      ...user.cnicFile,
+      ...user.interneeCv,
     ];
 
     // Create a new JSZip instance
@@ -92,91 +84,8 @@ const InterneeProfile = () => {
     await zip.generateAsync({ type: "blob" }).then(function (blob) {
       saveAs(blob, `${user.firstName}_Documents.zip`);
     });
-    //  const projects= // policeCertificateUpload[] ,employeeProImage{secure_url },degreesScanCopy[], cnicScanCopy[]
-
-    //   const zip = new JSZip();
-    //   const folder = zip.folder("projects");
-    //   for (const project of projects) {
-    //     console.log("this is project ");
-    //     console.log(project);
-    //     const response = await fetch(project.project_images);
-    //     console.log("res", response);
-    //     const blob = await response.blob();
-
-    //     // Add each file to the folder inside the zip
-    //     for (const img of project.project_images) {
-    //       folder.file(img.split("/").pop(), blob);
-    //     }
-    //   }
-    //   await zip.generateAsync({ type: "blob" }).then(function (blob) {
-    //     saveAs(blob, `projects.zip`);
-    //   });
   };
-  //  const downloadZip = async () => {
-  //    console.log("clicked", user);
-  //    console.log("clicked", user);
 
-  //    // Assuming `user` contains the arrays/objects like policeCertificateUpload[], cnicScanCopy[], etc.
-  //    const projects = [
-  //      ...user.policeCertificateUpload, // Array of objects with secure_url
-  //      user.employeeProImage, // Object with secure_url (e.g., { secure_url: "..." })
-  //      ...user.degreesScanCopy, // Array of objects with secure_url
-  //      ...user.cnicScanCopy, // Array of objects with secure_url
-  //    ];
-
-  //    // Create a new JSZip instance
-  //    const zip = new JSZip();
-  //    const folder = zip.folder("Employee Documents");
-
-  //    // Function to handle file addition to the zip
-  //    const addFileToZip = async (fileUrl, fileName) => {
-  //      const response = await fetch(fileUrl);
-  //      const blob = await response.blob();
-  //      folder.file(fileName, blob);
-  //    };
-
-  //    // Iterate through each project (either object with secure_url or array of objects with secure_url)
-  //    for (const project of projects) {
-  //      // If it's a single object (like employeeProImage) with a 'secure_url'
-  //      if (project?.secure_url) {
-  //        const fileName = project?.secure_url.split("/").pop();
-  //        await addFileToZip(project?.secure_url, fileName);
-  //      }
-  //      // If it's an array of objects (like policeCertificateUpload[], cnicScanCopy[], etc.)
-  //      else if (Array.isArray(project)) {
-  //        for (const item of project) {
-  //          if (item?.secure_url) {
-  //            const fileName = item?.secure_url.split("/").pop();
-  //            await addFileToZip(item?.secure_url, fileName);
-  //          }
-  //        }
-  //      }
-  //    }
-
-  //    // Generate the ZIP file and trigger the download
-  //    await zip.generateAsync({ type: "blob" }).then(function (blob) {
-  //      saveAs(blob, `Employee Documents.zip`);
-  //    });
-  //    //  const projects= // policeCertificateUpload[] ,employeeProImage{secure_url },degreesScanCopy[], cnicScanCopy[]
-
-  //    //   const zip = new JSZip();
-  //    //   const folder = zip.folder("projects");
-  //    //   for (const project of projects) {
-  //    //     console.log("this is project ");
-  //    //     console.log(project);
-  //    //     const response = await fetch(project.project_images);
-  //    //     console.log("res", response);
-  //    //     const blob = await response.blob();
-
-  //    //     // Add each file to the folder inside the zip
-  //    //     for (const img of project.project_images) {
-  //    //       folder.file(img.split("/").pop(), blob);
-  //    //     }
-  //    //   }
-  //    //   await zip.generateAsync({ type: "blob" }).then(function (blob) {
-  //    //     saveAs(blob, `projects.zip`);
-  //    //   });
-  //  };
   const isActive = (path) => location.pathname === path;
 
   const handleSuccess = () => {
@@ -427,9 +336,7 @@ const InterneeProfile = () => {
         </Grid>
 
         <Grid container spacing={2}>
-          {/* Column 1 */}
           <Grid item xs={12} md={6}>
-            {/* Personal Info Section */}
             <Paper
               sx={{ p: 3, display: "flex", flexDirection: "column", gap: 1 }}
             >
@@ -524,14 +431,53 @@ const InterneeProfile = () => {
                 >
                   Qualification:
                 </Typography>
+
                 <Typography fontSize={15} color="#212F3D">
                   {user.qualification}
                 </Typography>
               </Grid>
+              <Grid item display="flex" alignItems="center">
+                <AccessibleIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Disability:
+                </Typography>
+
+                <Typography fontSize={15} color="#212F3D">
+                  {user.disability}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <PsychologyIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Disability Type:
+                </Typography>
+
+                {user.disability === "yes" && (
+                  <Typography>{user.disabilityType}</Typography>
+                )}
+
+                {user.disability === "no" && <Typography>------</Typography>}
+              </Grid>
             </Paper>
             {/* Employee Info Section */}
             <Paper
-              sx={{ p: 3,mt:2, display: "flex", flexDirection: "column", gap: 1 }}
+              sx={{
+                p: 3,
+                mt: 2,
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
+              }}
             >
               <Typography fontSize={20} color="#BFC9CA">
                 Employee Info

@@ -233,7 +233,11 @@ const TalentAquisition = () => {
             value={experinceValue}
             onChange={handleExperince}
             renderInput={(params) => (
-              <CustomTextField {...params} label="Experince" variant="filled" />
+              <CustomTextField
+                {...params}
+                label="Experience"
+                variant="filled"
+              />
             )}
           />
         </Grid>
