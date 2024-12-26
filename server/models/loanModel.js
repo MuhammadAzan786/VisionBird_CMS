@@ -1,5 +1,20 @@
 const mongoose = require("mongoose");
 
+const loanTransactions = new mongoose.Schema({
+  paymentDate: {
+    type: Number,
+  },
+  installmentAmount: {
+    type: Number,
+  },
+  installmentsRemaining: {
+    type: Number,
+  },
+  remainingLoanAmount: {
+    type: Number,
+  },
+});
+
 const loanSchema = new mongoose.Schema(
   {
     employee_obj_id: {
@@ -77,11 +92,6 @@ loanSchema.index(
     partialFilterExpression: {
       $or: [{ approval_status: "pending" }, { activity_status: "active" }],
     },
-    // partialFilterExpression: {
-    //   loan_status: {
-    //     $or: [{ approval_status: "pending" }, { activity_status: "active" }],
-    //   },
-    // },
   }
 );
 
