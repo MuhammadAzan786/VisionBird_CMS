@@ -109,6 +109,8 @@ const Sidenav = ({ children }) => {
               left: "0",
               border: "none",
               scrollbarWidth: "none",
+              overflow: "auto",
+              height: "100vh",
             },
           }}
         >

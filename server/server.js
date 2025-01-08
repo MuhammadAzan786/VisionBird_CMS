@@ -24,6 +24,7 @@ const taxFileRoutes = require("./routes/taxFile_routes");
 const leaveRoutes = require("./routes/leave_routes");
 const notificationRoutes = require("./routes/notification_routes");
 const employeeOfWeekRoutes = require("./routes/Employee_of_week_routes");
+const teamRoutes = require("./routes/team_routes");
 
 const auth = require("./Middlewares/auth");
 
@@ -36,7 +37,10 @@ const EmployeeOfWeekModel = require("./models/emp_of_week.model");
 const app = express();
 
 const corsOptions = {
-  origin: process.env.NODE_ENV === "production" ? process.env.FRONTEND_DOMAIN_NAME : process.env.FRONTEND_LOCAL_ADDRESS,
+  origin:
+    process.env.NODE_ENV === "production"
+      ? process.env.FRONTEND_DOMAIN_NAME
+      : process.env.FRONTEND_LOCAL_ADDRESS,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true,
   optionsSuccessStatus: 200,
@@ -80,11 +84,14 @@ app.use("/api/tax_File", taxFileRoutes);
 app.use("/api/leave", leaveRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api/empOfWeek", employeeOfWeekRoutes);
+app.use("/api/team", teamRoutes);
 
 // Socket.io
 const server = http.createServer(app);
 const origin =
-  process.env.NODE_ENV === "production" ? process.env.FRONTEND_DOMAIN_NAME : process.env.FRONTEND_LOCAL_ADDRESS;
+  process.env.NODE_ENV === "production"
+    ? process.env.FRONTEND_DOMAIN_NAME
+    : process.env.FRONTEND_LOCAL_ADDRESS;
 console.log("CORS Origin :", origin);
 const io = new Server(server, {
   cors: {
@@ -101,7 +108,8 @@ setupEOPIoInstance(io);
 let users = [];
 
 const addUser = (userId, socketId) => {
-  !users.some((user) => user.userId === userId) && users.push({ userId, socketId });
+  !users.some((user) => user.userId === userId) &&
+    users.push({ userId, socketId });
 };
 
 const removeUser = (socketId) => {

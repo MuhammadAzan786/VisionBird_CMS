@@ -18,7 +18,6 @@ import { useState } from "react";
 import { customColors } from "../../theme/colors";
 import { cloudinaryConfig } from "../../utils/cloudinaryConfig";
 import { AXIOS_CLODUDINARY } from "../../utils/axios/axiosCloudinary";
-
 import CustomOverlay from "../../components/Styled/CustomOverlay";
 
 const UploadFiles = ({
