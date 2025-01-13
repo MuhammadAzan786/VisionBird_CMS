@@ -11,12 +11,12 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import BadgeIcon from "@mui/icons-material/Badge";
 import SchoolIcon from "@mui/icons-material/School";
 import WorkIcon from "@mui/icons-material/Work";
-
-
-import AssignmentIcon from "@mui/icons-material/Assignment";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import StarIcon from "@mui/icons-material/Star";
-import EventIcon from "@mui/icons-material/Event";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import DescriptionIcon from "@mui/icons-material/Description";
 import LoadingAnim from "../../components/LoadingAnim";
@@ -100,8 +100,8 @@ const EvaluationPage = () => {
   const appliedOn = evaluation?.appliedOn
     ? dateformat(evaluation.appliedOn)
     : "N/A";
-  const interviewCall = evaluation?.testRating
-    ? dateformat(evaluation.testRating)
+  const interviewCall = evaluation?.interviewCall
+    ? dateformat(evaluation.interviewCall)
     : "N/A";
   return (
     <Box p={3}>
@@ -357,47 +357,64 @@ const EvaluationPage = () => {
                 </Grid>
                 {[
                   {
-                    icon: <AssignmentIcon color="secondary" />,
+                    icon: <WorkIcon color="secondary" />, // Briefcase icon for the position
                     label: "Applying For",
                     value: evaluation.applyFor,
                   },
                   {
-                    icon: <AssignmentIcon color="secondary" />,
+                    icon: <SchoolIcon color="secondary" />, // Graduation cap for internship type
                     label: "Internship Type",
                     value: evaluation.internshipType,
                   },
                   {
-                    icon: <EventIcon color="info" />,
+                    icon: <CalendarTodayIcon color="info" />, // Calendar icon for applied date
                     label: "Applied On",
                     value: appliedOn,
                   },
                   {
-                    icon: <EventIcon color="info" />,
-                    label: "Interview Call",
+                    icon:
+                      evaluation.interviewCalled === "yes" ? (
+                        <CheckCircleIcon color="success" />
+                      ) : (
+                        <CancelIcon color="error" />
+                      ), // Green check for "Yes", red cross for "No"
+                    label: "Called For Interview",
+                    value: evaluation.interviewCalled,
+                  },
+                  evaluation.interviewCalled === "yes" && {
+                    icon: <EventAvailableIcon color="info" />, // Event icon for interview date
+                    label: "Interview Date",
                     value: interviewCall,
                   },
-                ].map(({ icon, label, value }, index) => (
-                  <Grid
-                    item
-                    key={index}
-                    sx={{ color: "text.secondary" }}
-                    fontWeight={600}
-                  >
+                  evaluation.interviewCalled === "yes" && {
+                    icon: <AccessTimeIcon color="info" />, // Clock icon for interview time
+                    label: "Interview Time",
+                    value: evaluation.interviewTime,
+                  },
+                ]
+                  .filter(Boolean)
+                  .map(({ icon, label, value }, index) => (
                     <Grid
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "start",
-                        gap: 0.5,
-                      }}
+                      item
+                      key={index}
+                      sx={{ color: "text.secondary" }}
+                      fontWeight={600}
                     >
-                      {icon} {label}:{" "}
-                      <Typography variant="body1" component={"span"}>
-                        {value}
-                      </Typography>
+                      <Grid
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "start",
+                          gap: 0.5,
+                        }}
+                      >
+                        {icon} {label}:{" "}
+                        <Typography variant="body1" component={"span"}>
+                          {value}
+                        </Typography>
+                      </Grid>
                     </Grid>
-                  </Grid>
-                ))}
+                  ))}
               </Grid>
             </Grid>
 
@@ -507,7 +524,7 @@ const EvaluationPage = () => {
                       fontWeight={700}
                       gutterBottom
                     >
-                      STIPEND
+                      Stipend / Salary
                     </Typography>
                   </Grid>
                   <Grid item sx={{ color: "text.secondary" }} fontWeight={600}>
@@ -519,11 +536,11 @@ const EvaluationPage = () => {
                         gap: 0.5,
                       }}
                     >
-                      <AttachMoneyIcon sx={{ color: "#4caf50" }} />{" "}
+                      {/* <AttachMoneyIcon sx={{ color: "#4caf50" }} />{" "} */}
                       {/* Green color */}
-                      Expected Stipend:{" "}
+                      {/* Expected Stipend / Salary:{" "} */}
                       <Typography variant="body1" component={"span"}>
-                        {evaluation.expectedSalary}
+                        RS : {evaluation.expectedSalary}
                       </Typography>
                     </Grid>
                   </Grid>

@@ -106,7 +106,37 @@ const AppearedEvaluations = ({ searchTerm }) => {
         <EmployeeNameCell userId={params.row.email} name={params.value} />
       ),
     },
-
+    {
+      field: "remarks",
+      headerName: "Remarks",
+      width: 200,
+      renderCell: (params) => {
+        if (!params.value) {
+          return <Typography>No Remarks</Typography>;
+        }
+        const truncatevalue = truncateText(params.value);
+        const isValueTruncated = truncatevalue.includes("...");
+        return (
+          <Typography>
+            {truncatevalue}
+            {isValueTruncated && (
+              <Button
+                style={{
+                  fontSize: "13px",
+                  textTransform: "none",
+                  textDecoration: "underline",
+                  padding: 0,
+                  marginTop: "-2px",
+                }}
+                onClick={() => handleReadClick(params.row)}
+              >
+                Read More
+              </Button>
+            )}
+          </Typography>
+        );
+      },
+    },
     {
       field: "contact",
       headerName: "Mobile Number",
@@ -294,11 +324,6 @@ const AppearedEvaluations = ({ searchTerm }) => {
             value={params.value}
             readOnly
           />
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
         </Box>
       ),
     },
@@ -313,33 +338,10 @@ const AppearedEvaluations = ({ searchTerm }) => {
             value={params.value}
             readOnly
           />
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
         </Box>
       ),
     },
-    {
-      field: "overallRating",
-      headerName: "Overall Rating",
-      width: 200,
-      renderCell: (params) => (
-        <Box>
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
-        </Box>
-      ),
-    },
+
     {
       field: "expectedSalary",
       headerName: "Expected Salary",
@@ -397,37 +399,6 @@ const AppearedEvaluations = ({ searchTerm }) => {
               </div>
             ))}
           </div>
-        );
-      },
-    },
-    {
-      field: "remarks",
-      headerName: "Remarks",
-      width: 200,
-      renderCell: (params) => {
-        if (!params.value) {
-          return <Typography>No Remarks</Typography>;
-        }
-        const truncatevalue = truncateText(params.value);
-        const isValueTruncated = truncatevalue.includes("...");
-        return (
-          <Typography>
-            {truncatevalue}
-            {isValueTruncated && (
-              <Button
-                style={{
-                  fontSize: "13px",
-                  textTransform: "none",
-                  textDecoration: "underline",
-                  padding: 0,
-                  marginTop: "-2px",
-                }}
-                onClick={() => handleReadClick(params.row)}
-              >
-                Read More
-              </Button>
-            )}
-          </Typography>
         );
       },
     },

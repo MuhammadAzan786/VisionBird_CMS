@@ -30,6 +30,11 @@ const interviewSchema = new mongoose.Schema(
     internshipType: {
       type: String,
     },
+    interviewCalled: {
+      type: String,
+      enum: ["yes", "no"],
+      required: true,
+    },
     appliedOn: {
       type: Date,
       required: true,
@@ -77,7 +82,9 @@ const interviewSchema = new mongoose.Schema(
     },
     CNIC: {
       type: String,
-      required: true,
+      default: "00000-0000000-0",
+      set: (value) =>
+        value && value.trim() !== "" ? value : "00000-0000000-0",
     },
     remarks: {
       type: String,
@@ -87,6 +94,14 @@ const interviewSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+interviewSchema.pre("save", function (next) {
+  if (this.interviewCalled === "no") {
+    this.interviewCall = null;
+    this.interviewTime = "";
+  }
+  next();
+});
 
 const Interview = mongoose.model("Interview", interviewSchema);
 module.exports = Interview;

@@ -36,6 +36,10 @@ const NotAppearedEvaluations = ({ searchTerm }) => {
   const navigateTo = (data) => {
     navigate(`/evaluation-page/${data.id}`);
   };
+
+  const downloadImage = (url) => {
+    saveAs(url, url.split("/").pop());
+  };
   const fetchData = async () => {
     setLoading(true);
     await axios
@@ -59,6 +63,36 @@ const NotAppearedEvaluations = ({ searchTerm }) => {
 
   const evaluation = [
     {
+      field: "cv",
+      headerName: "CV",
+      renderCell: (params) => {
+        const [isHovered, setIsHovered] = useState(false);
+
+        return (
+          <a
+            onClick={() => downloadImage(params.row.CvUpload)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <IconButton
+              aria-label="open CV"
+              color="primary"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              <FileDownloadTwoToneIcon
+                style={{
+                  fontSize: "2.2rem",
+                  transform: isHovered ? "rotate(-120deg)" : "rotate(0deg)",
+                  transition: "transform 0.3s ease-in-out",
+                }}
+              />
+            </IconButton>
+          </a>
+        );
+      },
+    },
+    {
       field: "name",
       headerName: "Name",
       width: 250,
@@ -67,7 +101,37 @@ const NotAppearedEvaluations = ({ searchTerm }) => {
         <EmployeeNameCell userId={params.row.email} name={params.value} />
       ),
     },
-
+    {
+      field: "remarks",
+      headerName: "Remarks",
+      width: 200,
+      renderCell: (params) => {
+        if (!params.value) {
+          return <Typography>No Remarks</Typography>;
+        }
+        const truncatevalue = truncateText(params.value);
+        const isValueTruncated = truncatevalue.includes("...");
+        return (
+          <Typography>
+            {truncatevalue}
+            {isValueTruncated && (
+              <Button
+                style={{
+                  fontSize: "13px",
+                  textTransform: "none",
+                  textDecoration: "underline",
+                  padding: 0,
+                  marginTop: "-2px",
+                }}
+                onClick={() => handleReadClick(params.row)}
+              >
+                Read More
+              </Button>
+            )}
+          </Typography>
+        );
+      },
+    },
     {
       field: "contact",
       headerName: "Mobile Number",
@@ -279,37 +343,6 @@ const NotAppearedEvaluations = ({ searchTerm }) => {
               </div>
             ))}
           </div>
-        );
-      },
-    },
-    {
-      field: "remarks",
-      headerName: "Remarks",
-      width: 200,
-      renderCell: (params) => {
-        if (!params.value) {
-          return <Typography>No Remarks</Typography>;
-        }
-        const truncatevalue = truncateText(params.value);
-        const isValueTruncated = truncatevalue.includes("...");
-        return (
-          <Typography>
-            {truncatevalue}
-            {isValueTruncated && (
-              <Button
-                style={{
-                  fontSize: "13px",
-                  textTransform: "none",
-                  textDecoration: "underline",
-                  padding: 0,
-                  marginTop: "-2px",
-                }}
-                onClick={() => handleReadClick(params.row)}
-              >
-                Read More
-              </Button>
-            )}
-          </Typography>
         );
       },
     },

@@ -5,7 +5,12 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import FileDownloadTwoToneIcon from "@mui/icons-material/FileDownloadTwoTone";
 import WorkIcon from "@mui/icons-material/Work";
-import { Close, RadioButtonChecked } from "@mui/icons-material";
+import {
+  Cancel,
+  CheckCircle,
+  Close,
+  RadioButtonChecked,
+} from "@mui/icons-material";
 
 import {
   Box,
@@ -21,6 +26,7 @@ import {
   Select,
   CircularProgress,
   Alert,
+  Tooltip,
 } from "@mui/material";
 import EmployeeNameCell from "../../components/Grid Cells/EmployeeProfileCell";
 import { truncateText } from "../../utils/common";
@@ -28,6 +34,8 @@ import AppearedFormDialog from "../../components/AppearedFormDialog";
 import RemarksDialog from "../../components/RemarksDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast, { Toaster } from "react-hot-toast";
+import SchoolTwoToneIcon from "@mui/icons-material/SchoolTwoTone";
+import InterviewStatusCell from "./components/InterviewStatusCell";
 
 const PendingEvaluations = ({ searchTerm }) => {
   const navigate = useNavigate();
@@ -98,10 +106,38 @@ const PendingEvaluations = ({ searchTerm }) => {
     );
   }
 
+  // Example of how to fetch updated data
+  const fetchUpdatedRowData = async (id, newData) => {
+    try {
+      // Assuming you have an API that fetches row data by ID
+      const response = await fetch(`/api/interview/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const updatedRow = await response.data;
+      console.log("updatedRow", updatedRow);
+      // Assuming you're using state management or updating your table data manually
+      updateTableRowData(id, updatedRow); // Update the table with the new data
+    } catch (error) {
+      console.error("Error fetching updated row data:", error);
+    }
+  };
+
+  const updateTableRowData = (id, updatedRow) => {
+    setTableData((prevData) =>
+      prevData.map((row) => (row.id === id ? updatedRow : row))
+    );
+  };
+
   const evaluation = [
     {
       field: "cv",
       headerName: "CV",
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
         const [isHovered, setIsHovered] = useState(false);
 
@@ -132,17 +168,45 @@ const PendingEvaluations = ({ searchTerm }) => {
     {
       field: "name",
       headerName: "Name",
-      width: 250,
+      width: 300,
+      headerAlign: "center",
+      align: "center",
       //email is provided instead
       renderCell: (params) => (
         <EmployeeNameCell userId={params.row.email} name={params.value} />
       ),
     },
-
+    {
+      field: "response",
+      headerName: "Response",
+      width: 200,
+      headerAlign: "center",
+      align: "center",
+      renderCell: ResponseCell,
+    },
+    {
+      field: "interviewCalled",
+      headerName: "Called For Interview",
+      headerAlign: "center",
+      align: "center",
+      width: 200,
+      renderCell: (params) => (
+        <InterviewStatusCell
+          value={params.row.interviewCalled}
+          rowId={params.row}
+          onUpdate={(id, newData) => {
+            console.log(`Row ${id} updated`, newData);
+            fetchUpdatedRowData(id, newData);
+          }}
+        />
+      ),
+    },
     {
       field: "contact",
       headerName: "Mobile Number",
       width: 200,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
         return (
           <Typography
@@ -158,6 +222,8 @@ const PendingEvaluations = ({ searchTerm }) => {
       field: "qualification",
       headerName: "Qualification",
       width: 200,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
         return (
           <Typography
@@ -172,6 +238,8 @@ const PendingEvaluations = ({ searchTerm }) => {
       field: "workExp",
       headerName: "Experience",
       width: 200,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
         if (params.value === "yes") {
           return (
@@ -198,13 +266,15 @@ const PendingEvaluations = ({ searchTerm }) => {
       field: "applyFor",
       headerName: "Apply for",
       width: 200,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
-        if (params.value === "Internship") {
+        if (params.value === "internship") {
           return (
             <Typography
               sx={{ fontSize: "0.95rem", fontWeight: "600", color: "#5a5a5a" }}
             >
-              <SchoolIcon style={{ marginRight: 6, color: "#257180" }} />{" "}
+              <SchoolTwoToneIcon style={{ marginRight: 6, color: "#257180" }} />{" "}
               Internship
             </Typography>
           );
@@ -225,6 +295,8 @@ const PendingEvaluations = ({ searchTerm }) => {
       field: "internshipType",
       headerName: "Internship Type",
       width: 200,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
         if (params.value !== "") {
           return (
@@ -247,6 +319,8 @@ const PendingEvaluations = ({ searchTerm }) => {
       field: "appliedOn",
       headerName: "Applied On",
       width: 200,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
         const appliedOn = new Date(params.value);
         const formatedDate = appliedOn.toLocaleDateString("en-US", {
@@ -267,13 +341,32 @@ const PendingEvaluations = ({ searchTerm }) => {
       field: "interviewCall",
       headerName: "Interview date",
       width: 200,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
-        const interviewCall = new Date(params.value);
+        const interviewCall = params.value ? new Date(params.value) : null;
+
+        if (!interviewCall || isNaN(interviewCall.getTime())) {
+          return (
+            <Typography
+              sx={{
+                fontSize: "0.95rem",
+                fontWeight: "500",
+                color: "#888",
+                fontStyle: "italic",
+              }}
+            >
+              Not Scheduled
+            </Typography>
+          );
+        }
+
         const interviewDate = interviewCall.toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
           day: "2-digit",
         });
+
         return (
           <Typography
             sx={{ fontSize: "0.95rem", fontWeight: "500", color: "#4d4d4d" }}
@@ -287,13 +380,31 @@ const PendingEvaluations = ({ searchTerm }) => {
       field: "interviewTime",
       headerName: "Interview Time",
       width: 200,
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
-        const [hour, minute] = params.value.split(":").map(Number);
+        const timeValue = params.value?.trim(); // Ensure value exists and is not just spaces
+
+        if (!timeValue) {
+          return (
+            <Typography
+              sx={{
+                fontSize: "0.95rem",
+                fontWeight: "500",
+                color: "#888",
+                fontStyle: "italic",
+              }}
+            >
+              Not Scheduled
+            </Typography>
+          );
+        }
+
+        const [hour, minute] = timeValue.split(":").map(Number);
         const isPM = hour >= 12;
-        const formattedHour = (hour % 12 || 12).toString().padStart(2, "0"); // Ensure the hour has a leading zero if needed
+        const formattedHour = (hour % 12 || 12).toString().padStart(2, "0");
         const suffix = isPM ? "PM" : "AM";
 
-        // Optional: Add a decorative element or icon
         return (
           <div style={{ display: "flex", alignItems: "center", color: "#333" }}>
             <span style={{ marginRight: "4px", fontSize: "1.3rem" }}>🕒</span>{" "}
@@ -316,15 +427,11 @@ const PendingEvaluations = ({ searchTerm }) => {
       },
     },
     {
-      field: "response",
-      headerName: "Response",
-      width: 200,
-      renderCell: ResponseCell,
-    },
-    {
       field: "expertiseAndSkills",
       headerName: "Expertise",
       width: 300, // Adjust width as needed
+      headerAlign: "center",
+      align: "center",
       renderCell: (params) => {
         // Assuming the data is a comma-separated string like "React JS, Node JS"
         const skills = params.value.split(",").map((skill) => skill.trim());

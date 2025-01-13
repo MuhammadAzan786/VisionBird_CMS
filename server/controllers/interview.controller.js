@@ -361,6 +361,34 @@ const update_record_when_appeared = async (req, res) => {
   }
 };
 
+const update_interviewCalled_status = async (req, res) => {
+  try {
+    const { interviewCalled, interviewCall, interviewTime } = req.body;
+
+    // If interviewCalled is "no", reset interviewCall and interviewTime
+    const updateData = {
+      interviewCalled,
+      interviewCall: interviewCalled === "no" ? null : interviewCall,
+      interviewTime: interviewCalled === "no" ? "" : interviewTime,
+    };
+
+    // Update document in database
+    const updatedInterview = await interview.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedInterview) {
+      return res.status(404).json({ message: "Interview not found" });
+    }
+
+    res.status(200).json(updatedInterview);
+  } catch (error) {
+    console.error("Error updating interview status:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 module.exports = {
   viewData,
   viewDataById,
@@ -373,4 +401,5 @@ module.exports = {
   appeared_Evaluations,
   not_appeared_Evaluations,
   update_record_when_appeared,
+  update_interviewCalled_status,
 };
