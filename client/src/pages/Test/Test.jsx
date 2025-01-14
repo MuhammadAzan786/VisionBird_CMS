@@ -20,7 +20,7 @@ const initialValues = {
 const AdvanceForm = () => {
   const { currentUser } = useSelector((state) => state.user);
   return (
-    <Box sx={{ px: "200px" }}>
+    <Box sx={{ px: "100px" }}>
       <Paper>
         <FormHeader title={"Loan and Advance Salary Request Form"} />
         <Formik

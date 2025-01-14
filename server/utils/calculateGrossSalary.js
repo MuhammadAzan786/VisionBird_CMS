@@ -27,7 +27,7 @@ const calculateGrossSalary = async (employee) => {
     }
 
     grossSalary = basicPay + allowances;
-    console.log("grosssssss", grossSalary);
+    // console.log("grosssssss", grossSalary);
 
     return { basicPay, allowances, grossSalary };
   } catch (error) {

@@ -44,10 +44,10 @@ module.exports = {
 
       netSalaryBeforeTax = netSalaryWithLeaveCutting + Number(extraBonusAmount);
       const loan = await advance_payments_calculation("active", employee_id);
-      console.log("data loan me return hua", loan);
+      // console.log("data loan me return hua", loan);
       if (loan.isLoanActive) {
         netSalaryBeforeTax -= loan.amountPerInstallment;
-        console.log("Loan Nikal Dya hai");
+        // console.log("Loan Nikal Dya hai");
       }
 
       const netSalary = tax_calculator(netSalaryBeforeTax);
@@ -81,7 +81,7 @@ module.exports = {
   pay_salary: async (req, res) => {
     try {
       console.log("Req agyi pay salary");
-      console.log("paidDate", req.body.paidDate);
+      // console.log("paidDate", req.body.paidDate);
 
       let {
         userId,
@@ -100,24 +100,8 @@ module.exports = {
         netSalary,
       } = req.body;
 
-      const { isLoanActive, loanId, loanAmount, amountPerInstallment } = loanDetails;
-
-      if (isLoanActive) {
-        const updateLoan = await Loan_Advance_Salary_Model.findByIdAndUpdate(loanId, {
-          $push: {
-            transactionHistory: {
-              paidDate: new Date(),
-              loanAmountRemaning: loanAmount - amountPerInstallment,
-              installmentRemaning: 4,
-            },
-          },
-        });
-      }
-
-      loanDetails = {
-        isLoanActive,
-        ...(isLoanActive ? { loanId } : {}),
-      };
+      const { isLoanActive, loanId, loanAmount, amountPerInstallment, numberOfInstallments, transactionHistory } =
+        loanDetails;
 
       //Mapping leaveDetail back to object form
 
@@ -126,6 +110,11 @@ module.exports = {
         acc[key] = value;
         return acc;
       }, {});
+
+      loanDetails = {
+        isLoanActive,
+        ...(isLoanActive ? { loanId } : {}),
+      };
 
       const salaryData = {
         employee_obj_id: userId,
@@ -142,7 +131,29 @@ module.exports = {
         netSalary,
       };
 
-      await salaryModel.create(salaryData);
+      const salaryDocument = await salaryModel.create(salaryData);
+
+      if (isLoanActive) {
+        let installmentRemaning;
+
+        if (transactionHistory.length === 0) {
+          installmentRemaning = numberOfInstallments - 1;
+        } else {
+          const lastTransaction = transactionHistory[transactionHistory.length - 1];
+          installmentRemaning = lastTransaction.installmentRemaning - 1;
+        }
+
+        const updateLoan = await Loan_Advance_Salary_Model.findByIdAndUpdate(loanId, {
+          $push: {
+            transactionHistory: {
+              paidDate: new Date(),
+              loanAmountRemaning: loanAmount - amountPerInstallment,
+              installmentRemaning,
+              salaryId: salaryDocument._id,
+            },
+          },
+        });
+      }
 
       res.status(200).json({ message: "Salary Generated" });
     } catch (error) {
