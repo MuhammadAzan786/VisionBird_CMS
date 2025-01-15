@@ -8,17 +8,31 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
-const initialValues = {
-  basicSalary: 30000,
-  loanAmount: 0,
-  repaymentMethod: "salaryDeduction",
-  numberOfInstallments: 1,
-  amountPerInstallment: 0,
-  reasonForAdvance: "",
-};
-
 const AdvanceForm = () => {
   const { currentUser } = useSelector((state) => state.user);
+  const {
+    BasicPayAfterProbationPeriod,
+    BasicPayInProbationPeriod,
+    AllowancesInProbationPeriod,
+    AllowancesAfterProbationPeriod,
+  } = currentUser;
+
+  let grossSalary;
+  if (currentUser.probationPeriod === "yes") {
+    grossSalary = BasicPayInProbationPeriod + AllowancesInProbationPeriod;
+  } else {
+    grossSalary = BasicPayAfterProbationPeriod + AllowancesAfterProbationPeriod;
+  }
+
+  const initialValues = {
+    grossSalary,
+    loanAmount: 0,
+    repaymentMethod: "salaryDeduction",
+    numberOfInstallments: 1,
+    amountPerInstallment: 0,
+    reasonForAdvance: "",
+  };
+
   return (
     <Box sx={{ px: "100px" }}>
       <Paper>
@@ -44,13 +58,13 @@ const AdvanceForm = () => {
                 {/* Starting Grid */}
                 <Grid item xs={6}>
                   <Field
-                    name="basicSalary"
+                    name="grossSalary"
                     as={TextField}
-                    label="Basic Salary"
+                    label="Gross Salary"
                     type="number"
                     fullWidth
                     disabled
-                    defaultValue={values.basicSalary}
+                    defaultValue={values.grossSalary}
                   ></Field>
                 </Grid>
 
@@ -87,48 +101,52 @@ const AdvanceForm = () => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={6}>
-                  <FormLabel>Repayment Plan</FormLabel>
-                  <Field
-                    sx={{ mt: 2 }}
-                    name="numberOfInstallments"
-                    label="Number of Installments"
-                    as={TextField}
-                    fullWidth
-                    type="number"
-                    onChange={(e) => {
-                      const value = Number(e.target.value);
-                      if (!value || value < 1) {
-                        setFieldValue("numberOfInstallments", 1);
-                        return;
-                      }
-                      setFieldValue("numberOfInstallments", value);
-                      if (value && values.loanAmount) {
-                        setFieldValue("amountPerInstallment", Math.round(values.loanAmount / value));
-                      } else {
-                        setFieldValue("amountPerInstallment", values.loanAmount);
-                      }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <Field
-                    name="amountPerInstallment"
-                    label="Amount per Installment"
-                    as={TextField}
-                    fullWidth
-                    value={values.amountPerInstallment}
-                    InputProps={{
-                      readOnly: true,
-                    }}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    sx={{ mt: 5 }}
-                  />
+                {values.repaymentMethod === "salaryDeduction" && (
+                  <>
+                    <Grid item xs={6}>
+                      <FormLabel>Repayment Plan</FormLabel>
+                      <Field
+                        sx={{ mt: 2 }}
+                        name="numberOfInstallments"
+                        label="Number of Installments"
+                        as={TextField}
+                        fullWidth
+                        type="number"
+                        onChange={(e) => {
+                          const value = Number(e.target.value);
+                          if (!value || value < 1) {
+                            setFieldValue("numberOfInstallments", 1);
+                            return;
+                          }
+                          setFieldValue("numberOfInstallments", value);
+                          if (value && values.loanAmount) {
+                            setFieldValue("amountPerInstallment", Math.round(values.loanAmount / value));
+                          } else {
+                            setFieldValue("amountPerInstallment", values.loanAmount);
+                          }
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Field
+                        name="amountPerInstallment"
+                        label="Amount per Installment"
+                        as={TextField}
+                        fullWidth
+                        value={values.amountPerInstallment}
+                        InputProps={{
+                          readOnly: true,
+                        }}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        sx={{ mt: 5 }}
+                      />
 
-                  <CustomErrorMessage name="amountPerInstallment" />
-                </Grid>
+                      <CustomErrorMessage name="amountPerInstallment" />
+                    </Grid>
+                  </>
+                )}
 
                 <Grid item xs={12}>
                   <Field
@@ -158,9 +176,12 @@ const AdvanceForm = () => {
 
 const customValidator = (values) => {
   const errors = {};
-  if (values.amountPerInstallment > values.basicSalary) {
-    errors.amountPerInstallment = "Amount per installment cannot be greater than basic salary.";
+  if (values.repaymentMethod === "salaryDeduction") {
+    if (values.amountPerInstallment > values.grossSalary) {
+      errors.amountPerInstallment = "Amount per installment cannot be greater than gross salary.";
+    }
   }
+
   if (!values.reasonForAdvance) {
     errors.reasonForAdvance = "This Field Is Required";
   }

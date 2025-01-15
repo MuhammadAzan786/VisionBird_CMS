@@ -8,13 +8,12 @@ const advanceController = require("../controllers/advanceController");
 // ye ab new route hai=================
 
 router.post("/advance_request/:id", advanceController.loan_advance_request);
+// Get User Applications
+router.post("/user/applications/:id", advanceController.fetch_user_advance_payments_applications);
 
 router.post("/advance/salary/request", advanceController.advance_salary_request);
 // User Loan Request
 router.post("/loan/request", advanceController.loan_request);
-
-// Get User Applications
-router.post("/user/advance-applications", advanceController.fetch_user_advance_payments_applications);
 
 // ========== Admin Table Routes ============== //
 

@@ -193,19 +193,23 @@ module.exports = {
 
   fetch_user_advance_payments_applications: async (req, res) => {
     try {
-      if (req.query.type === "salary") {
-        const employee_applications = await advanceSalaryModel
-          .find({ employee_obj_id: req.body.currentUser._id })
-          .sort({ createdAt: -1 });
-        return res.status(200).json(employee_applications);
-      }
+      const { id } = req.params;
 
-      if (req.query.type === "loan") {
-        const employee_applications = await loanModel
-          .find({ employee_obj_id: req.body.currentUser._id })
-          .sort({ createdAt: -1 });
-        return res.status(200).json(employee_applications);
-      }
+      const employeeApplications = await Loan_Advance_Salary_Model.find({ employeeId: id }).populate(
+        "employeeId",
+        "employeeProImage employeeID employeeName"
+      );
+
+      const mappedEmployeeApplications = employeeApplications.map((item) => {
+        const { employeeId, ...advanceData } = item.toObject();
+        return { ...employeeId, ...advanceData };
+      });
+
+      console.log("EMPLOYEE APPLICATION", mappedEmployeeApplications);
+
+      // const { employeeId, ...advanceData } = employeeApplications.toObject();
+
+      return res.status(200).json(mappedEmployeeApplications);
     } catch (error) {
       res.status(500).json({
         error: "An error occurred while fetching your applications",
