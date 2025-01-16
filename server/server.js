@@ -24,6 +24,7 @@ const taxFileRoutes = require("./routes/taxFile_routes");
 const leaveRoutes = require("./routes/leave_routes");
 const notificationRoutes = require("./routes/notification_routes");
 const employeeOfWeekRoutes = require("./routes/Employee_of_week_routes");
+const employeeDocumentRoutes = require("./routes/employeeDocumentRoutes");
 const teamRoutes = require("./routes/team_routes");
 
 const auth = require("./Middlewares/auth");
@@ -85,6 +86,7 @@ app.use("/api/leave", leaveRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api/empOfWeek", employeeOfWeekRoutes);
 app.use("/api/team", teamRoutes);
+app.use("/api/employee-documents", employeeDocumentRoutes);
 
 // Socket.io
 const server = http.createServer(app);
