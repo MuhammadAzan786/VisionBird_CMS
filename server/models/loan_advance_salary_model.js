@@ -52,6 +52,7 @@ const loanAdvanceSalarySchema = new mongoose.Schema({
     enum: ["pending", "approved", "rejected", "active", "completed"],
     default: "active",
   },
+
   transactionHistory: {
     type: [transactionHistory],
   },
@@ -68,6 +69,12 @@ loanAdvanceSalarySchema.pre("save", async function (next) {
 
 loanAdvanceSalarySchema.pre("findOneAndUpdate", async function (next) {
   const update = this.getUpdate();
+  console.log("update me te au", update);
+
+  if (update.activityStatus) {
+    return next();
+  }
+
   const lastTransaction = update.$push.transactionHistory;
 
   if (lastTransaction.installmentRemaning === 0) {

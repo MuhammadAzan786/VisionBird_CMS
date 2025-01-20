@@ -1,11 +1,9 @@
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Paper, Tab } from "@mui/material";
 import { useState } from "react";
-import AdminLoanTable from "./components/table/AdminLoanTable";
 import AdminSalaryTable from "./components/table/AdminSallaryTable";
 import { useSelector } from "react-redux";
 import UserAdvanceTable from "./components/table/UserAdvanceTable";
-import UserLoanTable from "./components/table/UserLoanTable";
 import { CheckCircle, LanguageOutlined, ReportProblem } from "@mui/icons-material";
 
 const AdvanceApplications = () => {
@@ -26,13 +24,25 @@ const AdvanceApplications = () => {
         </TabList>
 
         <TabPanel value="all" sx={{ padding: 0 }}>
-          {currentUser.role === "admin" ? <AdminSalaryTable /> : <UserAdvanceTable advanceStatus="all" />}
+          {currentUser.role === "admin" ? (
+            <AdminSalaryTable advanceStatus="all" />
+          ) : (
+            <UserAdvanceTable advanceStatus="all" />
+          )}
         </TabPanel>
         <TabPanel value="pending" sx={{ padding: 0 }}>
-          {currentUser.role === "admin" ? <AdminLoanTable /> : <UserAdvanceTable advanceStatus="pending" />}
+          {currentUser.role === "admin" ? (
+            <AdminSalaryTable advanceStatus="pending" />
+          ) : (
+            <UserAdvanceTable advanceStatus="pending" />
+          )}
         </TabPanel>
         <TabPanel value="active" sx={{ padding: 0 }}>
-          {currentUser.role === "admin" ? <AdminLoanTable /> : <UserAdvanceTable advanceStatus="active" />}
+          {currentUser.role === "admin" ? (
+            <AdminSalaryTable advanceStatus="active" />
+          ) : (
+            <UserAdvanceTable advanceStatus="active" />
+          )}
         </TabPanel>
       </TabContext>
     </Paper>

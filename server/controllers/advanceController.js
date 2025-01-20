@@ -2,6 +2,7 @@ const advanceSalaryModel = require("../models/advance_salary_model");
 const loanModel = require("../models/loanModel");
 const advance_notification_model = require("../models/advance_notification_model");
 const Loan_Advance_Salary_Model = require("../models/loan_advance_salary_model");
+const Employee_Model = require("../models/employeemodel");
 let ioInstance;
 
 module.exports = {
@@ -223,16 +224,31 @@ module.exports = {
   // =============== Fetch All Advance Salary Applications Controller ================ //
 
   fetch_all_advance_salary_requests: async (req, res) => {
-    if (!req.body.currentUser || req.body.currentUser.role !== "admin") {
-      return res.status(403).send("You do not have permission to access this resource.");
-    }
+    // if (!req.body.currentUser || req.body.currentUser.role !== "admin") {
+    //   return res.status(403).send("You do not have permission to access this resource.");
+    // }
 
     try {
-      const salaryApplications = await advanceSalaryModel
-        .find({})
-        .populate("employee_obj_id", "employeeProImage employeeName employeeID BasicPayAfterProbationPeriod")
-        .sort({ createdAt: -1 });
-      res.status(200).json(salaryApplications);
+      const { adminId } = req.params;
+      console.log("Admin Id", adminId);
+      const isAdmin = await Employee_Model.isAdmin(adminId);
+      if (!isAdmin) {
+        return res.status(401).json({ message: "Not Authorized" });
+      }
+
+      const applications = await Loan_Advance_Salary_Model.find().populate(
+        "employeeId",
+        "employeeProImage employeeID employeeName"
+      );
+
+      const mappedApplications = applications.map((applications) => {
+        const { employeeId, ...advanceData } = applications.toObject();
+        return { ...employeeId, ...advanceData };
+      });
+
+      console.log("EMPLOYEE APPLICATION", mappedApplications);
+
+      return res.status(200).json(mappedApplications);
     } catch (error) {
       res.status(500).json({
         error: "An error occurred while fetching all advance salaries requests",
@@ -264,74 +280,26 @@ module.exports = {
   // =============== Modify Status of Advance Salary Request ================ //
 
   modify_advance_payments_application_status: async (req, res) => {
-    if (req.body.currentUser.role !== "admin") {
-      return res.status(403).send("You do not have permission to access this resource.");
-    }
-
-    if (req.body.activity_status !== null && req.body.activity_status === "active") {
-      res.status(500).json({ msg: "active application status is not allowed to modify" });
-    }
-
-    let modified_application;
     try {
-      if (req.query.type === "loan") {
-        const { _id, approval_status } = req.body;
+      const { value, applicationId } = req.body;
+      console.log("value", value, applicationId);
+      const disableOptions = ["approved", "rejected", "complete", "active"];
 
-        if (approval_status === "approved") {
-          modified_application = await loanModel
-            .findByIdAndUpdate(
-              _id,
-              {
-                approval_status,
-                activity_status: "active",
-              },
-              { new: true }
-            )
-            .populate("employee_obj_id");
-        }
+      const updatedApplication = await Loan_Advance_Salary_Model.findOneAndUpdate(
+        {
+          _id: applicationId,
+          activityStatus: { $nin: disableOptions },
+        },
+        {
+          activityStatus: value,
+        },
+        { new: true }
+      );
 
-        if (approval_status === "rejected") {
-          modified_application = await loanModel
-            .findByIdAndUpdate(
-              _id,
-              {
-                approval_status,
-              },
-              { new: true }
-            )
-            .populate("employee_obj_id");
-        }
+      if (!updatedApplication) {
+        return res.status(403).json({ message: "Application not allowed to be modified" });
       }
-
-      if (req.query.type === "advanceSalary") {
-        const { _id, approval_status } = req.body;
-        if (approval_status === "approved") {
-          modified_application = await advanceSalaryModel
-            .findByIdAndUpdate(
-              _id,
-              {
-                approval_status,
-                activity_status: "active",
-              },
-              { new: true }
-            )
-            .populate("employee_obj_id");
-        }
-
-        if (approval_status === "rejected") {
-          modified_application = await advanceSalaryModel
-            .findByIdAndUpdate(
-              _id,
-              {
-                approval_status,
-              },
-              { new: true }
-            )
-            .populate("employee_obj_id");
-        }
-      }
-
-      res.status(200).json(modified_application);
+      res.status(200).json({ message: "Status Updated Successfully" });
     } catch (error) {
       return res.status(500).send("there is an error changing status of this application");
     }

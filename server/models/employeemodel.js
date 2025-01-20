@@ -220,6 +220,11 @@ const EmployeeSchema = new mongoose.Schema({
   },
 });
 
+EmployeeSchema.statics.isAdmin = async function (userId) {
+  const user = await this.findById(userId);
+  return user && user.role === "admin";
+};
+
 const Employee = mongoose.model("Employee", EmployeeSchema);
 
 module.exports = Employee;

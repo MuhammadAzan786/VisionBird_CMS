@@ -17,10 +17,10 @@ router.post("/loan/request", advanceController.loan_request);
 
 // ========== Admin Table Routes ============== //
 
-router.post("/admin/advance/salary/list", advanceController.fetch_all_advance_salary_requests);
+router.post("/admin/applications/:adminId", advanceController.fetch_all_advance_salary_requests);
 
 router.post("/admin/loan/list", advanceController.fetch_all_loan_applications);
 
-router.post("/admin/advance-applications", advanceController.modify_advance_payments_application_status);
+router.post("/admin/change_status", advanceController.modify_advance_payments_application_status);
 
 module.exports = router;
