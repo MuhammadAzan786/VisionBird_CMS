@@ -41,6 +41,9 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import { customColors } from "../../theme/colors";
 
+import useEmployeeDocuments from "../../hooks/useEmployeeDocuments";
+import DocumentCard from "../EmployeeDocuments/DocumentCard";
+
 const EmployeeProfile = () => {
   const { showMessage } = useMessage();
   const [loading, setLoading] = useState(false);
@@ -48,6 +51,8 @@ const EmployeeProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState({});
+  const { data: documents = [], isLoading: isDocumentsLoading } =
+    useEmployeeDocuments(id);
 
   const queryClient = useQueryClient();
 
@@ -99,7 +104,6 @@ const EmployeeProfile = () => {
     await zip.generateAsync({ type: "blob" }).then(function (blob) {
       saveAs(blob, `${user.employeeName}_Documents.zip`);
     });
-  
   };
   const handleSuccess = () => {
     showMessage("success", "Employee Deleted successful!");
@@ -120,10 +124,10 @@ const EmployeeProfile = () => {
   const getUser = async () => {
     try {
       const response = await axios.get(`/api/employee/get_employee/${id}`);
-      console.log("ress", response);
+      // console.log("ress", response);
       setUser(response.data);
 
-      console.log("user data", response.data);
+      // console.log("user data", response.data);
       // console.log(response.data.length);
     } catch (error) {
       if (error.response) {
@@ -139,7 +143,7 @@ const EmployeeProfile = () => {
       console.error("Error fetching employee data:", error);
     }
   };
-  console.log("user is ", user);
+  // console.log("user is ", user);
 
   const dateOfBirth = dateformat(user.dateOfBirth);
   const dateConfirmed = dateformat(user.dateConfirmed);
@@ -654,61 +658,6 @@ const EmployeeProfile = () => {
                     </Typography>
                   </Grid>
                 </Grid>
-                {/* <Grid container gap={2} component={Paper} p={2} mt={2}>
-                  <Grid item xs={12}>
-                    <Typography fontSize={20} color={"#BFC9CA "}>
-                      Documents
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} display={"flex"} alignItems={"center"}>
-                    <CreditScoreOutlinedIcon
-                      sx={{ marginRight: 1, color: "#5F6A6A" }}
-                    />
-                    <Typography
-                      fontSize={15}
-                      fontWeight={600}
-                      marginRight={1}
-                      color={"#212F3D"}
-                    >
-                      Cnic Scanned Copy
-                    </Typography>
-                    <a href={cnic} target="_blank">
-                      <Button sx={{ padding: 0 }}>Click Here</Button>
-                    </a>
-                  </Grid>
-                  <Grid item xs={12} display={"flex"} alignItems={"center"}>
-                    <LocalPoliceOutlinedIcon
-                      sx={{ marginRight: 1, color: "#5F6A6A" }}
-                    />
-                    <Typography
-                      fontSize={15}
-                      fontWeight={600}
-                      marginRight={1}
-                      color={"#212F3D"}
-                    >
-                      Police Certificate
-                    </Typography>
-                    <a href={policecertificate} target="_blank">
-                      <Button sx={{ padding: 0 }}>Click Here</Button>
-                    </a>
-                  </Grid>
-                  <Grid item xs={12} display={"flex"} alignItems={"center"}>
-                    <WorkspacePremiumOutlinedIcon
-                      sx={{ marginRight: 1, color: "#5F6A6A" }}
-                    />
-                    <Typography
-                      fontSize={15}
-                      fontWeight={600}
-                      marginRight={1}
-                      color={"#212F3D"}
-                    >
-                      Degree Certificate
-                    </Typography>
-                    <a href={degree} target="_blank">
-                      <Button sx={{ padding: 0 }}>Click Here</Button>
-                    </a>
-                  </Grid>
-                </Grid> */}
               </Grid>
 
               <Grid item xs={12} md={6.5}>
@@ -1106,6 +1055,28 @@ const EmployeeProfile = () => {
                     {user && <ViewDocuments values={user} />}
                   </Grid>
                 </Grid>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Grid container gap={2} component={Paper} p={5} mt={2}>
+                  <Typography
+                    sx={{
+                      fontWeight: "600",
+
+                      color: "#3b4056",
+                    }}
+                    fontSize={20}
+                    color={"#BFC9CA "}
+                  >
+                    Other Documents
+                  </Typography>
+                </Grid>
+
+                <DocumentCard
+                  selectedEmployee={id}
+                  documents={documents}
+                  isLoading={isDocumentsLoading}
+                />
               </Grid>
             </Grid>
           </Box>

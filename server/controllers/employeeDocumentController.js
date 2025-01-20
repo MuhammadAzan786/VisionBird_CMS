@@ -1,6 +1,8 @@
 const EmployeeDocument = require("../models/employeeDocument.Model");
 const cloudinary = require("../utils/cloudinaryConfig");
 const multer = require("multer");
+const path = require("path");
+const mime = require("mime-types");
 
 // Multer setup for file upload
 const storage = multer.memoryStorage();
@@ -9,6 +11,7 @@ const upload = multer({ storage });
 // @desc Upload a document
 // @route POST /api/employee-documents/upload
 // @access Public
+
 const uploadDocument = async (req, res) => {
   try {
     if (!req.file) {
@@ -19,12 +22,27 @@ const uploadDocument = async (req, res) => {
     const employeeId = req.body.employeeId;
     const documentName = req.body.documentName;
 
+    // Determine the file extension and MIME type
+    const fileExtension = path.extname(file.originalname);
+    const mimeType = mime.lookup(fileExtension);
+
+    // Choose the resource type based on the MIME type
+    const resourceType =
+      mimeType && mimeType.startsWith("image") ? "image" : "raw";
+
     // Upload file to Cloudinary
-    const result = await cloudinary.uploader
+    cloudinary.uploader
       .upload_stream(
-        { resource_type: "auto", folder: "Employee_Documents" },
+        {
+          resource_type: resourceType,
+          folder: "Employee_Documents",
+          public_id: `${documentName}-${Date.now()}${fileExtension}`,
+        },
         async (error, uploadedFile) => {
-          if (error) return res.status(500).json({ error: "Upload failed" });
+          if (error) {
+            console.error("Upload Error:", error);
+            return res.status(500).json({ error: "Upload failed" });
+          }
 
           // Save document details in MongoDB
           const newDocument = new EmployeeDocument({
@@ -40,6 +58,7 @@ const uploadDocument = async (req, res) => {
       )
       .end(file.buffer);
   } catch (error) {
+    console.error("Error:", error);
     res.status(500).json({ error: error.message });
   }
 };

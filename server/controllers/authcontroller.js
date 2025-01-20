@@ -4,11 +4,13 @@ const { errorHandler } = require("../utils/error");
 
 module.exports.signin = async (req, res, next) => {
   const { employeeUsername, employeePassword } = req.body;
+  // console.log("username", employeeUsername, "password", employeePassword);
   try {
     const validUser = await Employee.findOne({
       employeeUsername: employeeUsername,
       employeeStatus: "active",
     });
+    console.log("validUser", validUser);
     if (!validUser) {
       return next(errorHandler(404, "User Not Found !!!"));
     }
@@ -20,7 +22,7 @@ module.exports.signin = async (req, res, next) => {
     });
     const { employeePassword: Password, ...rest } = validUser._doc;
 
-    console.log("signin", rest);
+    // console.log("signin", rest);
 
     res
       .cookie("access_token", token, {
