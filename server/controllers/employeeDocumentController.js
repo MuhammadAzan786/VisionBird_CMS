@@ -19,8 +19,20 @@ const uploadDocument = async (req, res) => {
     }
 
     const file = req.file;
+    console.log("file size:", file.size);
     const employeeId = req.body.employeeId;
     const documentName = req.body.documentName;
+
+    // Check file size limit (10 MB = 10 * 1024 * 1024 bytes)
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+    if (file.size > MAX_FILE_SIZE) {
+      return res.status(400).json({
+        error: `File size exceeds the 10 MB limit. Your file is ${(
+          file.size /
+          (1024 * 1024)
+        ).toFixed(2)} MB.`,
+      });
+    }
 
     // Determine the file extension and MIME type
     const fileExtension = path.extname(file.originalname);

@@ -10,6 +10,7 @@ export default function AllLeaves({ table }) {
   //const [allLeaves, setAllLeave] = useState([]);
   const socket = useSelector((state) => state.socket.socket);
   const currentUser = useSelector((state) => state.user);
+  console.log("current user:", currentUser);
   const quryClient = useQueryClient();
   const dispatch = useDispatch();
 
@@ -25,12 +26,11 @@ export default function AllLeaves({ table }) {
         quryClient.invalidateQueries("All leaves");
       });
 
-
       return () => {
         socket.off("notification", () => {
           // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
         });
-        socket.off("leaveStatusChanges", () => { });
+        socket.off("leaveStatusChanges", () => {});
         socket.off("leaveSent", () => {
           quryClient.invalidateQueries("All leaves");
         });
@@ -92,8 +92,16 @@ export default function AllLeaves({ table }) {
   return (
     <>
       <LeavesTable
-        allLeaves={table == "Employee-leavesHistory" ? employeeAllLeave : MannagerAllLeave || []}
-        pendingLeaves={table == "Employee-leavesHistory" ? employeePendingLeaves : ManagerPendingLeaves || []}
+        allLeaves={
+          table == "Employee-leavesHistory"
+            ? employeeAllLeave
+            : MannagerAllLeave || []
+        }
+        pendingLeaves={
+          table == "Employee-leavesHistory"
+            ? employeePendingLeaves
+            : ManagerPendingLeaves || []
+        }
       />
     </>
   );

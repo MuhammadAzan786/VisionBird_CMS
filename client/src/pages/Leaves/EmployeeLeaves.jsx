@@ -9,6 +9,7 @@ export default function EmployeeLeaves() {
   const [employeePendingLeaves, setEmployeePendingLeaves] = useState([]);
   const { currentUser } = useSelector((state) => state.user);
   const id = currentUser._id;
+  console.log("currentUser", currentUser);
   const socket = useSelector((state) => state.socket.socket);
   const dispatch = useDispatch();
   const getLeaves = () => {
@@ -55,7 +56,10 @@ export default function EmployeeLeaves() {
     <>
       <>
         {/* <LeavesTable allLeaves={allLeaves} /> */}
-        <LeavesTable allLeaves={employeeLeaves || []} pendingLeaves={employeePendingLeaves || []} />
+        <LeavesTable
+          allLeaves={employeeLeaves || []}
+          pendingLeaves={employeePendingLeaves || []}
+        />
       </>
       {/* <LeavesTable allLeaves={employeeLeaves} /> */}
     </>

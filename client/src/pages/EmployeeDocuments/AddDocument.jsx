@@ -51,12 +51,17 @@ const AddDocument = ({ employeeId }) => {
     },
     onError: (error) => {
       setLoading(false);
+      setDocumentName("");
+      setFile(null);
+
+      const errorMessage =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "An error occurred while uploading the document.";
       Swal.fire({
         icon: "error",
         title: "Upload Failed",
-        text:
-          error.response?.data?.message ||
-          "An error occurred while uploading the document.",
+        text: errorMessage,
       });
     },
     onSettled: () => {
@@ -96,7 +101,8 @@ const AddDocument = ({ employeeId }) => {
         Upload Document
       </Button>
       <Typography variant="body2" sx={{ color: "gray", mt: 0.5 }}>
-        Upload a document in PDF, PNG or JPG format.
+        Upload a document in PDF, DOCX, PNG or JPG format.
+        <br /> (File Size must be less then 10MB)
       </Typography>
 
       <Dialog
@@ -120,12 +126,15 @@ const AddDocument = ({ employeeId }) => {
               Select File
               <input type="file" hidden onChange={handleFileChange} />
             </Button>
+            <Typography sx={{ fontSize: "0.9rem", color: "#333333" }}>
+              File Size must be less then 10MB
+            </Typography>
 
             {file && <Box mt={1}>{file.name}</Box>}
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)} color="secondary">
+          <Button onClick={() => setOpen(false)} sx={{ color: "#333333" }}>
             Cancel
           </Button>
           <Button onClick={handleUpload} variant="contained">

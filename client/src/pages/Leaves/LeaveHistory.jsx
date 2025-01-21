@@ -28,6 +28,7 @@ const LeaveHistory = () => {
   const [month, setMonth] = useState(moment(currentDate).month());
   const [year, setYear] = useState(moment(currentDate).year());
   const currentUser = useSelector((state) => state.user.currentUser);
+  console.log("current user", currentUser);
 
   // Mutation to fetch leave data
   const mutation = useMutation({
@@ -80,7 +81,7 @@ const LeaveHistory = () => {
   };
 
   useEffect(() => {
-    if (currentUser.role === "employee") {
+    if (currentUser.role === "employee" || currentUser.role === "manager") {
       const id = currentUser._id;
       mutation.mutate({ id, month, year });
     }
@@ -211,7 +212,7 @@ const LeaveHistory = () => {
           <Autocomplete
             disablePortal
             options={names}
-            slotProps={{ paper: {elevation:1} }}
+            slotProps={{ paper: { elevation: 1 } }}
             onChange={handleEmployeeSelect}
             sx={{ width: 300 }}
             renderInput={(params) => (
