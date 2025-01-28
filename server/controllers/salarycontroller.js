@@ -135,19 +135,22 @@ module.exports = {
 
       if (isLoanActive) {
         let installmentRemaning;
+        let loanAmountRemaning;
 
         if (transactionHistory.length === 0) {
           installmentRemaning = numberOfInstallments - 1;
+          loanAmountRemaning = loanAmount - amountPerInstallment;
         } else {
           const lastTransaction = transactionHistory[transactionHistory.length - 1];
           installmentRemaning = lastTransaction.installmentRemaning - 1;
+          loanAmountRemaning = lastTransaction.loanAmountRemaning - amountPerInstallment;
         }
 
         const updateLoan = await Loan_Advance_Salary_Model.findByIdAndUpdate(loanId, {
           $push: {
             transactionHistory: {
               paidDate: new Date(),
-              loanAmountRemaning: loanAmount - amountPerInstallment,
+              loanAmountRemaning,
               installmentRemaning,
               salaryId: salaryDocument._id,
             },

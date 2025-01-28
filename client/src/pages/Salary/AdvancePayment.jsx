@@ -48,7 +48,7 @@ const AdvancePayment = () => {
               toast.success(message);
             } catch (error) {
               console.log(error);
-              toast.error("Erro creating request");
+              toast.error(error.response.data.message);
             }
           }}
         >

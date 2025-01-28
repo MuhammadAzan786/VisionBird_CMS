@@ -146,7 +146,7 @@ const AdminSalaryTable = ({ advanceStatus }) => {
       width: 250,
       ...colStyle,
       renderCell: (params) =>
-        params.value ? (
+        params.value.length > 0 ? (
           <Button variant="contained" startIcon={<Visibility />} onClick={() => toggleHistoryModal(params.value)}>
             View
           </Button>
@@ -155,21 +155,13 @@ const AdminSalaryTable = ({ advanceStatus }) => {
         ),
     },
     {
-      field: "currentStatus",
-      headerName: "Active Status",
+      field: "activityStatus",
+      headerName: "Activty Status",
       width: 180,
       ...colStyle,
-      renderCell: (params) => {
-        const { activityStatus } = params.row;
-        console.log(activityStatus, params);
-        if (activityStatus === "completed" || activityStatus === "active") {
-          return <CustomChip label={activityStatus} status={activityStatus} />;
-        }
-        return "-";
-      },
     },
     {
-      field: "activityStatus",
+      field: "approvalStatus",
       headerName: "Approval Status",
       width: 180,
       ...colStyle,
@@ -258,17 +250,16 @@ const CustomMenuItem = ({ label, color }) => {
 
 const StatusChange = ({ value, applicationId }) => {
   const statusOptions = ["pending", "approved", "rejected"];
-  let updatedValue = value;
 
-  if (value === "completed" || value === "active") {
-    updatedValue = "approved";
-  }
-  const [activeStatus, setActiveStatus] = useState(updatedValue);
+  const [activeStatus, setActiveStatus] = useState(value);
 
   const handleChange = async (e) => {
     try {
-      const value = e.target.value;
-      const res = await axios.post(`/api/advance_payments/admin/change_status`, { value, applicationId });
+      console.log("valueeeeeeee", e.target.value);
+
+      const selectedValue = e.target.value;
+
+      const res = await axios.post(`/api/advance_payments/admin/change_status`, { selectedValue, applicationId });
       toast.success(res.data.message);
       setActiveStatus(e.target.value);
     } catch (error) {
@@ -277,7 +268,7 @@ const StatusChange = ({ value, applicationId }) => {
     }
   };
 
-  const disableOptions = ["approved", "rejected", "complete", "active"];
+  const disableOptions = ["approved", "rejected"];
   return (
     <Select value={activeStatus} fullWidth onChange={handleChange} disabled={disableOptions.includes(activeStatus)}>
       {statusOptions.map((item, index) => (

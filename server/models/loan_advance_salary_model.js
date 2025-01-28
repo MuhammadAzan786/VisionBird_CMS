@@ -47,10 +47,15 @@ const loanAdvanceSalarySchema = new mongoose.Schema({
   reasonForAdvance: {
     type: String,
   },
+  approvalStatus: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
+  },
   activityStatus: {
     type: String,
-    enum: ["pending", "approved", "rejected", "active", "completed"],
-    default: "active",
+    enum: ["-", "active", "completed"],
+    default: "-",
   },
 
   transactionHistory: {
@@ -69,30 +74,31 @@ loanAdvanceSalarySchema.pre("save", async function (next) {
 
 loanAdvanceSalarySchema.pre("findOneAndUpdate", async function (next) {
   const update = this.getUpdate();
-  console.log("update me te au", update);
 
   if (update.activityStatus) {
     return next();
   }
 
-  const lastTransaction = update.$push.transactionHistory;
+  if (update.$push && update.$push.transactionHistory) {
+    const lastTransaction = update.$push.transactionHistory;
 
-  if (lastTransaction.installmentRemaning === 0) {
-    this.setUpdate({
-      ...update,
-      $set: { activityStatus: "completed" },
-    });
+    if (lastTransaction.installmentRemaning === 0) {
+      this.setUpdate({
+        ...update,
+        $set: { activityStatus: "completed" },
+      });
+    }
   }
 
   next();
 });
 
 loanAdvanceSalarySchema.index(
-  { employeeId: 1, activityStatus: 1 },
+  { employeeId: 1, approvalStatus: 1, activityStatus: 1 },
   {
     unique: true,
     partialFilterExpression: {
-      activityStatus: { $in: ["pending", "active"] },
+      $or: [{ approvalStatus: "pending" }, { activityStatus: "active" }],
     },
   }
 );

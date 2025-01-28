@@ -13,20 +13,33 @@ module.exports = {
   // =================advance new
 
   loan_advance_request: async (req, res) => {
-    console.log("LOAN ADVANCE REQUEST CONTROLLER", req.body);
-    console.log("PARAMS", req.params);
     try {
       const { values } = req.body;
       const { id } = req.params;
-      const loanApplication = await Loan_Advance_Salary_Model.create({
-        employeeId: id,
-        ...values,
-      });
 
-      res.status(200).json({ message: "Loan Request Sent", loanApplication });
+      const application = await Loan_Advance_Salary_Model.findOneAndUpdate(
+        {
+          employeeId: id,
+          $or: [{ approvalStatus: "pending" }, { activityStatus: "active" }],
+        },
+        { $setOnInsert: { employeeId: id, ...values } },
+        { new: true, upsert: true, includeResultMetadata: true }
+      );
+
+      if (application.lastErrorObject.updatedExisting) {
+        console.log("isme agya");
+
+        const state =
+          application.approvalStatus === "pending"
+            ? application.value.approvalStatus
+            : application.value.activityStatus;
+        return res.status(409).json({ message: `Application is already ${state}` });
+      }
+
+      res.status(200).json({ message: "Loan Request Sent", application: application.value });
     } catch (error) {
       console.log("LOAN ERROR", error);
-      res.status(501).json({ message: "Erro Creating Loan Request" });
+      res.status(501).json({ message: "Error Creating Loan Request" });
     }
   },
 
@@ -281,17 +294,16 @@ module.exports = {
 
   modify_advance_payments_application_status: async (req, res) => {
     try {
-      const { value, applicationId } = req.body;
-      console.log("value", value, applicationId);
-      const disableOptions = ["approved", "rejected", "complete", "active"];
+      const { selectedValue, applicationId } = req.body;
+      console.log("value", selectedValue, applicationId);
 
       const updatedApplication = await Loan_Advance_Salary_Model.findOneAndUpdate(
         {
           _id: applicationId,
-          activityStatus: { $nin: disableOptions },
         },
         {
-          activityStatus: value,
+          approvalStatus: selectedValue,
+          ...(selectedValue === "approved" ? { activityStatus: "active" } : {}),
         },
         { new: true }
       );
