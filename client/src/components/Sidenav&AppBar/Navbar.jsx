@@ -20,14 +20,7 @@ import { useMediaQuery } from "@mui/material";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 
-const Navbar = ({
-  drawerWidth,
-  mobileOpen,
-  handleDrawerToggle,
-  handleMouseLeave,
-  handleMouseEnter,
-  hoverIndex,
-}) => {
+const Navbar = ({ drawerWidth, mobileOpen, handleDrawerToggle, handleMouseLeave, handleMouseEnter, hoverIndex }) => {
   const { currentUser } = useSelector((state) => state.user);
   const theme = useTheme();
 

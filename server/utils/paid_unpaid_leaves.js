@@ -277,6 +277,15 @@ const mapLeavesToLabels = (leaveDetails) => {
 
   const keys = Object.keys(leaveDetails);
 
+  console.log("check test22222222", leaveDetails);
+
+  console.log("check test", leaveDetails.hasOwnProperty("netSalaryWithLeaveCutting"));
+
+  if (leaveDetails.hasOwnProperty("netSalaryWithLeaveCutting")) {
+    console.log("isme aya hai");
+    labels.push("Net Salary");
+  }
+
   if (labels.length === keys.length) {
     const mapped = labels.map((item, index) => {
       const key = keys[index];
@@ -293,4 +302,6 @@ const mapLeavesToLabels = (leaveDetails) => {
   return [];
 };
 
-module.exports = paid_unpaid_leaves;
+module.exports = { mapLeavesToLabels, paid_unpaid_leaves };
+
+// module.exports = paid_unpaid_leaves;

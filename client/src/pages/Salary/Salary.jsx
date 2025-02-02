@@ -1,6 +1,6 @@
 import { Box, Button, Grid, Paper, styled, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { usePDF } from "react-to-pdf";
 import axios from "../../utils/axiosInterceptor";
 import dayjs from "dayjs";
@@ -9,7 +9,6 @@ import toast from "react-hot-toast";
 
 const Salary = () => {
   const { toPDF, targetRef } = usePDF({ filename: "Salary.pdf" });
-  const navigate = useNavigate();
   const location = useLocation();
   const { employeeDetails } = location.state || {};
 
@@ -272,19 +271,19 @@ const Salary = () => {
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Basic Pay:</Typography>
-                  <Typography>PKR {salaryDetails.basicPay}</Typography>
+                  <Typography>PKR {salaryDetails?.basicPay}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Allowences:</Typography>
-                  <Typography>PKR {salaryDetails.allowances}</Typography>
+                  <Typography>PKR {salaryDetails?.allowances}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Gross Salary:</Typography>
-                  <Typography>PKR {salaryDetails.grossSalary}</Typography>
+                  <Typography>PKR {salaryDetails?.grossSalary}</Typography>
                 </DivStyled>
               </Grid>
             </Grid>

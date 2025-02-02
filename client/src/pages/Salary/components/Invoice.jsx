@@ -1,7 +1,22 @@
 /* eslint-disable react/prop-types */
 import { Box, Grid, Paper, styled, Typography } from "@mui/material";
+import dayjs from "dayjs";
+import { getCurrentMonth } from "../../../utils/common";
 
 const Invoice = ({ salaryData }) => {
+  const {
+    workDetails,
+    paymentDetails,
+    employeeDetails,
+    salaryDetails,
+    leaveDetails,
+    bonusDetails,
+    loanDetails,
+    netSalary,
+    paidDate,
+    salary_month,
+    salary_year,
+  } = salaryData;
   return (
     <Box p={3}>
       <Paper sx={{ p: 4 }}>
@@ -16,115 +31,123 @@ const Invoice = ({ salaryData }) => {
           </Box>
         </Box>
 
-        {/* ==================================================Full & Final Settlement =========================================== */}
+        {/* ================================================== Full & Final Settlement =========================================== */}
         <Grid container spacing={1} style={{ marginTop: 5 }}>
           <Grid item xs={12}>
-            <BlueDivStyled bgColor="#C00000">
-              <Typography style={{ color: "white" }} variant={"h7"} fontWeight={700}>
+            <HeadingStyled
+              sx={{
+                padding: "8px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                backgroundColor: "#C00000",
+                color: "white",
+              }}
+            >
+              <Typography variant={"h7"} fontWeight={700}>
                 Full & Final Settlement of Dues
               </Typography>
-              <Typography style={{ color: "white" }} variant={"h7"} fontWeight={700}>
-                For the Month of ali
+              <Typography variant={"h7"} fontWeight={700}>
+                For the Month of {getCurrentMonth(salary_month)}, {salary_year}
               </Typography>
-            </BlueDivStyled>
+            </HeadingStyled>
           </Grid>
 
+          {/* ================================================== Employee Details =========================================== */}
           <Grid item xs={12}>
             <Grid container spacing={1}>
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Employee / Internee Name:</Typography>
-                  <Typography>{salaryData.employeeName}</Typography>
+                  <Typography>{employeeDetails?.employeeName ?? ""}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Employee / Internee Code:</Typography>
-                  <Typography>{salaryData.employeeID}</Typography>
+                  <Typography>{employeeDetails?.employeeID ?? ""}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Designation:</Typography>
-                  <Typography>{salaryData.employeeDesignation}</Typography>
+                  <Typography>{employeeDetails?.employeeDesignation ?? ""}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Bank Account Number:</Typography>
-                  <Typography>{salaryData.bankAccountNumber}</Typography>
+                  <Typography>{employeeDetails?.bankAccountNumber || "None"}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Date Join:</Typography>
-                  <Typography>{salaryData.dateOfJoining}</Typography>
+                  <Typography>{dayjs(employeeDetails?.dateOfJoining).format("DD/MM/YYYY")}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>CNIC #:</Typography>
-                  <Typography>{salaryData.employeeCNIC}</Typography>
+                  <Typography>{employeeDetails?.employeeCNIC ?? ""}</Typography>
                 </DivStyled>
               </Grid>
 
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Cheque Number:</Typography>
-                  <Typography>asd</Typography>
+                  <Typography>{paymentDetails?.chequeNumber ?? "None"}</Typography>
                 </DivStyled>
               </Grid>
 
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Payment Method:</Typography>
-                  <Typography>asd</Typography>
+                  <Typography sx={{ textTransform: "capitalize" }}>{paymentDetails?.paymentMethod}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Date of Birth:</Typography>
-                  <Typography>{salaryData.dateOfBirth}</Typography>
+                  <Typography>{dayjs(employeeDetails?.dateOfBirth).format("DD/MM/YYYY") ?? ""}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Gender:</Typography>
-                  <Typography>{salaryData.gender}</Typography>
+                  <Typography sx={{ textTransform: "capitalize" }}>{employeeDetails?.gender ?? ""}</Typography>
                 </DivStyled>
               </Grid>
-            </Grid>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Grid container spacing={1}>
               <Grid item xs={12}>
                 <DivStyled>
                   <Typography fontWeight={700}>Address:</Typography>
-                  <Typography>{salaryData.mailingAddress}</Typography>
+                  <Typography>{employeeDetails?.mailingAddress ?? ""}</Typography>
                 </DivStyled>
               </Grid>
             </Grid>
           </Grid>
 
+          {/* ================================================== Work Details =========================================== */}
           <Grid item xs={12}>
             <Grid container spacing={1}>
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Working Days by Company:</Typography>
-                  <Typography>asd</Typography>
+                  <Typography>{workDetails?.totalWorkingDays}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Days Worked:</Typography>
-                  <Typography>asd</Typography>
+                  <Typography>{workDetails?.daysWorked}</Typography>
                 </DivStyled>
               </Grid>
+
+              {/* ================================================== Salary Details =========================================== */}
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Incentive:</Typography>
-                  <Typography>PKR {salaryData.incentive}</Typography>
+                  <Typography>PKR {salaryDetails?.incentive}</Typography>
                 </DivStyled>
               </Grid>
             </Grid>
@@ -135,19 +158,19 @@ const Invoice = ({ salaryData }) => {
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Basic Pay:</Typography>
-                  <Typography>{salaryData.BasicPayAfterProbationPeriod}</Typography>
+                  <Typography>{salaryDetails?.basicPay}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Allowences:</Typography>
-                  <Typography>{salaryData.AllowancesAfterProbationPeriod}</Typography>
+                  <Typography>{salaryDetails?.allowances}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Gross Salary:</Typography>
-                  <Typography>PKR {salaryData.gross_salary}</Typography>
+                  <Typography>PKR {salaryDetails?.grossSalary}</Typography>
                 </DivStyled>
               </Grid>
             </Grid>
@@ -155,67 +178,34 @@ const Invoice = ({ salaryData }) => {
 
           {/* ================================================== Leave Information =========================================== */}
           <Grid item xs={12}>
-            <BlueDivStyled bgColor="#145DA0">
+            <HeadingStyled bgColor="#145DA0">
               <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
                 Leave Information
               </Typography>
-            </BlueDivStyled>
+            </HeadingStyled>
           </Grid>
-
           <Grid item xs={12}>
             <Grid container spacing={1}>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Short /Half Leave:</Typography>
-                  <Typography>{salaryData.Half_leaves}</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Casual Leave:</Typography>
-                  <Typography>0</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Sick Leave:</Typography>
-                  <Typography>0</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Without Pay Leave:</Typography>
-                  <Typography>asda</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Cash Leave:</Typography>
-                  <Typography>asda</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Other/Yearly Leave:</Typography>
-                  <Typography>0</Typography>
-                </DivStyled>
-              </Grid>
-              <Grid item xs={4}>
-                <DivStyled>
-                  <Typography fontWeight={700}>Net Salary:</Typography>
-                  <Typography>PKR {salaryData.net_salary}</Typography>
-                </DivStyled>
-              </Grid>
+              {leaveDetails?.map((item, index) => {
+                return (
+                  <Grid item xs={4} key={index}>
+                    <DivStyled>
+                      <Typography fontWeight={700}>{item.label}</Typography>
+                      <Typography> {item.value || 0}</Typography>
+                    </DivStyled>
+                  </Grid>
+                );
+              })}
             </Grid>
           </Grid>
 
           {/* ==================================================Extra / Bonus =========================================== */}
           <Grid item xs={12}>
-            <BlueDivStyled bgColor="#145DA0">
+            <HeadingStyled bgColor="#145DA0">
               <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
                 Extra / Bonus
               </Typography>
-            </BlueDivStyled>
+            </HeadingStyled>
           </Grid>
 
           <Grid item xs={12}>
@@ -223,33 +213,61 @@ const Invoice = ({ salaryData }) => {
               <Grid item xs={4}>
                 <DivStyled>
                   <Typography fontWeight={700}>Extra Bonus Amount:</Typography>
-                  <Typography>PKR {salaryData.extra_bonus}</Typography>
+                  <Typography>PKR {bonusDetails?.extraBonusAmount || 0}</Typography>
                 </DivStyled>
               </Grid>
               <Grid item xs={8}>
                 <DivStyled>
                   <Typography fontWeight={700}>Extra Amount Remarks:</Typography>
-                  <Typography>TODO:</Typography>
+                  <Typography>{bonusDetails?.extraBonusRemarks || "None"}</Typography>
                 </DivStyled>
               </Grid>
             </Grid>
           </Grid>
 
-          {/* ================================ Payment Information ================================ */}
-
-          {/* ================================ Payment Information ================================ */}
-
-          {/* ==================================================Net Amount Paid =========================================== */}
+          {/* ==================================================Loan / Advance =========================================== */}
 
           <Grid item xs={12}>
-            <BlueDivStyled bgColor="#C00000" sx={{ display: "flex", justifyContent: "space-around", padding: "10px" }}>
-              <Typography fontWeight={700} fontSize={23} style={{ color: "white", display: "inline-block" }}>
+            <HeadingStyled bgColor="#145DA0">
+              <Typography fontWeight={700} fontSize={18} style={{ color: "white" }}>
+                Loan Information / Advance Salary
+              </Typography>
+            </HeadingStyled>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Grid container spacing={1}>
+              <Grid item xs={4}>
+                <DivStyled>
+                  <Typography fontWeight={700}>Loan/Advance Salary Amount:</Typography>
+                  <Typography>PKR {loanDetails?.isLoanActive ? loanDetails.loanAmount : 0}</Typography>
+                </DivStyled>
+              </Grid>
+              <Grid item xs={8}>
+                <DivStyled>
+                  <Typography fontWeight={700}>Loan / Advance Salary Amount Returned from Salary:</Typography>
+                  <Typography>PKR {loanDetails?.isLoanActive ? loanDetails.amountPerInstallment : 0}</Typography>
+                </DivStyled>
+              </Grid>
+            </Grid>
+          </Grid>
+          {/* ================================================== Footer  =========================================== */}
+          <Grid item xs={12}>
+            <DivStyled
+              sx={{
+                marginTop: "10px",
+                marginBottom: "10px",
+                backgroundColor: "#C00000",
+                justifyContent: "space-around",
+              }}
+            >
+              <Typography fontWeight={700} fontSize={23} color={"white"}>
                 Net Amount Paid:
               </Typography>
-              <Typography fontWeight={700} fontSize={23} style={{ color: "white", display: "inline-block" }}>
-                PKR asda
+              <Typography fontWeight={700} fontSize={23} color={"white"}>
+                PKR {netSalary}
               </Typography>
-            </BlueDivStyled>
+            </DivStyled>
           </Grid>
 
           <Grid item xs={12}>
@@ -263,7 +281,7 @@ const Invoice = ({ salaryData }) => {
               <Grid item xs={6}>
                 <DivStyled>
                   <Typography fontWeight={700}>Paid Date:</Typography>
-                  <Typography>asdadas</Typography>
+                  <Typography>{dayjs(paidDate).format("dddd, MMMM D, YYYY")}</Typography>
                 </DivStyled>
               </Grid>
             </Grid>
@@ -271,61 +289,31 @@ const Invoice = ({ salaryData }) => {
 
           <Grid item xs={12}>
             <Grid item xs={12}>
-              <div
-                style={{
-                  borderBottom: "1px solid #ccc",
-                  padding: "3px",
-                  textAlign: "center",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography style={{}} variant="body2">
+              <DivStyled sx={{ padding: "3px", border: "none", borderBottom: "1px solid #ccc" }}>
+                <Typography variant="body2">
                   All Previous/Current dues cleared up to the date mentioned here. So this is Full and Final Payment
                   from Vision Bird Technologies, Gujrat.
                 </Typography>
-              </div>
+              </DivStyled>
             </Grid>
           </Grid>
 
           <Grid item xs={12} style={{ marginTop: 130 }}>
             <Grid container spacing={2}>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    borderTop: "1px solid #ccc",
-                    padding: "10px",
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
+                <DivStyled sx={{ justifyContent: "center", border: "none", borderTop: "1px solid #ccc" }}>
                   <Typography fontWeight={700}>Employee&apos;s/Internee&apos;s Signature</Typography>
-                </div>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    borderTop: "1px solid #ccc",
-                    padding: "10px",
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
+                <DivStyled sx={{ justifyContent: "center", border: "none", borderTop: "1px solid #ccc" }}>
                   <Typography fontWeight={700}>Thumb Impression</Typography>
-                </div>
+                </DivStyled>
               </Grid>
               <Grid item xs={4}>
-                <div
-                  style={{
-                    borderTop: "1px solid #ccc",
-                    padding: "10px",
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
+                <DivStyled sx={{ justifyContent: "center", border: "none", borderTop: "1px solid #ccc" }}>
                   <Typography fontWeight={700}>CEO Signature with Stamp</Typography>
-                </div>
+                </DivStyled>
               </Grid>
             </Grid>
           </Grid>
@@ -344,7 +332,7 @@ const DivStyled = styled("div")(() => ({
   alignItems: "center",
 }));
 
-const BlueDivStyled = styled("div")(({ bgColor }) => ({
+const HeadingStyled = styled("div")(({ bgColor }) => ({
   marginTop: 10,
   marginBottom: 0,
   backgroundColor: bgColor || "#145DA0",

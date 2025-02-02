@@ -3,16 +3,20 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Invoice from "./components/Invoice";
+import CustomOverlay from "../../components/Styled/CustomOverlay";
 
 const ViewSalary = ({ salary_id }) => {
   const [salaryData, setSalaryData] = useState({});
+  const [loading, setLoading] = useState(false);
   const fetchSalaryData = async () => {
     try {
+      setLoading(true);
       const salary = await axios.get(`/api/pay/get_salary/${salary_id}`);
       const data = salary.data.result;
       setSalaryData(data);
-      toast.success(JSON.stringify(data));
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.log("View Salary", error);
       toast.error("Error Viewing Salary");
     }
@@ -23,7 +27,8 @@ const ViewSalary = ({ salary_id }) => {
   }, []);
   return (
     <>
-      <Box
+      <CustomOverlay open={loading} />
+      {/* <Box
         sx={{
           marginTop: "16px",
           padding: "20px",
@@ -33,8 +38,8 @@ const ViewSalary = ({ salary_id }) => {
           backgroundColor: "white",
         }}
       >
-        {JSON.stringify(salaryData)}
-      </Box>
+        {JSON.stringify(salaryData, null, 2)}
+      </Box> */}
       <Box
         sx={{
           marginTop: "16px",

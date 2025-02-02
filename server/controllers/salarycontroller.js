@@ -1,6 +1,6 @@
 const salaryModel = require("../models/salarymodel");
 const employeeModel = require("../models/employeemodel");
-const paid_unpaid_leaves = require("../utils/paid_unpaid_leaves");
+const { paid_unpaid_leaves, mapLeavesToLabels } = require("../utils/paid_unpaid_leaves");
 
 const daysInMonth = require("../utils/date/daysInMonths");
 const calculateGrossSalary = require("../utils/calculateGrossSalary");
@@ -168,22 +168,48 @@ module.exports = {
   getSingleSalary: async (req, res) => {
     try {
       const { id } = req.params;
-      console.log("id aa gyi", id);
 
-      const salary = await salaryModel
-        .findById(id)
-        .populate(
-          "employee_obj_id",
-          "employeeName gender employeeCNIC employeeID employeeDesignation mailingAddress BasicPayAfterProbationPeriod AllowancesAfterProbationPeriod bankAccountNumber dateOfBirth dateOfJoining"
-        );
+      const salary = await salaryModel.findById(id).populate("employee_obj_id").populate("loanDetails.loanId");
 
-      const { employee_obj_id, ...salaryData } = salary.toObject(); // Convert to a plain JavaScript object
-      const result = {
-        ...salaryData, // Spread salary data
-        ...employee_obj_id, // Spread employee object fields
+      const {
+        employee_obj_id,
+        workDetails,
+        salaryDetails,
+        leaveDetails,
+        bonusDetails,
+        loanDetails,
+        netSalary,
+        paidDate,
+        salary_month,
+        salary_year,
+        paymentDetails,
+      } = salary.toObject();
+
+      const mappedLeaves = mapLeavesToLabels(leaveDetails);
+
+      const { isLoanActive } = loanDetails;
+      const { loanAmount, amountPerInstallment } = loanDetails.loanId;
+
+      const tranformedLoan = {
+        isLoanActive,
+        ...(isLoanActive ? { loanAmount } : {}),
+        ...(isLoanActive ? { amountPerInstallment } : {}),
       };
 
-      console.log("slaart mil gyi", result);
+      const result = {
+        employeeDetails: employee_obj_id,
+        salaryDetails,
+        workDetails,
+        leaveDetails: mappedLeaves,
+        bonusDetails,
+        loanDetails: tranformedLoan,
+        netSalary,
+        paidDate,
+        salary_month,
+        salary_year,
+        paymentDetails,
+      };
+
       res.status(200).json({ result });
     } catch (error) {
       console.log("Get Single Salary Error", error);

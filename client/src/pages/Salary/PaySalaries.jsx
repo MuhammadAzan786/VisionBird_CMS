@@ -239,7 +239,6 @@ const PaySalaries = () => {
 
   return (
     <>
-      {/* <Paper>{JSON.stringify(paidEmployees)}</Paper> */}
       <Modal open={viewModel} onClose={handleViewModalClose} sx={{ overflowY: "scroll", scrollbarWidth: "none" }}>
         <ViewSalary salary_id={salaryId} />
       </Modal>

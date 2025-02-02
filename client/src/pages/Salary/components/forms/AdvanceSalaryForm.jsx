@@ -16,13 +16,10 @@ const AdvanceSalary = () => {
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       setSubmitting(true);
-      const res = await axios.post(
-        "/api/advance_payments/advance/salary/request",
-        {
-          ...values,
-          currentUser,
-        }
-      );
+      const res = await axios.post("/api/advance_payments/advance/salary/request", {
+        ...values,
+        currentUser,
+      });
 
       toast.success(res.data.msg, { duration: 3000 });
       setSubmitting(false);
@@ -79,9 +76,7 @@ const AdvanceSalary = () => {
                   {...field}
                   error={Boolean(meta.error)}
                   helperText={
-                    meta.error
-                      ? "this field is required"
-                      : "Why do you want to apply for the advance salary?"
+                    meta.error ? "this field is required" : "Why do you want to apply for the advance salary?"
                   }
                 />
               )}
