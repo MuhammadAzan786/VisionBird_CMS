@@ -2,24 +2,27 @@
 import { Box, Grid, Paper, styled, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { getCurrentMonth } from "../../../utils/common";
+import { forwardRef } from "react";
 
-const Invoice = ({ salaryData }) => {
-  const {
-    workDetails,
-    paymentDetails,
-    employeeDetails,
-    salaryDetails,
-    leaveDetails,
-    bonusDetails,
-    loanDetails,
-    netSalary,
-    paidDate,
-    salary_month,
-    salary_year,
-  } = salaryData;
-  return (
-    <Box p={3}>
-      <Paper sx={{ p: 4 }}>
+const Invoice = forwardRef(
+  (
+    {
+      workDetails,
+      paymentDetails,
+      employeeDetails,
+      salaryDetails,
+      leaveDetails,
+      bonusDetails,
+      loanDetails,
+      netSalary,
+      paidDate,
+      salary_month,
+      salary_year,
+    },
+    ref
+  ) => {
+    return (
+      <Paper sx={{ p: 4 }} ref={ref}>
         <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
           <img style={{ height: 80 }} src="/vbt-logo.png" alt="logo" />
           <Box textAlign={"right"}>
@@ -319,9 +322,9 @@ const Invoice = ({ salaryData }) => {
           </Grid>
         </Grid>
       </Paper>
-    </Box>
-  );
-};
+    );
+  }
+);
 
 const DivStyled = styled("div")(() => ({
   border: "1px solid #ccc",
@@ -339,4 +342,7 @@ const HeadingStyled = styled("div")(({ bgColor }) => ({
   textAlign: "center",
   padding: "8px",
 }));
+
+Invoice.displayName = "Invoice";
+
 export default Invoice;

@@ -62,6 +62,7 @@ import { signOut } from "./redux/user/userSlice";
 import Notifications from "./pages/Notifications/Notifications";
 import EmployeeLeaveHistory from "./pages/Leaves/EmployeeLeaveHistory";
 import LeaveHistory from "./pages/Leaves/LeaveHistory";
+import ViewSalary from "./pages/Salary/ViewSalary";
 
 const App = () => {
   const socket = useSelector((state) => state.socket.socket);
@@ -199,6 +200,7 @@ const App = () => {
             {/* Salary Routes */}
             <Route path="/pay-salaries" element={<PaySalaries />} />
             <Route path="/salary/:id" element={<Salary />} />
+            <Route path="/view-salary/:salaryId" element={<ViewSalary />} />
             <Route path="/manage-salaries" element={<ManageSalary />} />
             <Route path="/advance-payments" element={<AdvancePayment />} />
             <Route path="/advance-applications" element={<AdvanceApplications />} />

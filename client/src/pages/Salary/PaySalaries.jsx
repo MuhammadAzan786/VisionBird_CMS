@@ -31,10 +31,8 @@ import {
   Tab,
   Stack,
   Paper,
-  Modal,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
-import ViewSalary from "./ViewSalary";
 
 const PaySalaries = () => {
   const navigate = useNavigate();
@@ -44,18 +42,6 @@ const PaySalaries = () => {
   const [selectedEmployeeId, setSelectedEmployeeId] = React.useState(null);
   const [employeeDetails, setEmployeeDetails] = React.useState(null);
   const [paymentMethod, setPaymentMethod] = React.useState("cash");
-
-  const [salaryId, setSalaryId] = useState();
-  const [viewModel, setViewModal] = useState(false);
-
-  const toggleViewModal = async (id) => {
-    setSalaryId(id);
-    setViewModal(!viewModel);
-  };
-
-  const handleViewModalClose = () => {
-    setViewModal(false);
-  };
 
   const [errorText, setErrorText] = React.useState();
   const [open, setOpen] = React.useState(false);
@@ -228,7 +214,7 @@ const PaySalaries = () => {
             size="small"
             startIcon={<RemoveRedEye />}
             sx={{ borderRadius: "100px", fontFamily: "Poppins, sans-serif" }}
-            onClick={() => toggleViewModal(params.row.salary_id)}
+            onClick={() => navigate(`/view-salary/${params.row.salary_id}`)}
           >
             View
           </Button>
@@ -239,9 +225,6 @@ const PaySalaries = () => {
 
   return (
     <>
-      <Modal open={viewModel} onClose={handleViewModalClose} sx={{ overflowY: "scroll", scrollbarWidth: "none" }}>
-        <ViewSalary salary_id={salaryId} />
-      </Modal>
       <Paper>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6} md={4}>

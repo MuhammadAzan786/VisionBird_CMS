@@ -188,12 +188,11 @@ module.exports = {
       const mappedLeaves = mapLeavesToLabels(leaveDetails);
 
       const { isLoanActive } = loanDetails;
-      const { loanAmount, amountPerInstallment } = loanDetails.loanId;
 
       const tranformedLoan = {
         isLoanActive,
-        ...(isLoanActive ? { loanAmount } : {}),
-        ...(isLoanActive ? { amountPerInstallment } : {}),
+        ...(isLoanActive ? { loanAmount: loanDetails.loanId.loanAmount } : {}),
+        ...(isLoanActive ? { amountPerInstallment: loanDetails.loanId.amountPerInstallment } : {}),
       };
 
       const result = {
