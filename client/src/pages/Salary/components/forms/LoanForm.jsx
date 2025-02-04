@@ -48,7 +48,7 @@ const LoanComponent = () => {
     loanAmount: 1000,
     loanPayback: "full",
     loanReason: "",
-    installmentDuration: 0,
+    installmentDuration: 1,
   };
   return (
     <Formik initialValues={initialValues} onSubmit={handleSubmit} validationSchema={validationSchema}>
@@ -71,7 +71,7 @@ const LoanComponent = () => {
             <FormControl component="fieldset">
               <FormLabel component="legend">
                 How would you like to payback the loan?
-                <Tooltip title="ali">
+                <Tooltip title="Choose how you want to repay the loan: in installments or as a full payment">
                   <InfoOutlined style={{ color: "gray", cursor: "pointer", marginLeft: "10px" }} />
                 </Tooltip>
               </FormLabel>
@@ -88,12 +88,19 @@ const LoanComponent = () => {
                   <TextField
                     label="Installment Plan"
                     type="number"
+                   
                     fullWidth
                     {...field}
                     error={Boolean(meta.error)}
                     helperText={
                       meta.error ? meta.error : "In how many installments you would like to payback the loan?"
                     }
+                    // to handle the negitive values
+                    onInput={(e) => {
+                      if (e.target.value < 1) e.target.value = 1;
+                      }
+                    }
+
                   />
                 )}
               </Field>
@@ -106,6 +113,7 @@ const LoanComponent = () => {
                   multiline
                   minRows={3}
                   fullWidth
+             
                   {...field}
                   error={Boolean(meta.error)}
                   helperText={meta.error ? "this field is required" : "Why do you want to apply for the loan?"}

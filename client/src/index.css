@@ -38,3 +38,14 @@
   color: white;
   border: 1px solid #666cff;
 }
+
+/* the solution for employee admin panel cards issue */
+.makeStyles-TaskBoxHeading-1,
+.makeStyles-TaskBoxHeading-3,
+.makeStyles-TaskBoxHeading-2 {
+  display: block !important;
+}
+/* the solution for sidebar scroll issue*/
+.css-1giaxtu-MuiList-root{
+  max-height: 170vh !important;
+}
