@@ -63,12 +63,15 @@ I added the following code to the index.css file: */
   max-width: 100% !important;
 }
 @media (min-width: 600px) {
+  .css-zbaamk-MuiGrid-root{
+    flex-basis: 30%;
+  }
   .css-zbaamk-MuiGrid-root {
       flex-grow: 1 !important;
       max-width: 100% !important;
   }
 }
-@media (min-width: 1200px) {
+@media (min-width: 1000px) {
   .css-1equabv-MuiGrid-root{
     flex-grow: 1 !important;
     max-width: 30% !important;
