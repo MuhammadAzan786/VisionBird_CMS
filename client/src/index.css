@@ -42,10 +42,39 @@
 /* the solution for employee admin panel cards issue */
 .makeStyles-TaskBoxHeading-1,
 .makeStyles-TaskBoxHeading-3,
-.makeStyles-TaskBoxHeading-2 {
+.makeStyles-TaskBoxHeading-2,
+.makeStyles-TaskBoxHeading-4,
+.makeStyles-TaskBoxHeading-5,
+.makeStyles-TaskBoxHeading-6 {
   display: block !important;
 }
 /* the solution for sidebar scroll issue*/
 .css-1giaxtu-MuiList-root{
   max-height: 170vh !important;
+}
+/* to solve the buttons at the bottom of create task page issue, 
+I added the following code to the index.css file: */
+
+.css-2qpj53-MuiButtonBase-root-MuiButton-root{
+  width: 100% !important;
+}
+.css-1equabv-MuiGrid-root{
+  flex-grow: 1 !important;
+  max-width: 100% !important;
+}
+@media (min-width: 600px) {
+  .css-zbaamk-MuiGrid-root {
+      flex-grow: 1 !important;
+      max-width: 100% !important;
+  }
+}
+@media (min-width: 1200px) {
+  .css-1equabv-MuiGrid-root{
+    flex-grow: 1 !important;
+    max-width: 30% !important;
+  }
+  .css-zbaamk-MuiGrid-root {
+      flex-grow: 1 !important;
+      max-width: 30% !important;
+  }
 }
