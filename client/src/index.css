@@ -103,3 +103,17 @@ I added the following code to the index.css file: */
     padding: 5px !important;
   }
 }
+
+/*to solve the issue in employee avaluation*/
+.css-4muqlg-MuiGrid-root{
+  padding-top: 0px !important;
+}
+.css-4muqlg-MuiGrid-root>.MuiGrid-item{ 
+  padding-bottom: 10px !important;
+  padding-top: 0px !important;
+}
+
+.css-4muqlg-MuiGrid-root{
+  margin-top: -16px !important;
+  margin-right: 16px !important;
+}
