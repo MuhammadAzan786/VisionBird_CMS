@@ -81,3 +81,25 @@ I added the following code to the index.css file: */
       max-width: 30% !important;
   }
 }
+
+
+/* to solve the issue of the responsiveness at the leave/loan form section*/
+@media (max-width: 700px) {
+  .css-12itpog-MuiPaper-root{
+    padding: 30px !important;
+  }
+  .css-16jurb0{
+    padding: 0px !important;
+  }
+}
+@media (max-width: 600px) {
+  .css-12itpog-MuiPaper-root{
+    padding: 10px !important;
+  }
+  .css-16jurb0{
+    padding: 0px !important;
+  }
+  .css-168ikf9-MuiStack-root{
+    padding: 5px !important;
+  }
+}
