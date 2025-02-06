@@ -37,6 +37,34 @@ export default function Signin() {
     setShowPassword((prev) => !prev);
   };
 
+  const handleSignInSubmit = async (values) => {
+    const data = {
+      employeeUsername: values.userName,
+      employeePassword: values.password,
+    };
+
+    try {
+      const res = await axios.post(LOGIN_URL, data, {
+        withCredentials: true,
+      });
+      const { _id } = res.data;
+
+      // Save emp_id in localStorage
+      localStorage.setItem("emp_id", _id);
+
+      setLoading(true);
+      navigate("/"); // Redirect to home/dashboard
+      dispatch(loginSuccess(res.data));
+      dispatch(initializeSocket(res.data));
+      dispatch(fetchNotifications(_id));
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      handleError(error);
+      console.log(error);
+    }
+  };
+
   const handleError = (error) => {
     if (error && error.status === 404) {
       toast.error("Invalid User");
@@ -62,31 +90,7 @@ export default function Signin() {
           password: "",
         }}
         validationSchema={validationSchema}
-        onSubmit={async (values) => {
-          const data = {
-            employeeUsername: values.userName,
-            employeePassword: values.password,
-          };
-
-          axios
-            .post(LOGIN_URL, data, {
-              withCredentials: true,
-            })
-            .then((res) => {
-              const { _id } = res.data;
-              setLoading(true);
-              navigate("/");
-              dispatch(loginSuccess(res.data));
-              dispatch(initializeSocket(res.data));
-              dispatch(fetchNotifications(_id));
-              setLoading(false);
-            })
-            .catch((error) => {
-              setLoading(false);
-              handleError(error);
-              console.log(error);
-            });
-        }}
+        onSubmit={handleSignInSubmit}
       >
         {({ values, setFieldValue }) => (
           <Form>

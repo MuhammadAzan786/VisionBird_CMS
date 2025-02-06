@@ -3,8 +3,11 @@ import { Box, Grid, Paper } from "@mui/material";
 import BasicBarChart from "./BasicBarChart";
 import BasicPieChart from "./BasicPieChart";
 import BasicLineChart from "./BasicLineChart";
+import { useSelector } from "react-redux";
+
 
 const ViewPerformance = () => {
+  const { currentUser } = useSelector((state) => state.user);
   return (
     <>
       <Box display={"flex"} justifyContent={"start"} px={3} pt={6}>
@@ -20,17 +23,17 @@ const ViewPerformance = () => {
       <Grid container spacing={3} px={5} py={4}>
         <Grid item xs={12} md={6}>
           <Paper>
-            <BasicBarChart />
+            <BasicBarChart _currentUser={currentUser._id} />
           </Paper>
         </Grid>
         <Grid item xs={12} md={6}>
           <Paper>
-            <BasicPieChart />
+            <BasicPieChart _currentUser={currentUser._id}/>
           </Paper>
         </Grid>
         <Grid item xs={12}>
           <Paper>
-            <BasicLineChart />
+          <BasicLineChart _currentUser={currentUser._id} />
           </Paper>
         </Grid>
       </Grid>
