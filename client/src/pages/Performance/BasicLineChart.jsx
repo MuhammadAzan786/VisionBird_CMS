@@ -75,6 +75,11 @@ const BasicLineChart = ({ _currentUser }) => {
   }
 
   return (
+    <>
+
+              <Typography>
+                  Points earned by this week
+              </Typography>
     <Box sx={{ p: 3 }}>
 
 
@@ -82,7 +87,7 @@ const BasicLineChart = ({ _currentUser }) => {
         <Box sx={{ mb: 3 }}>
           <LineChart
             xAxis={[{ data: weekDays, scaleType: 'point', label: "Weekday" }]}
-            yAxis={[{ label: "Total Points", min: 1, max: 20 }]}
+            yAxis={[{ label: "Total Points", min: 1, max: 30 }]}
             series={[{
               data: dailyPoints,
               label: "Total Points",
@@ -95,6 +100,7 @@ const BasicLineChart = ({ _currentUser }) => {
         <Typography>No daily points available</Typography>
       )}
     </Box>
+    </>
   );
 };
 

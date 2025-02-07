@@ -79,6 +79,10 @@ const DetailedBarChart = ({ _currentUser }) => {
   }
 
   return (
+    <>
+          <Typography>
+            Tasks completed this week
+          </Typography>
     <Box sx={{ p: 3 }}>
       {dailyTasks.some(count => count > 0) ? (
         <Box sx={{ mb: 3 }}>
@@ -89,11 +93,13 @@ const DetailedBarChart = ({ _currentUser }) => {
           />
         </Box>
       ) : (
-        <Typography>No tasks completed this week 
+        <Typography>
+          No tasks completed this week 
           
         </Typography>
       )}
     </Box>
+    </>
   );
 };
 

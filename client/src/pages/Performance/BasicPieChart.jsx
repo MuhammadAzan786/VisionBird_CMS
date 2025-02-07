@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart } from '@mui/x-charts/PieChart';
 import axios from "../../utils/axiosInterceptor";
-
+import { Box, Typography } from '@mui/material';
 const BasicPieChart = ({ _currentUser }) => {
   const [latestEvaluationData, setLatestEvaluationData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -78,6 +78,10 @@ const BasicPieChart = ({ _currentUser }) => {
   ];
 
   return (
+    <>
+      <Typography>
+        Points for the latest evaluation:
+      </Typography>
     <PieChart
       series={[{ data: pieData }]}
       height={400}
@@ -90,6 +94,7 @@ const BasicPieChart = ({ _currentUser }) => {
         </div>
       )}
     />
+    </>
   );
 };
 
