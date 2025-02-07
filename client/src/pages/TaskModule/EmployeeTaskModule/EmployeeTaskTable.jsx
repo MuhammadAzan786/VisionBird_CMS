@@ -21,12 +21,12 @@ import { initializeSocket } from "../../../redux/socketSlice";
 const fetchTaskTimes = async (taskId) => {
   try {
     const response = await axios.get(`/api/task/getTaskById/${taskId}`);
-    const taskTimes = response.data;
+    const taskTimes = response.DateTime;
     const startTime = taskTimes.taskStartTime;
     const endTime = taskTimes.taskcompleteTime;
     const taskTime = taskTimes.taskTime;
-
     return { startTime, endTime, taskTime };
+
   } catch (error) {
     console.error("Error fetching task times:", error);
     return null;
@@ -43,7 +43,19 @@ const updateTaskCompleteStatus = async (taskId, TaskStatus) => {
     }
   );
 };
+const formatTime = (seconds) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
 
+  // Formatting to ensure two digits for hours, minutes, and seconds
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${remainingSeconds
+    .toString()
+    .padStart(2, "0")}`;
+};
+function formatDateTime(unixTime) {
+  return new Date(unixTime * 1000).toLocaleString(); // Convert UNIX timestamp to readable date
+}
 const columns = (handleStatusChange) => [
   {
     field: "taskTicketNo",
@@ -165,31 +177,55 @@ const columns = (handleStatusChange) => [
     },
   },
   {
-    field: "taskTime",
+    field: "TimeSlots",
     headerName: "Time",
     width: 250,
     headerAlign: "center",
-
     renderCell: (params) => {
-      const { taskStartTime, taskTime } = params.row;
+      // Directly access taskTime_1 from params.row
+      const taskTime = params.row.taskTime_1;
+  
+      if (!taskTime) {
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+            }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: "700" }}>
+              No task time available
+            </Typography>
+          </Box>
+        );
+      }
+  
+      // Format the date_time using the formatDateTime function
+      const formattedDateTime = formatDateTime(taskTime.date_time);
+  
       return (
         <Box
           sx={{
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             width: "100%",
           }}
         >
-          <EmployeeTaskTimer
-            taskStartTime={taskStartTime} // Pass taskStartTime from row data
-            totalDuration={taskTime} // Assuming taskTime is total duration in seconds
-            taskStatus={params.row.taskStatus} // Pass taskStatus from row data
-          />
+          <Typography variant="body2" sx={{ fontWeight: "700" }}>
+            {formattedDateTime}
+          </Typography>
         </Box>
       );
     },
   },
+  
+  
+  
   {
     field: "taskStatus",
     headerName: "Status",

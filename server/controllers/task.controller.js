@@ -152,44 +152,30 @@ const getCompletedTasksByEmployeeIdDate = async (req, res) => {
 const getLateTasksByEmployeeIdDate = async (req, res) => {
   try {
     const { id } = req.params;
-
     // Get the current date
     const currentDate = new Date();
-    const currentTime = currentDate.getTime();
+    const startOfDay = new Date(currentDate.setUTCHours(0, 0, 0, 0));
+    const endOfDay = new Date(currentDate.setUTCHours(23, 59, 59, 999));
 
-    // Set the "shift end time" to 18:00 PM today
-    const shiftEndTime = new Date(currentDate);
-    shiftEndTime.setHours(18, 0, 0, 0);  // 18:00 PM
-
-    // Find tasks that are late (task DateTime should be in the past and after shift end time)
     const data = await Task.find({
       employee_obj_id: id,
-      taskcompleteStatus: { $ne: "completed" }, // Only non-completed tasks
-      taskStatus: { $ne: "Not Started" }, // Optional: exclude tasks that are "Not Started"
-      DateTime: { $lte: currentTime }, // Task should have a past date
+      taskcompleteStatus: "Late",
       createdAt: {
-        $gte: currentDate.setUTCHours(0, 0, 0, 0), // Ensure tasks are from today
-        $lt: currentDate.setUTCHours(23, 59, 59, 999),
+        $gte: startOfDay,
+        $lt: endOfDay,
       },
     });
 
-    // Filter out late tasks
-    const lateTasks = data.filter(task => {
-      // Check if task DateTime exceeds shift end time (18:00 PM)
-      return task.DateTime <= shiftEndTime.getTime();
-    });
-
-    if (lateTasks.length === 0) {
+    if (!data) {
       return res.status(404).json({ message: "No Late Tasks Found" });
     }
 
-    res.status(200).json(lateTasks);
+    res.status(200).json(data);
   } catch (error) {
     console.error("Error fetching tasks by employee and date:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 // ! Get Tasks by Id
 const getTaskById = async (req, res) => {
@@ -666,23 +652,23 @@ const delete_task_type = async (req, res) => {
 };
 
 const getPendingTasksByEmpId = async (req, res) => {
-  try {
-    const { id } = req.params;
+      try {
+      const { id } = req.params;
 
-    const tasks = await Task.find({
-      employee_obj_id: id,
-      taskcompleteStatus: "Task UnComplete"
-    });
+      const tasks = await Task.find({
+        employee_obj_id: id,
+        taskcompleteStatus: "Task UnComplete"
+      });
 
-    if (!tasks.length) {
-      return res.status(404).json({ message: 'No incomplete tasks found for this employee.' });
+      if (!tasks.length) {
+        return res.status(404).json({ message: 'No incomplete tasks found for this employee.' });
+      }
+
+      res.json(tasks);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      res.status(500).json({ message: 'Server error.', error: error.message });
     }
-
-    res.json(tasks);
-  } catch (error) {
-    console.error('Error fetching tasks:', error);
-    res.status(500).json({ message: 'Server error.', error: error.message });
-  }
 }
 
 module.exports = {

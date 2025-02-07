@@ -120,7 +120,9 @@ const commonCenteringProps = {
     </Box>
   ),
 };
-
+function formatDateTime(unixTime) {
+  return new Date(unixTime * 1000).toLocaleString(); // Convert UNIX timestamp to readable date
+}
 const columns = [
   {
     field: "taskTicketNo",
@@ -160,89 +162,52 @@ const columns = [
   },
   {
     field: "TimeSlots",
-    headerName: "Elapsed Time",
-    flex: 2,
-    editable: true,
+    headerName: "Time",
+    width: 250,
     headerAlign: "center",
-    align: "center",
     renderCell: (params) => {
-      const [currentUnixTime, setCurrentUnixTime] = React.useState(Math.floor(new Date().getTime() / 1000));
+      // Directly access taskTime_1 from params.row
+      const taskTime = params.row.taskTime_1;
   
-      React.useEffect(() => {
-        const intervalId = setInterval(() => {
-          setCurrentUnixTime(Math.floor(new Date().getTime() / 1000));
-        }, 1000);
+      if (!taskTime) {
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+            }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: "700" }}>
+              No task time available
+            </Typography>
+          </Box>
+        );
+      }
   
-        return () => clearInterval(intervalId);
-      }, []);
-  
-      const convertToUnix = (timestamp) => (timestamp ? Math.floor(new Date(timestamp).getTime() / 1000) : null);
-  
-      const createdAtUnix = convertToUnix(params.row.createdAt);
-      const taskTime1Unix = convertToUnix(params.row.taskTime_1?.date_time);
-      const taskTime2Unix = convertToUnix(params.row.taskTime_2?.date_time);
-      const taskTime3Unix = convertToUnix(params.row.taskTime_3?.date_time);
-  
-      const calculateRemainingTime = (endingTime) => {
-        return endingTime ? Math.max(endingTime - currentUnixTime, 0) : 0;
-      };
-  
-      const taskTime1RemainingTime = calculateRemainingTime(taskTime1Unix);
-      const taskTime2RemainingTime = calculateRemainingTime(taskTime2Unix);
-      const taskTime3RemainingTime = calculateRemainingTime(taskTime3Unix);
-  
-      const taskTime1Duration = taskTime1Unix && createdAtUnix ? taskTime1Unix - createdAtUnix : 1;
-      const taskTime2Duration = taskTime2Unix && createdAtUnix ? taskTime2Unix - createdAtUnix : 1;
-      const taskTime3Duration = taskTime3Unix && createdAtUnix ? taskTime3Unix - createdAtUnix : 1;
-  
-      const taskTime1Progress = taskTime1Unix ? (taskTime1RemainingTime / taskTime1Duration) * 100 : 0;
-      const taskTime2Progress = taskTime2Unix ? (taskTime2RemainingTime / taskTime2Duration) * 100 : 0;
-      const taskTime3Progress = taskTime3Unix ? (taskTime3RemainingTime / taskTime3Duration) * 100 : 0;
+      // Format the date_time using the formatDateTime function
+      const formattedDateTime = formatDateTime(taskTime.date_time);
   
       return (
-        <Box sx={{ width: "100%", px: 2 }}>
-          {taskTime1Unix && (
-            <>
-              <LinearProgress
-                variant="determinate"
-                value={taskTime1Progress}
-                sx={{ height: 4, borderRadius: 6, backgroundColor: "#e0e0e0", "& .MuiLinearProgress-bar": { backgroundColor: "#5cb85c" } }}
-              />
-              <Typography variant="body2" sx={{ textAlign: "center", fontWeight: "bold", color: "#2c6e2f", fontSize: 12 }}>
-                {formatTime(taskTime1RemainingTime)}
-              </Typography>
-            </>
-          )}
-  
-          {taskTime2Unix && (
-            <>
-              <LinearProgress
-                variant="determinate"
-                value={taskTime2Progress}
-                sx={{ height: 4, borderRadius: 6, backgroundColor: "#e0e0e0", "& .MuiLinearProgress-bar": { backgroundColor: "#f2f380" } }}
-              />
-              <Typography variant="body2" sx={{ textAlign: "center", fontWeight: "bold", color: "#6e5c1f", fontSize: 12 }}>
-                {formatTime(taskTime2RemainingTime)}
-              </Typography>
-            </>
-          )}
-  
-          {taskTime3Unix && (
-            <>
-              <LinearProgress
-                variant="determinate"
-                value={taskTime3Progress}
-                sx={{ height: 4, borderRadius: 6, backgroundColor: "#e0e0e0", "& .MuiLinearProgress-bar": { backgroundColor: "#e74c3c" } }}
-              />
-              <Typography variant="body2" sx={{ textAlign: "center", fontWeight: "bold", color: "#9e2a2a", fontSize: 12 }}>
-                {formatTime(taskTime3RemainingTime)}
-              </Typography>
-            </>
-          )}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+          }}
+        >
+          <Typography variant="body2" sx={{ fontWeight: "700" }}>
+            {formattedDateTime}
+          </Typography>
         </Box>
       );
     },
   },
+  
   
   {
     field: "Action",
@@ -348,9 +313,7 @@ export default function EmployeeTaskBoard() {
     setPopoverContent(null);
   };
 
-  function formatDateTime(unixTime) {
-    return new Date(unixTime * 1000).toLocaleString(); // Convert UNIX timestamp to readable date
-  }
+
 
   useEffect(() => {
     fetchData(); // Call fetchData function when component mounts
