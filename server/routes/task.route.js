@@ -17,6 +17,7 @@ const {
   pauseRequest,
   pauseRequestAccepted,
   add_new_task_types,
+  getPendingTasksByEmpId,
   get_all_task_types,
   delete_task_type,
   edit_task_type,
@@ -47,6 +48,17 @@ router.get(
   authorizeRoles("admin", "manager", "employee"),
   getTaskByEmpId
 );
+
+
+// * Get Task from Employee Id where task is not completed
+router.get(
+  "/getPendingTasksByEmpId/:id",
+  auth,
+  authorizeRoles("admin", "manager", "employee"),
+  getPendingTasksByEmpId
+);
+
+
 // * Get Task from Employee Id and date
 router.get(
   "/getAssignedTasksByEmployeeIdDate/:id",

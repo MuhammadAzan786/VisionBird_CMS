@@ -43,7 +43,7 @@ const TaskBoard = () => {
       setCompletedTasks(completedTasks.length);
 
       const { data: inProgressTasks } = await axios.get(
-        `/api/task/getInProgressTasksByEmployeeIdDate/${currentUser._id}`
+        `/api/task/getPendingTasksByEmpId/${currentUser._id}`
       );
       setInProgressTasks(inProgressTasks.length);
 
@@ -142,7 +142,7 @@ const TaskBoard = () => {
               variant="body1"
               sx={{ fontWeight: "450", fontSize: "1.2rem" }}
             >
-              In Progress
+              Pending Tasks
             </Typography>
             <Typography
               sx={{
