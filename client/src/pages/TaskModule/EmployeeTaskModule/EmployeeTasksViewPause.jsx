@@ -136,7 +136,7 @@ const columns = () => [
               width: "100%",
             }}
           >
-            <Typography variant="body2" sx={{ fontWeight: "700" }}>
+            <Typography variant="body2" sx={{ fontWeight: "400" }}>
               No task time available
             </Typography>
           </Box>
@@ -156,7 +156,7 @@ const columns = () => [
             width: "100%",
           }}
         >
-          <Typography variant="body2" sx={{ fontWeight: "700" }}>
+          <Typography variant="body2" sx={{ fontWeight: "400" }}>
             {formattedDateTime}
           </Typography>
         </Box>
