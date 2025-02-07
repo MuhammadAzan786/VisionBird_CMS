@@ -167,126 +167,83 @@ const columns = [
     align: "center",
     renderCell: (params) => {
       const [currentUnixTime, setCurrentUnixTime] = React.useState(Math.floor(new Date().getTime() / 1000));
-
+  
       React.useEffect(() => {
         const intervalId = setInterval(() => {
           setCurrentUnixTime(Math.floor(new Date().getTime() / 1000));
         }, 1000);
-
+  
         return () => clearInterval(intervalId);
       }, []);
-
-      // Extracting the timestamps from the row
-      const { createdAt, taskTime_1, taskTime_2, taskTime_3 } = params.row;
-
-      const convertToUnix = (timestamp) => Math.floor(new Date(timestamp).getTime() / 1000);
-
-      const createdAtUnix = convertToUnix(createdAt);
-      const taskTime1Unix = taskTime_1?.date_time;
-      const taskTime2Unix = taskTime_2?.date_time;
-      const taskTime3Unix = taskTime_3?.date_time;
-
+  
+      const convertToUnix = (timestamp) => (timestamp ? Math.floor(new Date(timestamp).getTime() / 1000) : null);
+  
+      const createdAtUnix = convertToUnix(params.row.createdAt);
+      const taskTime1Unix = convertToUnix(params.row.taskTime_1?.date_time);
+      const taskTime2Unix = convertToUnix(params.row.taskTime_2?.date_time);
+      const taskTime3Unix = convertToUnix(params.row.taskTime_3?.date_time);
+  
       const calculateRemainingTime = (endingTime) => {
-        return Math.max(endingTime - currentUnixTime, 0);
+        return endingTime ? Math.max(endingTime - currentUnixTime, 0) : 0;
       };
-
+  
       const taskTime1RemainingTime = calculateRemainingTime(taskTime1Unix);
       const taskTime2RemainingTime = calculateRemainingTime(taskTime2Unix);
       const taskTime3RemainingTime = calculateRemainingTime(taskTime3Unix);
-
-      // Calculate the total duration for each task
-      const taskTime1Duration = taskTime1Unix - createdAtUnix;
-      const taskTime2Duration = taskTime2Unix - createdAtUnix;
-      const taskTime3Duration = taskTime3Unix - createdAtUnix;
-
-      // Calculate progress percentage
-      const taskTime1Progress = (taskTime1RemainingTime / taskTime1Duration) * 100;
-      const taskTime2Progress = (taskTime2RemainingTime / taskTime2Duration) * 100;
-      const taskTime3Progress = (taskTime3RemainingTime / taskTime3Duration) * 100;
-
+  
+      const taskTime1Duration = taskTime1Unix && createdAtUnix ? taskTime1Unix - createdAtUnix : 1;
+      const taskTime2Duration = taskTime2Unix && createdAtUnix ? taskTime2Unix - createdAtUnix : 1;
+      const taskTime3Duration = taskTime3Unix && createdAtUnix ? taskTime3Unix - createdAtUnix : 1;
+  
+      const taskTime1Progress = taskTime1Unix ? (taskTime1RemainingTime / taskTime1Duration) * 100 : 0;
+      const taskTime2Progress = taskTime2Unix ? (taskTime2RemainingTime / taskTime2Duration) * 100 : 0;
+      const taskTime3Progress = taskTime3Unix ? (taskTime3RemainingTime / taskTime3Duration) * 100 : 0;
+  
       return (
         <Box sx={{ width: "100%", px: 2 }}>
-          <LinearProgress
-            variant="determinate"
-            value={taskTime1Progress}
-            sx={{
-              height: 4,
-              borderRadius: 6,
-              backgroundColor: "#e0e0e0", // Gray background
-              "& .MuiLinearProgress-bar": {
-                backgroundColor: "#5cb85c", // Green progress bar
-              },
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", // Shadow for depth
-              transition: "all 0.3s ease", // Smooth transition
-            }}
-          />
-          <Typography
-            variant="body2"
-            sx={{
-              textAlign: "center",
-              fontWeight: "bold", // Make the text stand out
-              color: "#2c6e2f", // Dark green for contrast
-              fontSize: 12, // Slightly larger font size
-            }}
-          >
-            {formatTime(taskTime1RemainingTime)}
-          </Typography>
-
-          <LinearProgress
-            variant="determinate"
-            value={taskTime2Progress}
-            sx={{
-              height: 4,
-              borderRadius: 6,
-              backgroundColor: "#e0e0e0", // Gray background
-              "& .MuiLinearProgress-bar": {
-                backgroundColor: "#f2f380", // Yellow progress bar
-              },
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", // Shadow for depth
-              transition: "all 0.3s ease", // Smooth transition
-            }}
-          />
-          <Typography
-            variant="body2"
-            sx={{
-              textAlign: "center",
-              fontWeight: "bold", // Make the text stand out
-              color: "#6e5c1f", // Darker yellow for contrast
-              fontSize: 12, // Slightly larger font size
-            }}
-          >
-            {formatTime(taskTime2RemainingTime)}
-          </Typography>
-
-          <LinearProgress
-            variant="determinate"
-            value={taskTime3Progress}
-            sx={{
-              height: 4,
-              borderRadius: 6,
-              backgroundColor: "#e0e0e0", // Gray background
-              "& .MuiLinearProgress-bar": {
-                backgroundColor: "#e74c3c", // Red progress bar
-              },
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", // Shadow for depth
-              transition: "all 0.3s ease", // Smooth transition
-            }}
-          />
-          <Typography
-            variant="body2"
-            sx={{
-              textAlign: "center",
-              fontWeight: "bold", // Make the text stand out
-              color: "#9e2a2a", // Darker red for contrast
-              fontSize: 12, // Slightly larger font size
-            }}
-          >
-            {formatTime(taskTime3RemainingTime)}
-          </Typography>
+          {taskTime1Unix && (
+            <>
+              <LinearProgress
+                variant="determinate"
+                value={taskTime1Progress}
+                sx={{ height: 4, borderRadius: 6, backgroundColor: "#e0e0e0", "& .MuiLinearProgress-bar": { backgroundColor: "#5cb85c" } }}
+              />
+              <Typography variant="body2" sx={{ textAlign: "center", fontWeight: "bold", color: "#2c6e2f", fontSize: 12 }}>
+                {formatTime(taskTime1RemainingTime)}
+              </Typography>
+            </>
+          )}
+  
+          {taskTime2Unix && (
+            <>
+              <LinearProgress
+                variant="determinate"
+                value={taskTime2Progress}
+                sx={{ height: 4, borderRadius: 6, backgroundColor: "#e0e0e0", "& .MuiLinearProgress-bar": { backgroundColor: "#f2f380" } }}
+              />
+              <Typography variant="body2" sx={{ textAlign: "center", fontWeight: "bold", color: "#6e5c1f", fontSize: 12 }}>
+                {formatTime(taskTime2RemainingTime)}
+              </Typography>
+            </>
+          )}
+  
+          {taskTime3Unix && (
+            <>
+              <LinearProgress
+                variant="determinate"
+                value={taskTime3Progress}
+                sx={{ height: 4, borderRadius: 6, backgroundColor: "#e0e0e0", "& .MuiLinearProgress-bar": { backgroundColor: "#e74c3c" } }}
+              />
+              <Typography variant="body2" sx={{ textAlign: "center", fontWeight: "bold", color: "#9e2a2a", fontSize: 12 }}>
+                {formatTime(taskTime3RemainingTime)}
+              </Typography>
+            </>
+          )}
         </Box>
       );
     },
   },
+  
   {
     field: "Action",
     headerName: "Action",

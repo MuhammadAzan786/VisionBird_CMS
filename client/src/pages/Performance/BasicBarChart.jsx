@@ -18,60 +18,54 @@ const generateWeekDays = () => {
 };
 
 const DetailedBarChart = ({ _currentUser }) => {
-  const [dailyPoints, setDailyPoints] = useState([]);
+  const [dailyTasks, setDailyTasks] = useState(Array(5).fill(0)); // Tasks count per weekday
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchDailyPoints = async () => {
+  const fetchDailyTasks = async () => {
     setLoading(true);
     setError(null);
+
     if (!_currentUser) {
-      setError('User ID is required');
-      setLoading(false);
-      return;
+        setError('User ID is required');
+        setLoading(false);
+        return;
     }
 
     try {
-      const response = await axios.get(`/api/empOfWeek/evaluations/employee/${_currentUser}`);
-      const evaluations = response.data.evaluations || [];
+        const response = await axios.get(`/api/task/getCompletedTasksByEmployeeIdDate/${_currentUser}`);
+        const tasks = response.data || []; // Ensure data is correctly fetched
 
-      if (evaluations.length > 0) {
-        const pointsData = {
-          behavior: Array(5).fill(0),
-          workAttitude: Array(5).fill(0),
-          qualityOfWork: Array(5).fill(0),
-          workCreativity: Array(5).fill(0),
-          mistakes: Array(5).fill(0),
-        };
+        if (tasks.length > 0) {
+            const taskCountByDay = Array(5).fill(0); // Monday to Friday
 
-        evaluations.forEach((evaluation) => {
-          const evaluationDate = new Date(evaluation.evaluation_date);
-          const dayOfWeek = evaluationDate.getDay();
+            tasks.forEach((task) => {
+                if (task.taskcompleteStatus === "completed" && task.DateTime) {
+                    const taskDate = new Date(task.DateTime);
+                    const dayOfWeek = taskDate.getDay();
 
-          if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
-            const index = dayOfWeek - 1; // Convert Sunday-Saturday to 0-6 index (Monday=0, Friday=4)
-            pointsData.behavior[index] += evaluation.behavior_points;
-            pointsData.workAttitude[index] += evaluation.work_attitude_points;
-            pointsData.qualityOfWork[index] += evaluation.quality_of_work_points;
-            pointsData.workCreativity[index] += evaluation.work_creativity;
-            pointsData.mistakes[index] += evaluation.mistakes_points;
-          }
-        });
+                    if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
+                        const index = dayOfWeek - 1; // Convert Monday=1 to array index 0
+                        taskCountByDay[index] += 1; // Count tasks for that weekday
+                    }
+                }
+            });
 
-        setDailyPoints(pointsData);
-      } else {
-        setError('No evaluations found for this user');
-      }
+            setDailyTasks(taskCountByDay);
+        } else {
+            setError('No tasks found for this user');
+        }
     } catch (err) {
-      console.error("Error fetching employee data:", err);
-      setError("Failed to fetch data");
+        console.error("Error fetching employee tasks:", err);
+        setError("Failed to fetch data");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
 
   useEffect(() => {
-    fetchDailyPoints();
+    fetchDailyTasks();
   }, [_currentUser]);
 
   const weekDays = generateWeekDays(); // Monday to Friday
@@ -86,22 +80,18 @@ const DetailedBarChart = ({ _currentUser }) => {
 
   return (
     <Box sx={{ p: 3 }}>
-      {dailyPoints.behavior.length > 0 ? (
+      {dailyTasks.some(count => count > 0) ? (
         <Box sx={{ mb: 3 }}>
           <BarChart
             xAxis={[{ scaleType: 'band', data: weekDays }]} // Weekdays from Monday to Friday
-            series={[
-              { data: dailyPoints.behavior, label: 'Behavior Points' },
-              { data: dailyPoints.workAttitude, label: 'Work Attitude Points' },
-              { data: dailyPoints.qualityOfWork, label: 'Quality of Work Points' },
-              { data: dailyPoints.workCreativity, label: 'Work Creativity Points' },
-              { data: dailyPoints.mistakes, label: 'Mistakes Points' },
-            ]} // Displaying the detailed points as separate bars
+            series={[{ data: dailyTasks, label: 'Tasks Completed', color: "#1a237e" }]} // Task count per day
             height={400}
           />
         </Box>
       ) : (
-        <Typography>No daily points available</Typography>
+        <Typography>No tasks completed this week 
+          
+        </Typography>
       )}
     </Box>
   );
