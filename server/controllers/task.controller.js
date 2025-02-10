@@ -155,18 +155,28 @@ const getLateTasksByEmployeeIdDate = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Fetch tasks where updatedAt is before today and createdAt is not the same day as updatedAt
-    const lateTasks = await Task.find({
+    // Get today's start and end time
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    // Fetch tasks created today
+    const tasks = await Task.find({
       employee_obj_id: id,
-      taskcompleteStatus: "completed", // Fetch only completed tasks
-      createdAt: { $lt: new Date() }, // Tasks created before today
-      updatedAt: { $lt: new Date() }, // Tasks updated before today
-      $expr: { 
-        $ne: [
-          { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-          { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } }
-        ]
-      }
+      taskcompleteStatus: "completed",
+      createdAt: { $gte: todayStart, $lte: todayEnd }, // Task created today
+      "taskTime_3.date_time": { $exists: true }, // Ensure taskTime_3 exists
+    });
+
+    // Filter tasks where updatedAt is later than taskTime_3.date_time
+    const lateTasks = tasks.filter((task) => {
+      if (!task.taskTime_3 || !task.taskTime_3.date_time) return false;
+
+      const taskTime3Date = new Date(task.taskTime_3.date_time * 1000); // Convert from seconds to milliseconds
+
+      return task.updatedAt > taskTime3Date; // Compare updatedAt with taskTime_3
     });
 
     res.status(200).json(lateTasks);
@@ -175,7 +185,6 @@ const getLateTasksByEmployeeIdDate = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
-
 
 
 // ! Get Tasks by Id

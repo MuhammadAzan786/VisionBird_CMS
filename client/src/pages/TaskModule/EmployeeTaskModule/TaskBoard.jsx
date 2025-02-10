@@ -35,9 +35,13 @@ const TaskBoard = () => {
       const { data: assignedTasks } = await axios.get(
         `/api/task/getAssignedTasksByEmployeeIdDate/${currentUser._id}`
       );
-      
       setAssignTasks(assignedTasks.length);
-  
+
+      const { data: lateTasks } = await axios.get(
+        `/api/task/getLateTasksByEmployeeIdDate/${currentUser._id}`
+      );
+      setLateTask(lateTasks.length);
+
       const { data: completedTasks } = await axios.get(
         `/api/task/getCompletedTasksByEmployeeIdDate/${currentUser._id}`
       );
@@ -48,11 +52,8 @@ const TaskBoard = () => {
       );
       setInProgressTasks(inProgressTasks.length);
   
-      const { data: lateTasks } = await axios.get(
-        `/api/task/getLateTasksByEmployeeIdDate/${currentUser._id}`
-      );
-      console.log("Late Tasks Response:", lateTasks); // Add this log
-      setLateTask(lateTasks.length);
+
+
     } catch (error) {
       console.error("Error fetching tasks:", error);
       if (error.response) {
@@ -68,7 +69,6 @@ const TaskBoard = () => {
     
   };
   
-
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -236,7 +236,7 @@ const TaskBoard = () => {
                 lineHeight: "13px",
               }}
             >
-              {lateTask ? lateTask : 0} Tasks
+              {lateTask} Tasks
             </Typography>
           </Box>
         </Paper>
