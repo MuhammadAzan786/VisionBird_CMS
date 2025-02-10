@@ -35,26 +35,39 @@ const TaskBoard = () => {
       const { data: assignedTasks } = await axios.get(
         `/api/task/getAssignedTasksByEmployeeIdDate/${currentUser._id}`
       );
+      
       setAssignTasks(assignedTasks.length);
-
+  
       const { data: completedTasks } = await axios.get(
         `/api/task/getCompletedTasksByEmployeeIdDate/${currentUser._id}`
       );
       setCompletedTasks(completedTasks.length);
-
+  
       const { data: inProgressTasks } = await axios.get(
         `/api/task/getPendingTasksByEmpId/${currentUser._id}`
       );
       setInProgressTasks(inProgressTasks.length);
-
+  
       const { data: lateTasks } = await axios.get(
         `/api/task/getLateTasksByEmployeeIdDate/${currentUser._id}`
       );
+      console.log("Late Tasks Response:", lateTasks); // Add this log
       setLateTask(lateTasks.length);
     } catch (error) {
       console.error("Error fetching tasks:", error);
+      if (error.response) {
+        console.error("Response status:", error.response.status);
+        console.error("Response data:", error.response.data);
+      } else if (error.request) {
+        console.error("Request error:", error.request);
+      } else {
+        console.error("Error message:", error.message);
+      }
     }
+    
+    
   };
+  
 
   useEffect(() => {
     fetchTasks();

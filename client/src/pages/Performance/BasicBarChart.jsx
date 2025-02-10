@@ -53,7 +53,7 @@ const DetailedBarChart = ({ _currentUser }) => {
 
             setDailyTasks(taskCountByDay);
         } else {
-            setError('No tasks found for this user');
+            setError('No tasks have been assigned to this user.');
         }
     } catch (err) {
         console.error("Error fetching employee tasks:", err);

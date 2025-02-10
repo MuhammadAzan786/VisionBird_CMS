@@ -148,34 +148,33 @@ const getCompletedTasksByEmployeeIdDate = async (req, res) => {
   }
 };
 
-//! Get In Late Tasks By EmployeeId According to date
+//Get  Late Tasks By EmployeeId According to date
 const getLateTasksByEmployeeIdDate = async (req, res) => {
   try {
     const { id } = req.params;
-    // Get the current date
-    const currentDate = new Date();
-    const startOfDay = new Date(currentDate.setUTCHours(0, 0, 0, 0));
-    const endOfDay = new Date(currentDate.setUTCHours(23, 59, 59, 999));
 
-    const data = await Task.find({
+    // Fetch tasks where updatedAt is before today and createdAt is not the same day as updatedAt
+    const lateTasks = await Task.find({
       employee_obj_id: id,
-      taskcompleteStatus: "Late",
-      createdAt: {
-        $gte: startOfDay,
-        $lt: endOfDay,
-      },
+      taskcompleteStatus: "completed", // Fetch only completed tasks
+      createdAt: { $lt: new Date() }, // Tasks created before today
+      updatedAt: { $lt: new Date() }, // Tasks updated before today
+      $expr: { 
+        $ne: [
+          { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } }
+        ]
+      }
     });
 
-    if (!data) {
-      return res.status(404).json({ message: "No Late Tasks Found" });
-    }
-
-    res.status(200).json(data);
+    res.status(200).json(lateTasks);
   } catch (error) {
-    console.error("Error fetching tasks by employee and date:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error fetching late tasks:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
+
+
 
 // ! Get Tasks by Id
 const getTaskById = async (req, res) => {

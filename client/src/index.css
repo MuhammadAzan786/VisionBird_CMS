@@ -117,3 +117,12 @@ I added the following code to the index.css file: */
   margin-top: -16px !important;
   margin-right: 16px !important;
 }
+
+
+
+@media (max-width: 900px) {
+.css-1i3rjxp-MuiGrid-root>.MuiGrid-item,
+.css-1i3rjxp-MuiGrid-root{
+  padding-left: 0px !important;
+}
+}
