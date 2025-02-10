@@ -125,20 +125,21 @@ const getCompletedTasksByEmployeeIdDate = async (req, res) => {
     const { id } = req.params;
     // Get the current date
     const currentDate = new Date();
-    const startOfDay = new Date(currentDate.setUTCHours(0, 0, 0, 0));
-    const endOfDay = new Date(currentDate.setUTCHours(23, 59, 59, 999));
+    const startOfDay = new Date(currentDate.setUTCHours(0, 0, 0, 0));  // Start of today
+    const endOfDay = new Date(currentDate.setUTCHours(23, 59, 59, 999)); // End of today
 
+    // Fetch tasks where updatedAt is today's date, but createdAt can be anytime
     const data = await Task.find({
       employee_obj_id: id,
       taskcompleteStatus: "completed",
-      createdAt: {
-        $gte: startOfDay,
-        $lt: endOfDay,
+      updatedAt: {
+        $gte: startOfDay,  // Updated today or later
+        $lt: endOfDay,     // Updated before the end of today
       },
     });
 
-    if (!data) {
-      return res.status(404).json({ message: "No In Progress Tasks Found" });
+    if (!data || data.length === 0) {
+      return res.status(404).json({ message: "No Completed Tasks Found" });
     }
 
     res.status(200).json(data);
@@ -147,6 +148,7 @@ const getCompletedTasksByEmployeeIdDate = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 //Get  Late Tasks By EmployeeId According to date
 const getLateTasksByEmployeeIdDate = async (req, res) => {

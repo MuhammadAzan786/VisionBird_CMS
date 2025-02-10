@@ -40,9 +40,9 @@ const DetailedBarChart = ({ _currentUser }) => {
             const taskCountByDay = Array(5).fill(0); // Monday to Friday
 
             tasks.forEach((task) => {
-                if (task.taskcompleteStatus === "completed" && task.DateTime) {
-                    const taskDate = new Date(task.DateTime);
-                    const dayOfWeek = taskDate.getDay();
+                if (task.taskcompleteStatus === "completed" && task.updatedAt) {
+                    const updatedAtDate = new Date(task.updatedAt);  // Using updatedAt to filter
+                    const dayOfWeek = updatedAtDate.getDay();
 
                     if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
                         const index = dayOfWeek - 1; // Convert Monday=1 to array index 0
@@ -61,8 +61,7 @@ const DetailedBarChart = ({ _currentUser }) => {
     } finally {
         setLoading(false);
     }
-};
-
+  };
 
   useEffect(() => {
     fetchDailyTasks();
@@ -80,25 +79,24 @@ const DetailedBarChart = ({ _currentUser }) => {
 
   return (
     <>
+      <Typography>
+        Tasks completed this week
+      </Typography>
+      <Box sx={{ p: 3 }}>
+        {dailyTasks.some(count => count > 0) ? (
+          <Box sx={{ mb: 3 }}>
+            <BarChart
+              xAxis={[{ scaleType: 'band', data: weekDays }]} // Weekdays from Monday to Friday
+              series={[{ data: dailyTasks, label: 'Tasks Completed', color: "#1a237e" }]} // Task count per day
+              height={400}
+            />
+          </Box>
+        ) : (
           <Typography>
-            Tasks completed this week
+            No tasks completed this week 
           </Typography>
-    <Box sx={{ p: 3 }}>
-      {dailyTasks.some(count => count > 0) ? (
-        <Box sx={{ mb: 3 }}>
-          <BarChart
-            xAxis={[{ scaleType: 'band', data: weekDays }]} // Weekdays from Monday to Friday
-            series={[{ data: dailyTasks, label: 'Tasks Completed', color: "#1a237e" }]} // Task count per day
-            height={400}
-          />
-        </Box>
-      ) : (
-        <Typography>
-          No tasks completed this week 
-          
-        </Typography>
-      )}
-    </Box>
+        )}
+      </Box>
     </>
   );
 };
