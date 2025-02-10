@@ -7,6 +7,9 @@ import axios from "../../utils/axiosInterceptor";
 import { setHighlightedDates } from "../../redux/ReportDatesSlice";
 import { useSelector, useDispatch } from "react-redux";
 
+// Set Monday as the first day of the week
+moment.updateLocale("en", { week: { dow: 1 } });
+
 // Initialize the localizer for moment
 const localizer = momentLocalizer(moment);
 
@@ -57,18 +60,30 @@ const CalendarComponent = ({ onSelectDate }) => {
   };
 
   return (
-    <Calendar
-      localizer={localizer}
-      events={[]} // No events, just highlighting dates
-      startAccessor="start"
-      endAccessor="end"
-      style={{ height: 500 }}
-      selectable
-      onSelectSlot={handleDateClick}
-      defaultView="month"
-      views={["month"]}
-      dayPropGetter={dayPropGetter} // Apply custom styling for specific days
-    />
+    <>
+      <style>
+        {`
+          .rbc-off-range {
+            visibility: hidden; /* Hide previous & next month days */
+          }
+          .rbc-off-range-bg {
+            background: transparent !important;
+          }
+        `}
+      </style>
+      <Calendar
+        localizer={localizer}
+        events={[]} // No events, just highlighting dates
+        startAccessor="start"
+        endAccessor="end"
+        style={{ height: 500 }}
+        selectable
+        onSelectSlot={handleDateClick}
+        defaultView="month"
+        views={["month"]}
+        dayPropGetter={dayPropGetter} // Apply custom styling for specific days
+      />
+    </>
   );
 };
 

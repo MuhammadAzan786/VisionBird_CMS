@@ -59,6 +59,7 @@ export default function LeavesTable({ allLeaves, pendingLeaves }) {
         );
       },
     },
+    { field: "status", headerName: "Status", width: 300 },
     { field: "leaveCategory", headerName: "Category", width: 150 },
     { field: "leaveType", headerName: "Type", width: 120 },
     {
@@ -111,7 +112,7 @@ export default function LeavesTable({ allLeaves, pendingLeaves }) {
     //     </Box>
     //   ),
     // },
-    { field: "status", headerName: "Status", width: 300 },
+    
     { field: "reason", headerName: "Reason", width: 300 },
 
     {

@@ -119,10 +119,9 @@ module.exports = {
     try {
       const _id = req.params.id;
       const status = req.body.status;
-      const statusForLeave = status == "Rejected" ? "rejected" : "accepted";
-      // status == "Rejected"
-      //   ? `Rejected by ${req.body.statusChangedBy}`
-      //   : `Accepted by ${req.body.statusChangedBy}`;
+      const statusForLeave = status == "Rejected"
+        ? `Rejected by ${req.body.statusChangedBy}`
+        : `Accepted by ${req.body.statusChangedBy}`;
 
       let message = "";
       if (status == "Rejected") {

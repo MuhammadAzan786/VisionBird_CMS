@@ -73,7 +73,7 @@ const Navbar = ({
     {
       label: "Employee Documents",
       icon: <FolderIcon />,
-      path: "/pay-salaries",
+      // path: "/pay-salaries",
       collapsable: true,
       open: false,
       children: [

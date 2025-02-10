@@ -22,6 +22,13 @@ const EmployeeDailyReportForm = () => {
   const handleSelectDate = async (date) => {
     try {
       const formattedDate = new Date(date);
+      const dayOfWeek = formattedDate.getDay();
+
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
+        toast.error("Reports can only be submitted for weekdays (Mon - Fri).");
+        return;
+      }
+
       const isoString = new Date(
         formattedDate.getTime() - formattedDate.getTimezoneOffset() * 60000
       ).toISOString();
@@ -47,7 +54,7 @@ const EmployeeDailyReportForm = () => {
         setEvaluationPermission(false);
       }
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.message);
       console.error("API error:", error);
     }
   };
@@ -95,7 +102,7 @@ const EmployeeDailyReportForm = () => {
       </Dialog>
 
       {/* Toast container for notifications */}
-      <Toaster position="bottom-right" reverseOrder={false} />
+      {/* <Toaster position="bottom-right" reverseOrder={false} /> */}
     </Paper>
   );
 };

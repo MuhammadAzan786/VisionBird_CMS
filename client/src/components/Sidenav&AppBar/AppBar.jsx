@@ -40,6 +40,7 @@ import {
   Menu,
   MenuItem,
   AppBar as MuiAppBar,
+  Stack,
   Toolbar,
   Tooltip,
   Typography,
@@ -52,7 +53,7 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
   const { currentUser } = useSelector((state) => state.user);
   const [notifications, setNotifications] = React.useState([]);
   const [totalNotifications, setTotalNotifications] = React.useState(0);
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const [permission, setPermission] = React.useState(Notification.permission);
   const [navScroll, setNavScroll] = useState();
 
@@ -103,6 +104,10 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
       dispatch(initializeSocket(currentUser));
     }
   }, [socket]);
+
+  useEffect(() => {
+    notifications.length > 0 && setOpen(true);
+  }, [notifications]);
 
   useEffect(() => {
     window.addEventListener("scroll", () => {
@@ -277,29 +282,7 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
             >
               {mobileOpen ? <KeyboardDoubleArrowLeftIcon /> : <KeyboardDoubleArrowRightIcon />}
             </IconButton>
-          </Box>
-
-          <Box>
-            <Box
-              sx={{
-                marginLeft: "1vw",
-
-                alignItems: "center",
-                display: greaterthanlg ? "flex" : "none",
-              }}
-            >
-              <CircleIcon
-                sx={{
-                  fontSize: ".6rem",
-                  color: "#72E128",
-                  marginRight: "0.3rem",
-                }}
-              />
-              <Typography variant="h6" color="text.primary" sx={{ fontWeight: "600" }}>
-                {currentUser.employeeName}
-              </Typography>
-            </Box>
-          </Box>
+          </Box>          
         </Box>
 
         <Box display={"flex"} alignItems={"center"} gap={1}>
@@ -386,7 +369,7 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
             >
               <IconButton
                 onClick={() => {
-                  setOpen(true);
+                  setOpen(prev => !prev);
                 }}
                 sx={{
                   "&:hover": {
@@ -396,15 +379,14 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
               >
                 <Badge
                   color="warning"
-                  variant="dot"
+                  badgeContent={notifications.length}
                   sx={{
                     "& .MuiBadge-badge": {
                       backgroundColor: "#FF4D49", // Custom badge background color
-                      color: "yellow", // Custom badge text color
                       position: "absolute",
                       top: "0.4rem",
                       right: "0.4rem",
-                      border: "0.001rem solid #fff", // Border for badge
+                      border: "0.1rem solid #fff", // Border for badge
                     },
                   }}
                 >
@@ -429,47 +411,91 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
             </Tooltip>
           </ClickAwayListener>
 
-          <Badge
-            color="success.light"
-            variant="dot"
+          <Stack
+            direction="row"
+            spacing={1}
+            onMouseDown={handleMenuClick}
+            sx={{
+              padding: 1,
+              borderRadius: "2%",
+              cursor: "pointer",
+              transition: "0.3s ease-in-out",
+              "&:hover": {
+                backgroundColor: "#f0f0f0"
+              } 
+            }}
+          >
+            <Badge
+              color="success.light"
+              variant="dot"
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              sx={{
+                "& .MuiBadge-badge": {
+                  backgroundColor: "#72E128",
+                  color: "yellow",
+                  position: "absolute",
+                  bottom: "0.3rem",
+                  right: "0.3rem",
+                  width: "12px",
+                  height: "12px",
+                  border: "0.125rem solid #fff",
+                  borderRadius: "50%",
+                },
+              }}
+            >
+              <Avatar
+                src={currentUser.employeeProImage?.secure_url || manAvatar}
+                sx={{ width: "3rem", height: "3rem" }}
+              />
+            </Badge>
+            
+            <Stack direction="column" sx={{ alignItems: "start", justifyContent: "center" }}>
+              <Typography
+                fontWeight={500}
+                fontSize={15}
+                sx={{ fontFamily: "Poppins, sans-serif", color: "black" }}
+              >
+                {currentUser.employeeName}
+              </Typography>
+              <Typography color="#a0a0a0" fontSize={12}>
+                {currentUser.employeeID}
+              </Typography>
+            </Stack>
+          </Stack>
+
+          <Menu 
+            anchorEl={anchorEl} 
+            open={menuOpen} 
+            onClose={handleClose} 
+            container={anchorEl?.parentElement}
+            
             anchorOrigin={{
               vertical: "bottom",
               horizontal: "right",
             }}
-            sx={{
-              "& .MuiBadge-badge": {
-                backgroundColor: "#72E128",
-                color: "yellow",
-                position: "absolute",
-                bottom: "0.3rem",
-                right: "0.3rem",
-                width: "11px",
-                height: "11px",
-                border: "0.125rem solid #fff",
-                borderRadius: "50%",
-              },
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
             }}
-          >
-            <Avatar
-              src={currentUser.employeeProImage?.secure_url || manAvatar}
-              onClick={handleMenuClick}
-              sx={{
-                cursor: "pointer",
-                marginLeft: "auto",
-                width: "3rem",
-                height: "3rem",
-              }}
-            />
-          </Badge>
 
-          <Menu sx={{ mt: 1.8, ml: "-25px" }} anchorEl={anchorEl} open={menuOpen} onClose={handleClose}>
+            sx={{ 
+              mt: 1.8,
+              "& .MuiPaper-root": { padding: 1 }
+            }} 
+          >
             <MenuItem
               sx={{ ml: 1, mr: 1 }}
               component={Link}
               to={`/employee-profile/${currentUser._id}`}
               onClick={handleClose}
             >
-              <PersonIcon />
+              <Avatar
+                src={currentUser.employeeProImage?.secure_url || manAvatar}
+                sx={{ width: "2rem", height: "2rem" }}
+              />
               <Typography sx={{ ml: 2 }}>Profile</Typography>
             </MenuItem>
             <MenuItem sx={{ ml: 1, mr: 1 }} onClick={handleLogout}>

@@ -185,7 +185,7 @@ const checkReportExists = async (req, res) => {
     // Check if the date is a weekday (Monday to Friday)
     if (date_fns.isWeekend(todayDate)) {
       return res.status(200).json({
-        message: "Reports can only be submitted for weekdays.",
+        message: "Reports can only be submitted for weekdays (Mon - Fri).",
         exists: false,
         evaluation_permission: false,
       });
