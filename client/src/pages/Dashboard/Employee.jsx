@@ -21,6 +21,7 @@ import EmployeeTaskTable from "../TaskModule/EmployeeTaskModule/EmployeeTaskBoar
 import { useSelector } from "react-redux";
 import InfoIcon from "@mui/icons-material/Info"; // Add an info icon for tooltips
 import { colorCombinations, customColors, palette } from "../../theme/colors";
+import TaskChart from "../Performance/TaskChart";
 
 const Employee = ({
   classes,
@@ -273,6 +274,7 @@ const Employee = ({
       <Paper>
         <EmployeeTaskTable />
       </Paper>
+
     </Stack>
   );
 };

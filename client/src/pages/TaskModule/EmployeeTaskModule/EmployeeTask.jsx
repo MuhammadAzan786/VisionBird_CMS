@@ -63,7 +63,6 @@ const EmployeeTask = () => {
 
   useEffect(() => {
     if (socket) {
-
       const handlefetchTasks = () => {
         fetchEmployees();
       };

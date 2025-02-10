@@ -21,12 +21,12 @@ import { initializeSocket } from "../../../redux/socketSlice";
 const fetchTaskTimes = async (taskId) => {
   try {
     const response = await axios.get(`/api/task/getTaskById/${taskId}`);
-    const taskTimes = response.DateTime;
+    const taskTimes = response.data;
     const startTime = taskTimes.taskStartTime;
     const endTime = taskTimes.taskcompleteTime;
     const taskTime = taskTimes.taskTime;
-    return { startTime, endTime, taskTime };
 
+    return { startTime, endTime, taskTime };
   } catch (error) {
     console.error("Error fetching task times:", error);
     return null;
@@ -43,19 +43,6 @@ const updateTaskCompleteStatus = async (taskId, TaskStatus) => {
     }
   );
 };
-const formatTime = (seconds) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainingSeconds = seconds % 60;
-
-  // Formatting to ensure two digits for hours, minutes, and seconds
-  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${remainingSeconds
-    .toString()
-    .padStart(2, "0")}`;
-};
-function formatDateTime(unixTime) {
-  return new Date(unixTime * 1000).toLocaleString(); // Convert UNIX timestamp to readable date
-}
 
 const columns = (handleStatusChange) => [
   {
@@ -105,30 +92,32 @@ const columns = (handleStatusChange) => [
       }, [params.row.manager_obj_id]);
 
       return (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <Box sx={{ marginRight: "10px" }}>
-            {ManagerProfilePic ? (
-              <Avatar alt="Avatar" sx={{ width: 28, height: 28 }} src={ManagerProfilePic} />
-            ) : (
-              <Skeleton variant="circular" width={28} height={28} />
-            )}
+        <>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+            }}
+          >
+            <Box sx={{ marginRight: "10px" }}>
+              {ManagerProfilePic ? (
+                <Avatar alt="Avatar" sx={{ width: 28, height: 28 }} src={ManagerProfilePic} />
+              ) : (
+                <Skeleton variant="circular" width={28} height={28} />
+              )}
+            </Box>
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: "700", fontSize: "0.8rem" }}>
+                {managerName}
+              </Typography>
+              <Typography variant="body2" sx={{ fontSize: "0.7rem" }}>
+                {managerEmail}
+              </Typography>
+            </Box>
           </Box>
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: "700", fontSize: "0.8rem" }}>
-              {managerName}
-            </Typography>
-            <Typography variant="body2" sx={{ fontSize: "0.7rem" }}>
-              {managerEmail}
-            </Typography>
-          </Box>
-        </Box>
+        </>
       );
     },
   },
@@ -136,6 +125,7 @@ const columns = (handleStatusChange) => [
     field: "taskPriority",
     headerName: "Task Priority",
     width: 150,
+
     editable: true,
     renderCell: (params) => {
       let color, backgroundColor;
@@ -175,50 +165,29 @@ const columns = (handleStatusChange) => [
     },
   },
   {
-    field: "TimeSlots",
+    field: "taskTime",
     headerName: "Time",
     width: 250,
     headerAlign: "center",
+
     renderCell: (params) => {
-      const taskTimes = params.row;
-
-      // Prepare a list of task times to display
-      const taskTimeList = [
-        taskTimes.taskTime_1 || null,
-        taskTimes.taskTime_2 || null,
-        taskTimes.taskTime_3 || null,
-      ];
-
+      const { taskStartTime, taskTime } = params.row;
       return (
         <Box
           sx={{
             display: "flex",
-            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             width: "100%",
           }}
         >
-          {taskTimeList.map((taskTime, index) => {
-            if (!taskTime) {
-              return (
-                <Typography variant="body2" sx={{ fontWeight: "300" }} key={index}>
-                  No task time available
-                </Typography>
-              );
-            }
-            const formattedDateTime = formatDateTime(taskTime.date_time);
-            return (
-              <Typography variant="body2" sx={{ fontWeight: "300" }} key={index}>
-                {formattedDateTime} (Points: {taskTime.points})
-              </Typography>
-            );
-          })}
-
+          <EmployeeTaskTimer
+            taskStartTime={taskStartTime} // Pass taskStartTime from row data
+            totalDuration={taskTime} // Assuming taskTime is total duration in seconds
+            taskStatus={params.row.taskStatus} // Pass taskStatus from row data
+          />
         </Box>
       );
-
-
     },
   },
   {
@@ -227,6 +196,7 @@ const columns = (handleStatusChange) => [
     width: 250,
     headerAlign: "center",
     cellClassName: "centeredCell",
+
     renderCell: (params) => {
       const [anchorEl, setAnchorEl] = useState(null);
       const open = Boolean(anchorEl);
@@ -313,8 +283,11 @@ const columns = (handleStatusChange) => [
 
               <Menu id="long-menu" anchorEl={anchorEl} open={open} onClose={handleClose}>
                 <MenuItem onClick={() => onChangeStatus("In Progress")}>In Progress</MenuItem>
+
                 <MenuItem onClick={() => onChangeStatus("PauseRequest")}>Pause Request</MenuItem>
+
                 <MenuItem onClick={() => onChangeStatus("ResumeRequest")}>Resume Task</MenuItem>
+
                 <MenuItem onClick={() => onChangeStatus("Completed")}>Completed</MenuItem>
               </Menu>
             </Box>
@@ -359,38 +332,53 @@ const columns = (handleStatusChange) => [
 
           const endTimeUnix = endTimeDate.getTime();
           const startTimeUnix = startTimeDate.getTime();
-          const allocatedTimeUnix = allocatedTimeDate.getTime();
-          if (allocatedTimeUnix > startTimeUnix && allocatedTimeUnix < endTimeUnix) {
+          const differenceInSeconds = (endTimeUnix - startTimeUnix) / 1000;
+          console.log("differenceInSeconds", differenceInSeconds);
+          console.log(allocatedTimeDate);
+          if (differenceInSeconds <= allocatedTimeDate) {
+            updateTaskCompleteStatus(params.row._id, "On Time");
             setStatus({
-              label: "Task Running",
-              icon: <AccessTimeIcon />,
-              color: "#fbc02d",
-              backgroundColor: "#fff8e1",
+              label: "On Time",
+              icon: <CheckCircleIcon />,
+              color: "#34CAF9",
+              backgroundColor: "#DCF6FE",
             });
-          } else if (allocatedTimeUnix >= endTimeUnix) {
+          } else {
+            updateTaskCompleteStatus(params.row._id, "Late");
             setStatus({
-              label: "Task Ended",
-              icon: <TimerOffIcon />,
-              color: "#d32f2f",
-              backgroundColor: "#ffebee",
+              label: "Late",
+              icon: <ErrorIcon />,
+              color: "#d74444",
+              backgroundColor: "#fbeaea",
             });
           }
         };
         calculateStatus();
-      }, [params.row._id, params.row.taskStatus]);
+      }, [params.row.taskStatus, params.row._id]);
 
       return (
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingX: "20px",
+            width: "100%",
+          }}
+        >
           <Chip
-            icon={status.icon}
             label={status.label}
+            icon={status.icon}
             sx={{
               backgroundColor: status.backgroundColor,
               color: status.color,
               fontSize: "0.7rem",
-              fontWeight: "600",
-              paddingX: "15px",
-              marginLeft: "5px",
+              fontWeight: "500",
+              paddingX: "10px",
+              "& .MuiChip-icon": {
+                fontSize: "1.1rem",
+                color: status.color,
+              },
             }}
           />
         </Box>
@@ -398,8 +386,6 @@ const columns = (handleStatusChange) => [
     },
   },
 ];
-
-
 
 export default function EmployeeTaskTable() {
   const [rows, setRows] = useState([]);

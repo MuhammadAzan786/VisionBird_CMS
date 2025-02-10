@@ -85,7 +85,7 @@ const BasicLineChart = ({ _currentUser }) => {
   }, [_currentUser]);
 
   const weekDays = generateWeekDays();
-
+  const maxY = Math.max(...dailyPoints) + 10; // Add a margin for visual clarity (e.g., +10)
   if (loading) return <p>Loading...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
@@ -97,7 +97,7 @@ const BasicLineChart = ({ _currentUser }) => {
           <Box sx={{ mb: 3 }}>
             <LineChart
               xAxis={[{ data: weekDays, scaleType: 'point', label: "Weekday" }]}
-              yAxis={[{ label: "Total Points", min: 1, max: 30 }]}
+              yAxis={[{ min: 0, max: maxY }]} // Set dynamic max value based on task data
               series={[{
                 data: dailyPoints,
                 label: "Total Points",

@@ -4,6 +4,7 @@ import BasicBarChart from "./BasicBarChart";
 import BasicPieChart from "./BasicPieChart";
 import BasicLineChart from "./BasicLineChart";
 import { useSelector } from "react-redux";
+import TaskChart from "./TaskChart";
 
 
 const ViewPerformance = () => {
@@ -34,6 +35,11 @@ const ViewPerformance = () => {
         <Grid item xs={12}>
           <Paper>
           <BasicLineChart _currentUser={currentUser._id} />
+          </Paper>
+        </Grid>
+        <Grid item xs={12}>
+          <Paper>
+          <TaskChart _currentUser={currentUser._id} />
           </Paper>
         </Grid>
       </Grid>

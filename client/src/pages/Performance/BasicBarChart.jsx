@@ -68,7 +68,7 @@ const DetailedBarChart = ({ _currentUser }) => {
   }, [_currentUser]);
 
   const weekDays = generateWeekDays(); // Monday to Friday
-
+  const maxY = Math.max(...dailyTasks) + 10; // Add a margin for visual clarity (e.g., +10)
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -88,6 +88,7 @@ const DetailedBarChart = ({ _currentUser }) => {
             <BarChart
               xAxis={[{ scaleType: 'band', data: weekDays }]} // Weekdays from Monday to Friday
               series={[{ data: dailyTasks, label: 'Tasks Completed', color: "#1a237e" }]} // Task count per day
+              yAxis={[{ min: 0, max: maxY }]} // Set dynamic max value based on task data
               height={400}
             />
           </Box>
