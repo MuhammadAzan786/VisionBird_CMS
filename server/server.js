@@ -83,7 +83,7 @@ app.use("/api/task", taskRoute);
 app.use("/api/tax_Category", taxCategoryRoutes);
 app.use("/api/tax_File", taxFileRoutes);
 app.use("/api/leave", leaveRoutes);
-app.use("/api/notification", notificationRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/empOfWeek", employeeOfWeekRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/api/employee-documents", employeeDocumentRoutes);

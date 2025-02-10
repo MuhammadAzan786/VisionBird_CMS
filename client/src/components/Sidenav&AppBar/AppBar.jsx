@@ -45,6 +45,7 @@ import {
   Typography,
 } from "@mui/material";
 
+
 export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -55,7 +56,7 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
   const [open, setOpen] = React.useState(true);
   const [permission, setPermission] = React.useState(Notification.permission);
   const [navScroll, setNavScroll] = useState();
-
+  const [notificationTimeout, setNotificationTimeout] = useState(null);
   const notificationSound = new Howl({
     src: ["/notificationsound.wav"], // Path to your sound file
     volume: 1, // Adjust volume (0.0 to 1.0)
@@ -185,7 +186,16 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
       };
     }
   };
-
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      const response = await fetch('/api/notifications');
+      const data = await response.json();
+      setNotifications(data); // Make sure this updates the state correctly
+    };
+  
+    fetchNotifications();
+  }, []); // Add dependencies if needed, like currentUser or employee_id
+  
   const deleteNotification = (notificationId) => {
     setTotalNotifications((prev) => (prev > 0 ? prev - 1 : 0));
     setNotifications((prevNotifications) =>
@@ -224,7 +234,20 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
     setMenuOpen(false);
   };
 
+  useEffect(() => {
+    if (notifications.length === 0) {
+      // Automatically close the notification after 3 seconds if there are no notifications
+      const timeout = setTimeout(() => {
+        setOpen(false);
+      }, 3000);
+
+      setNotificationTimeout(timeout);
+
+      return () => clearTimeout(timeout); // Clean up the timeout on unmount
+    }
+  }, [notifications]);
   return (
+
     <MuiAppBar elevation={0} sx={{ backgroundColor: "white", paddingX: "10px" }}>
       <Toolbar
         sx={{
@@ -303,181 +326,176 @@ export default function Appbar({ mobileOpen, greaterthanlg, handleDrawerToggle }
         </Box>
 
         <Box display={"flex"} alignItems={"center"} gap={1}>
-          <ClickAwayListener
-            onClickAway={() => {
-              setOpen(false);
-            }}
-          >
-            <Tooltip
-              PopperProps={{
-                disablePortal: true,
-              }}
-              onClose={() => {
-                setOpen(false);
-              }}
-              open={open}
-              disableFocusListener
-              disableHoverListener
-              disableTouchListener
-              title={
-                <Box sx={{ maxHeight: 400, overflow: "auto" }}>
-                  <List>
-                    {notifications.length > 0 ? (
-                      notifications.map((notification, index) => (
-                        <React.Fragment key={notification._id}>
-                          {index !== 0 && <Divider component="li" sx={{ borderColor: "white" }} />}
-                          <ListItem
-                            sx={{
-                              padding: 1,
-                              display: "flex",
-                              alignItems: "center",
-                              height: 50,
-                            }}
-                          >
-                            <button
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                padding: 0,
-                                backgroundColor: "red !important",
-                              }}
-                              onClick={() => {
-                                // Determine path based on notification type
-                                let path = "/";
-
-                                const isAdmin = currentUser.role === "admin";
-
-                                // const isManagerOrAdmin = currentUser.role === "manager" || currentUser.role === "admin"; // Adjust role checks as needed
-
-                                switch (notification.NotificationName) {
-                                  case "Leave_Notification":
-                                    path = `/view-leave/${notification.leave_id}`;
-                                    break;
-                                  case "Task_Notification":
-                                    path = isAdmin
-                                      ? `/employeetaskviewPause/${notification.employee_id}`
-                                      : `/employeetaskboard/${notification.employee_id}`;
-                                    break;
-                                  default:
-                                    path = `/`;
-                                }
-
-                                navigate(path);
-                                setOpen(false);
-                                deleteNotification(notification._id);
-                              }}
-                            >
-                              <InfoIcon />
-                              <Typography sx={{ textAlign: "start" }} marginLeft={1} variant="caption">
-                                {notification.message}
-                              </Typography>
-                            </button>
-                          </ListItem>
-                        </React.Fragment>
-                      ))
-                    ) : (
-                      <ListItem>
-                        <ListItemText primary="No Notifications" />
+      <ClickAwayListener onClickAway={() => setOpen(false)}>
+        <Tooltip
+          PopperProps={{ disablePortal: true }}
+          onClose={() => setOpen(false)}
+          open={open}
+          disableFocusListener
+          disableHoverListener
+          disableTouchListener
+          title={
+            <Box sx={{ maxHeight: 400, overflow: "auto" }}>
+              <List>
+                {notifications.length > 0 ? (
+                  notifications.map((notification, index) => (
+                    <React.Fragment key={notification._id}>
+                      {index !== 0 && <Divider component="li" sx={{ borderColor: "white" }} />}
+                      <ListItem sx={{ padding: 1, display: "flex", alignItems: "center", height: 50 }}>
+                        <button
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: 0,
+                            backgroundColor: "red !important",
+                          }}
+                          onClick={() => {
+                            let path = "/";
+                            const isAdmin = currentUser.role === "admin";
+                            switch (notification.NotificationName) {
+                              case "Leave_Notification":
+                                path = `/view-leave/${notification.leave_id}`;
+                                break;
+                              case "Task_Notification":
+                                path = isAdmin
+                                  ? `/employeetaskviewPause/${notification.employee_id}`
+                                  : `/employeetaskboard/${notification.employee_id}`;
+                                break;
+                              default:
+                                path = "/";
+                            }
+                            navigate(path);
+                            setOpen(false);
+                            deleteNotification(notification._id);
+                          }}
+                        >
+                          <InfoIcon />
+                          <Typography sx={{ textAlign: "start" }} marginLeft={1} variant="caption">
+                            {notification.message}
+                          </Typography>
+                        </button>
                       </ListItem>
-                    )}
-                  </List>
-                </Box>
-              }
-            >
-              <IconButton
-                onClick={() => {
-                  setOpen(true);
-                }}
-                sx={{
-                  "&:hover": {
-                    background: "none",
-                  },
-                }}
-              >
-                <Badge
-                  color="warning"
-                  variant="dot"
-                  sx={{
-                    "& .MuiBadge-badge": {
-                      backgroundColor: "#FF4D49", // Custom badge background color
-                      color: "yellow", // Custom badge text color
-                      position: "absolute",
-                      top: "0.4rem",
-                      right: "0.4rem",
-                      border: "0.001rem solid #fff", // Border for badge
-                    },
-                  }}
-                >
-                  <Box
-                    sx={{
-                      padding: "5px",
-                      borderRadius: "25%",
-                      color: palette.primary.main,
-                      width: "3rem",
-                      backgroundColor: palette.primary.light,
-                      transition: "0.5s ease-in-out",
-                      "&:hover": {
-                        color: "white",
-                        backgroundColor: palette.primary.main,
-                      },
-                    }}
-                  >
-                    <i className="ri-notification-2-line"></i>
-                  </Box>
-                </Badge>
-              </IconButton>
-            </Tooltip>
-          </ClickAwayListener>
-
-          <Badge
-            color="success.light"
-            variant="dot"
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <ListItem>
+                    <ListItemText primary="No Notifications" />
+                  </ListItem>
+                )}
+              </List>
+            </Box>
+          }
+        >
+          <IconButton
+            onClick={() => setOpen(true)}
             sx={{
-              "& .MuiBadge-badge": {
-                backgroundColor: "#72E128",
-                color: "yellow",
-                position: "absolute",
-                bottom: "0.3rem",
-                right: "0.3rem",
-                width: "11px",
-                height: "11px",
-                border: "0.125rem solid #fff",
-                borderRadius: "50%",
+              "&:hover": {
+                background: "none",
               },
             }}
           >
-            <Avatar
-              src={currentUser.employeeProImage?.secure_url || manAvatar}
-              onClick={handleMenuClick}
-              sx={{
-                cursor: "pointer",
-                marginLeft: "auto",
-                width: "3rem",
-                height: "3rem",
-              }}
-            />
-          </Badge>
+            {/* Show the badge dot only if there are notifications */}
+            {notifications.length > 0 ? (
+              <Badge
+                color="warning"
+                variant="dot"
+                sx={{
+                  "& .MuiBadge-badge": {
+                    backgroundColor: "#FF4D49", // Custom badge background color
+                    color: "yellow", // Custom badge text color
+                    position: "absolute",
+                    top: "0.4rem",
+                    right: "0.4rem",
+                    border: "0.001rem solid #fff", // Border for badge
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    padding: "5px",
+                    borderRadius: "25%",
+                    color: palette.primary.main,
+                    width: "3rem",
+                    backgroundColor: palette.primary.light,
+                    transition: "0.5s ease-in-out",
+                    "&:hover": {
+                      color: "white",
+                      backgroundColor: palette.primary.main,
+                    },
+                  }}
+                >
+                  <i className="ri-notification-2-line"></i>
+                </Box>
+              </Badge>
+            ) : (
+              <Box
+                sx={{
+                  padding: "5px",
+                  borderRadius: "25%",
+                  color: palette.primary.main,
+                  width: "3rem",
+                  backgroundColor: palette.primary.light,
+                  transition: "0.5s ease-in-out",
+                  "&:hover": {
+                    color: "white",
+                    backgroundColor: palette.primary.main,
+                  },
+                }}
+              >
+                <i className="ri-notification-2-line"></i>
+              </Box>
+            )}
+          </IconButton>
+        </Tooltip>
+      </ClickAwayListener>
 
-          <Menu sx={{ mt: 1.8, ml: "-25px" }} anchorEl={anchorEl} open={menuOpen} onClose={handleClose}>
-            <MenuItem
-              sx={{ ml: 1, mr: 1 }}
-              component={Link}
-              to={`/employee-profile/${currentUser._id}`}
-              onClick={handleClose}
-            >
-              <PersonIcon />
-              <Typography sx={{ ml: 2 }}>Profile</Typography>
-            </MenuItem>
-            <MenuItem sx={{ ml: 1, mr: 1 }} onClick={handleLogout}>
-              <LogoutOutlinedIcon />
-              <Typography sx={{ ml: 2 }}>Logout</Typography>
-            </MenuItem>
-          </Menu>
-        </Box>
+      <Badge
+        color="success.light"
+        variant="dot"
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        sx={{
+          "& .MuiBadge-badge": {
+            backgroundColor: "#72E128",
+            color: "yellow",
+            position: "absolute",
+            bottom: "0.3rem",
+            right: "0.3rem",
+            width: "11px",
+            height: "11px",
+            border: "0.125rem solid #fff",
+            borderRadius: "50%",
+          },
+        }}
+      >
+        <Avatar
+          src={currentUser.employeeProImage?.secure_url || manAvatar}
+          onClick={handleMenuClick}
+          sx={{
+            cursor: "pointer",
+            marginLeft: "auto",
+            width: "3rem",
+            height: "3rem",
+          }}
+        />
+      </Badge>
+
+      <Menu sx={{ mt: 1.8, ml: "-25px" }} anchorEl={anchorEl} open={menuOpen} onClose={handleClose}>
+        <MenuItem
+          sx={{ ml: 1, mr: 1 }}
+          component={Link}
+          to={`/employee-profile/${currentUser._id}`}
+          onClick={handleClose}
+        >
+          <PersonIcon />
+          <Typography sx={{ ml: 2 }}>Profile</Typography>
+        </MenuItem>
+        <MenuItem sx={{ ml: 1, mr: 1 }} onClick={handleLogout}>
+          <LogoutOutlinedIcon />
+          <Typography sx={{ ml: 2 }}>Logout</Typography>
+        </MenuItem>
+      </Menu>
+    </Box>
+
       </Toolbar>
     </MuiAppBar>
   );

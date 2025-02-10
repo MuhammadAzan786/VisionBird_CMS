@@ -56,6 +56,7 @@ const formatTime = (seconds) => {
 function formatDateTime(unixTime) {
   return new Date(unixTime * 1000).toLocaleString(); // Convert UNIX timestamp to readable date
 }
+
 const columns = (handleStatusChange) => [
   {
     field: "taskTicketNo",
@@ -104,32 +105,30 @@ const columns = (handleStatusChange) => [
       }, [params.row.manager_obj_id]);
 
       return (
-        <>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-            }}
-          >
-            <Box sx={{ marginRight: "10px" }}>
-              {ManagerProfilePic ? (
-                <Avatar alt="Avatar" sx={{ width: 28, height: 28 }} src={ManagerProfilePic} />
-              ) : (
-                <Skeleton variant="circular" width={28} height={28} />
-              )}
-            </Box>
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: "700", fontSize: "0.8rem" }}>
-                {managerName}
-              </Typography>
-              <Typography variant="body2" sx={{ fontSize: "0.7rem" }}>
-                {managerEmail}
-              </Typography>
-            </Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+          }}
+        >
+          <Box sx={{ marginRight: "10px" }}>
+            {ManagerProfilePic ? (
+              <Avatar alt="Avatar" sx={{ width: 28, height: 28 }} src={ManagerProfilePic} />
+            ) : (
+              <Skeleton variant="circular" width={28} height={28} />
+            )}
           </Box>
-        </>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: "700", fontSize: "0.8rem" }}>
+              {managerName}
+            </Typography>
+            <Typography variant="body2" sx={{ fontSize: "0.7rem" }}>
+              {managerEmail}
+            </Typography>
+          </Box>
+        </Box>
       );
     },
   },
@@ -137,7 +136,6 @@ const columns = (handleStatusChange) => [
     field: "taskPriority",
     headerName: "Task Priority",
     width: 150,
-
     editable: true,
     renderCell: (params) => {
       let color, backgroundColor;
@@ -182,30 +180,15 @@ const columns = (handleStatusChange) => [
     width: 250,
     headerAlign: "center",
     renderCell: (params) => {
-      // Directly access taskTime_1 from params.row
-      const taskTime = params.row.taskTime_1;
-  
-      if (!taskTime) {
-        return (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-            }}
-          >
-            <Typography variant="body2" sx={{ fontWeight: "700" }}>
-              No task time available
-            </Typography>
-          </Box>
-        );
-      }
-  
-      // Format the date_time using the formatDateTime function
-      const formattedDateTime = formatDateTime(taskTime.date_time);
-  
+      const taskTimes = params.row;
+
+      // Prepare a list of task times to display
+      const taskTimeList = [
+        taskTimes.taskTime_1 || null,
+        taskTimes.taskTime_2 || null,
+        taskTimes.taskTime_3 || null,
+      ];
+
       return (
         <Box
           sx={{
@@ -216,23 +199,34 @@ const columns = (handleStatusChange) => [
             width: "100%",
           }}
         >
-          <Typography variant="body2" sx={{ fontWeight: "700" }}>
-            {formattedDateTime}
-          </Typography>
+          {taskTimeList.map((taskTime, index) => {
+            if (!taskTime) {
+              return (
+                <Typography variant="body2" sx={{ fontWeight: "300" }} key={index}>
+                  No task time available
+                </Typography>
+              );
+            }
+            const formattedDateTime = formatDateTime(taskTime.date_time);
+            return (
+              <Typography variant="body2" sx={{ fontWeight: "300" }} key={index}>
+                {formattedDateTime} (Points: {taskTime.points})
+              </Typography>
+            );
+          })}
+
         </Box>
       );
+
+
     },
   },
-  
-  
-  
   {
     field: "taskStatus",
     headerName: "Status",
     width: 250,
     headerAlign: "center",
     cellClassName: "centeredCell",
-
     renderCell: (params) => {
       const [anchorEl, setAnchorEl] = useState(null);
       const open = Boolean(anchorEl);
@@ -319,11 +313,8 @@ const columns = (handleStatusChange) => [
 
               <Menu id="long-menu" anchorEl={anchorEl} open={open} onClose={handleClose}>
                 <MenuItem onClick={() => onChangeStatus("In Progress")}>In Progress</MenuItem>
-
                 <MenuItem onClick={() => onChangeStatus("PauseRequest")}>Pause Request</MenuItem>
-
                 <MenuItem onClick={() => onChangeStatus("ResumeRequest")}>Resume Task</MenuItem>
-
                 <MenuItem onClick={() => onChangeStatus("Completed")}>Completed</MenuItem>
               </Menu>
             </Box>
@@ -368,53 +359,38 @@ const columns = (handleStatusChange) => [
 
           const endTimeUnix = endTimeDate.getTime();
           const startTimeUnix = startTimeDate.getTime();
-          const differenceInSeconds = (endTimeUnix - startTimeUnix) / 1000;
-          console.log("differenceInSeconds", differenceInSeconds);
-          console.log(allocatedTimeDate);
-          if (differenceInSeconds <= allocatedTimeDate) {
-            updateTaskCompleteStatus(params.row._id, "On Time");
+          const allocatedTimeUnix = allocatedTimeDate.getTime();
+          if (allocatedTimeUnix > startTimeUnix && allocatedTimeUnix < endTimeUnix) {
             setStatus({
-              label: "On Time",
-              icon: <CheckCircleIcon />,
-              color: "#34CAF9",
-              backgroundColor: "#DCF6FE",
+              label: "Task Running",
+              icon: <AccessTimeIcon />,
+              color: "#fbc02d",
+              backgroundColor: "#fff8e1",
             });
-          } else {
-            updateTaskCompleteStatus(params.row._id, "Late");
+          } else if (allocatedTimeUnix >= endTimeUnix) {
             setStatus({
-              label: "Late",
-              icon: <ErrorIcon />,
-              color: "#d74444",
-              backgroundColor: "#fbeaea",
+              label: "Task Ended",
+              icon: <TimerOffIcon />,
+              color: "#d32f2f",
+              backgroundColor: "#ffebee",
             });
           }
         };
         calculateStatus();
-      }, [params.row.taskStatus, params.row._id]);
+      }, [params.row._id, params.row.taskStatus]);
 
       return (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingX: "20px",
-            width: "100%",
-          }}
-        >
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
           <Chip
-            label={status.label}
             icon={status.icon}
+            label={status.label}
             sx={{
               backgroundColor: status.backgroundColor,
               color: status.color,
               fontSize: "0.7rem",
-              fontWeight: "500",
-              paddingX: "10px",
-              "& .MuiChip-icon": {
-                fontSize: "1.1rem",
-                color: status.color,
-              },
+              fontWeight: "600",
+              paddingX: "15px",
+              marginLeft: "5px",
             }}
           />
         </Box>
@@ -422,6 +398,8 @@ const columns = (handleStatusChange) => [
     },
   },
 ];
+
+
 
 export default function EmployeeTaskTable() {
   const [rows, setRows] = useState([]);

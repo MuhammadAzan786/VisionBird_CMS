@@ -166,30 +166,15 @@ const columns = [
     width: 250,
     headerAlign: "center",
     renderCell: (params) => {
-      // Directly access taskTime_1 from params.row
-      const taskTime = params.row.taskTime_1;
-  
-      if (!taskTime) {
-        return (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-            }}
-          >
-            <Typography variant="body2" sx={{ fontWeight: "300" }}>
-              No task time available
-            </Typography>
-          </Box>
-        );
-      }
-  
-      // Format the date_time using the formatDateTime function
-      const formattedDateTime = formatDateTime(taskTime.date_time);
-  
+      const taskTimes = params.row;
+
+      // Prepare a list of task times to display
+      const taskTimeList = [
+        taskTimes.taskTime_1 || null,
+        taskTimes.taskTime_2 || null,
+        taskTimes.taskTime_3 || null,
+      ];
+
       return (
         <Box
           sx={{
@@ -200,15 +185,30 @@ const columns = [
             width: "100%",
           }}
         >
-          <Typography variant="body2" sx={{ fontWeight: "400" }}>
-            {formattedDateTime}
-          </Typography>
+          {taskTimeList.map((taskTime, index) => {
+            if (!taskTime) {
+              return (
+                <Typography variant="body2" sx={{ fontWeight: "300" }} key={index}>
+                  No task time available
+                </Typography>
+              );
+            }
+            const formattedDateTime = formatDateTime(taskTime.date_time);
+            return (
+              <Typography variant="body2" sx={{ fontWeight: "300" }} key={index}>
+                {formattedDateTime} (Points: {taskTime.points})
+              </Typography>
+            );
+          })}
+
         </Box>
       );
+
+
     },
   },
-  
-  
+
+
   {
     field: "Action",
     headerName: "Action",
