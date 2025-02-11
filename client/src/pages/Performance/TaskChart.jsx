@@ -64,7 +64,6 @@ const TaskChart = ({ _currentUser }) => {
           }
         });
 
-        // Set the daily points for Monday to Friday
         setDailyPoints(pointsData);
 
       } catch (err) {
@@ -95,7 +94,7 @@ const TaskChart = ({ _currentUser }) => {
               yAxis={[{ min: 0, max: maxY }]} // Set dynamic max value based on task data
               series={[{
                 data: dailyPoints,
-                label: "Total Points",
+                label: "Total Points Earned",
                 color: "#1a237e",
               }]}
               height={500}

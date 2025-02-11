@@ -5,7 +5,7 @@ import BasicPieChart from "./BasicPieChart";
 import BasicLineChart from "./BasicLineChart";
 import { useSelector } from "react-redux";
 import TaskChart from "./TaskChart";
-
+import Top5EmployeesTable from "../../components/Tables/Top5EmployeesTable";
 
 const ViewPerformance = () => {
   const { currentUser } = useSelector((state) => state.user);
@@ -40,6 +40,11 @@ const ViewPerformance = () => {
         <Grid item xs={12}>
           <Paper>
           <TaskChart _currentUser={currentUser._id} />
+          </Paper>
+        </Grid>
+        <Grid item xs={12}>
+          <Paper>
+          <Top5EmployeesTable />
           </Paper>
         </Grid>
       </Grid>

@@ -41,11 +41,22 @@ const TaskBoard = () => {
         `/api/task/getLateTasksByEmployeeIdDate/${currentUser._id}`
       );
       setLateTask(lateTasks.length);
-
       const { data: completedTasks } = await axios.get(
         `/api/task/getCompletedTasksByEmployeeIdDate/${currentUser._id}`
       );
-      setCompletedTasks(completedTasks.length);
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Start of today
+      
+      // Filter only tasks that were updated today
+      const tasksCompletedToday = completedTasks.filter(task => {
+        const taskDate = new Date(task.updatedAt);
+        taskDate.setHours(0, 0, 0, 0); // Normalize to compare only the date
+        return taskDate.getTime() === today.getTime();
+      });
+      
+      setCompletedTasks(tasksCompletedToday.length);
+      
   
       const { data: inProgressTasks } = await axios.get(
         `/api/task/getPendingTasksByEmpId/${currentUser._id}`

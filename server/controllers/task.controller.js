@@ -123,18 +123,26 @@ const getInProgressTasksByEmployeeIdDate = async (req, res) => {
 const getCompletedTasksByEmployeeIdDate = async (req, res) => {
   try {
     const { id } = req.params;
-    // Get the current date
-    const currentDate = new Date();
-    const startOfDay = new Date(currentDate.setUTCHours(0, 0, 0, 0));  // Start of today
-    const endOfDay = new Date(currentDate.setUTCHours(23, 59, 59, 999)); // End of today
+    
+    // Get the start of the week (Monday) and today
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Adjust if it's Sunday
 
-    // Fetch tasks where updatedAt is today's date, but createdAt can be anytime
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() + diffToMonday);
+    startOfWeek.setUTCHours(0, 0, 0, 0); // Set to the start of Monday
+
+    const endOfToday = new Date(today);
+    endOfToday.setUTCHours(23, 59, 59, 999); // End of today
+
+    // Fetch tasks updated from Monday to today
     const data = await Task.find({
       employee_obj_id: id,
       taskcompleteStatus: "completed",
       updatedAt: {
-        $gte: startOfDay,  // Updated today or later
-        $lt: endOfDay,     // Updated before the end of today
+        $gte: startOfWeek,  // Start of Monday
+        $lte: endOfToday,   // End of today
       },
     });
 
@@ -148,6 +156,7 @@ const getCompletedTasksByEmployeeIdDate = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 
 //Get  Late Tasks By EmployeeId According to date

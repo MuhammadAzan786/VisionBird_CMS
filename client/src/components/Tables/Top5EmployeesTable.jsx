@@ -22,6 +22,15 @@ const TopEmployeePerformance = () => {
     return Math.ceil((days + startDate.getDay() + 1) / 7);
   };
 
+  const isDateInCurrentWeek = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1)); // Monday
+    const lastDayOfWeek = new Date(today.setDate(firstDayOfWeek.getDate() + 4)); // Friday
+
+    return date >= firstDayOfWeek && date <= lastDayOfWeek;
+  };
+
   const fetchEmployeeEvaluations = async () => {
     setLoading(true);
     setError(null);
@@ -42,9 +51,19 @@ const TopEmployeePerformance = () => {
               params: { employee_id: employeeId, week_no: weekNo },
             }
           );
+          
+          const taskResponse = await axios.get(
+            `http://localhost:4000/api/task/getCompletedTasksByEmployeeIdDate/${employeeId}`
+          );
+
+          const weeklyTaskPoints = taskResponse.data
+            .filter((task) => isDateInCurrentWeek(task.createdAt))
+            .reduce((sum, task) => sum + task.pointsGained, 0);
+
           return {
             employeeId,
             evaluations: evaluationResponse.data.evaluations || [],
+            additionalPoints: weeklyTaskPoints,
           };
         })
       );
@@ -52,11 +71,12 @@ const TopEmployeePerformance = () => {
       const formattedRows = evaluations
         .filter((evaluation) => evaluation.evaluations.length > 0)
         .map((evaluation) => {
-          const { evaluations } = evaluation;
+          const { evaluations, additionalPoints } = evaluation;
           let totalPoints = evaluations.reduce(
             (sum, singleEvaluation) => sum + singleEvaluation.total_points,
             0
           );
+          totalPoints += additionalPoints;
 
           return {
             EmployeeName: evaluations[0]?.employee?.name || "Unknown Employee",
@@ -124,7 +144,7 @@ const TopEmployeePerformance = () => {
           columns={columns}
           pageSizeOptions={[5]}
           disableRowSelectionOnClick
-          pagination={false} // Disable default pagination
+          pagination={false}
           sx={{ height: "300px" }}
         />
       )}
