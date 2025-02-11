@@ -74,7 +74,8 @@ const BasicLineChart = ({ _currentUser }) => {
 
   return (
     <>
-      <Typography>Points earned by this week</Typography>
+     <Typography variant="h6">Points earned by this week(Monday to Friday)</Typography>
+
       <Box sx={{ p: 3 }}>
         {dailyPoints.some(point => point > 0) ? (
           <Box sx={{ mb: 3 }}>

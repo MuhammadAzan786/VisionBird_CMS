@@ -375,66 +375,18 @@ const getReportDates = async (req, res) => {
 // };
 const getAllEvaluations = async (req, res) => {
   try {
-    // Extract weekNo from the query parameters
-    const { weekNo } = req.query;
+    // Retrieve all evaluations with all required fields, including __v
+    const evaluations = await EmpOfWeekWinners.find().select(
+      "_id week_no employee_id employee_name total_points award_date __v"
+    );
 
-    let weekQuery = {};
-    if (weekNo) {
-      // If a week number is provided, fetch data for that specific week
-      weekQuery = { week_no: weekNo };
-    } else {
-      // If no week number is provided, fetch data for the most recent week
-      const mostRecentWeek = await EmpOfWeek.findOne().sort({ week_no: -1 }); // Sort by week_no in descending order
-      if (mostRecentWeek) {
-        weekQuery = { week_no: mostRecentWeek.week_no }; // Use the most recent week's number
-      } else {
-        return res.status(400).json({ message: 'No evaluations found' });
-      }
-    }
+    // Log the fetched data
+    console.log("Evaluations fetched:", evaluations);
 
-    let allEmployeeTotals = []; // To store totals for all weeks
-
-    // Retrieve all evaluations for the specified or most recent week
-    const evaluations = await EmpOfWeek.find(weekQuery);
-
-    // Group evaluations by employee ID and calculate total points
-    const employeeTotals = await evaluations.reduce(async (accPromise, evalData) => {
-      const acc = await accPromise; // Wait for the accumulator to resolve
-      const employeeId = evalData.employee.id; // Employee ID
-      const points = evalData.total_points; // Points awarded
-
-      // Fetch employee details (name, email, profile image, designation)
-      const employee = await Employee.findById(employeeId, 'employeeName email employeeProImage employeeDesignation');
-
-      if (employee) {
-        const { employeeName, email, employeeProImage, employeeDesignation } = employee;
-
-        // If employee ID already exists in the accumulator, add the points
-        if (acc[employeeId]) {
-          acc[employeeId].totalPoints += points;
-        } else {
-          // Otherwise, initialize this employee's entry
-          acc[employeeId] = {
-            name: employeeName,
-            email: email,
-            employeeProImage: employeeProImage,
-            employeeDesignation: employeeDesignation, // Include designation here
-            totalPoints: points
-          };
-        }
-      }
-
-      return acc;
-    }, Promise.resolve({})); // Initialize accumulator as a resolved promise
-
-    // Add the employee totals for this week to the overall result
-    allEmployeeTotals.push({ weekNo: weekQuery.week_no || mostRecentWeek.week_no, employeeTotals });
-
-    // Return all employee totals for each week
-    return res.status(200).json({ data: allEmployeeTotals });
+    return res.status(200).json({ data: evaluations });
 
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching evaluations:", error);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
