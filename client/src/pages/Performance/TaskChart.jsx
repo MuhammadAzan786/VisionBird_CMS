@@ -100,7 +100,7 @@ const TaskChart = ({ _currentUser }) => {
                 label: "Total Points Earned",
                 color: "#1a237e",
               }]}
-              height={500}
+              height={300}
             />
           </Box>
         ) : (

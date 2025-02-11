@@ -83,7 +83,7 @@ const BasicPieChart = ({ _currentUser }) => {
       <Typography>Points for the latest evaluation:</Typography>
       <PieChart
         series={[{ data: pieData }]}
-        height={400}
+        height={300}
         label={(data) => `${data.label} - ${data.value}`}
       />
     </>

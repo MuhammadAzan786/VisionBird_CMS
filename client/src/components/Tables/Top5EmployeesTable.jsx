@@ -56,7 +56,7 @@ const TopEmployeePerformance = () => {
           );
           
           const taskResponse = await axios.get(
-            `http://localhost:4000/api/task/getCompletedTasksByEmployeeIdDate/${employeeId}`
+            `/api/task/getCompletedTasksByEmployeeIdDate/${employeeId}`
           );
 
           const weekDays = getWeekDays();

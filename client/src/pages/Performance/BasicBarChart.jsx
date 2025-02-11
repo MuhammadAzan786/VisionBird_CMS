@@ -89,7 +89,7 @@ const DetailedBarChart = ({ _currentUser }) => {
               xAxis={[{ scaleType: 'band', data: weekDays }]} // Weekdays from Monday to Friday
               series={[{ data: dailyTasks, label: 'Tasks Completed', color: "#1a237e" }]} // Task count per day
               yAxis={[{ min: 0, max: maxY }]} // Set dynamic max value based on task data
-              height={400}
+              height={300}
             />
           </Box>
         ) : (
