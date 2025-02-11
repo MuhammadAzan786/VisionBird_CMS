@@ -17,16 +17,17 @@ const getWeekRange = () => {
 };
 
 const generateWeekDays = () => {
-  const { monday } = getWeekRange(); // Assume getWeekRange returns an object with monday date
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  
-  return days.map((_, index) => {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + index); // Add index to the monday date to get the rest of the days
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
-  });
-};
+  const { monday } = getWeekRange(); // Get the correct Monday date
+  const days = [];
 
+  for (let i = 0; i < 5; i++) { // Only generate Monday to Friday
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + i);
+    days.push(date.toLocaleDateString('en-US', { weekday: 'short' })); 
+  }
+
+  return days;
+};
 
 const TaskChart = ({ _currentUser }) => {
   const [dailyPoints, setDailyPoints] = useState([0, 0, 0, 0, 0]);
@@ -37,43 +38,43 @@ const TaskChart = ({ _currentUser }) => {
     const fetchWeeklyData = async () => {
       setLoading(true);
       setError(null);
-
+    
       if (!_currentUser) {
         setError('User ID is required');
         setLoading(false);
         return;
       }
-
+    
       try {
         const { monday, friday } = getWeekRange();
-
         const response = await axios.get(`/api/task/getCompletedTasksByEmployeeIdDate/${_currentUser}`);
         const tasks = response.data || [];
         const pointsData = Array(5).fill(0); // Initialize points for Monday to Friday
-
+    
         tasks.forEach((task) => {
           const updatedAtDate = new Date(task.updatedAt);
-
-          // Check if task is updated within this week (Monday to Friday)
-          const isWithinWeekRange = updatedAtDate >= monday && updatedAtDate <= friday;
-
-          if (isWithinWeekRange) {
-            const dayOfWeek = updatedAtDate.getDay();
-            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-              const index = dayOfWeek - 1;
-              pointsData[index] += task.pointsGained; // Sum points for the correct day
+    
+          // ✅ Convert task date to local time (remove UTC issues)
+          const localDate = new Date(updatedAtDate.getFullYear(), updatedAtDate.getMonth(), updatedAtDate.getDate());
+          
+          // ✅ Ensure date falls within Monday to Friday
+          if (localDate >= monday && localDate <= friday) {
+            const dayOfWeek = localDate.getDay();
+            if (dayOfWeek >= 1 && dayOfWeek <= 5) { 
+              const index = dayOfWeek - 1; // Monday = 0, ..., Friday = 4
+              pointsData[index] += task.pointsGained;
             }
           }
         });
-
+    
         setDailyPoints(pointsData);
-
       } catch (err) {
         setError("Failed to fetch data");
       } finally {
         setLoading(false);
       }
     };
+    
 
     fetchWeeklyData();
   }, [_currentUser]);
@@ -92,7 +93,7 @@ const TaskChart = ({ _currentUser }) => {
         {dailyPoints.length > 0 ? (
           <Box sx={{ mb: 3 }}>
             <LineChart
-              xAxis={[{ data: weekDays, scaleType: 'point', label: "Weekday" }]}
+              xAxis={[{ data: weekDays, scaleType: 'point', label: "Weekday" }] }
               yAxis={[{ min: 0, max: maxY }]} // Set dynamic max value based on task data
               series={[{
                 data: dailyPoints,
