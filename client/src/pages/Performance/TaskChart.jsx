@@ -17,14 +17,16 @@ const getWeekRange = () => {
 };
 
 const generateWeekDays = () => {
-  const { monday } = getWeekRange();
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const { monday } = getWeekRange(); // Assume getWeekRange returns an object with monday date
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  
   return days.map((_, index) => {
     const date = new Date(monday);
-    date.setDate(monday.getDate() + index);
+    date.setDate(monday.getDate() + index); // Add index to the monday date to get the rest of the days
     return date.toLocaleDateString('en-US', { weekday: 'short' });
   });
 };
+
 
 const TaskChart = ({ _currentUser }) => {
   const [dailyPoints, setDailyPoints] = useState([0, 0, 0, 0, 0]);

@@ -22,13 +22,16 @@ const TopEmployeePerformance = () => {
     return Math.ceil((days + startDate.getDay() + 1) / 7);
   };
 
-  const isDateInCurrentWeek = (dateString) => {
-    const date = new Date(dateString);
+  const getWeekDays = () => {
     const today = new Date();
     const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1)); // Monday
-    const lastDayOfWeek = new Date(today.setDate(firstDayOfWeek.getDate() + 4)); // Friday
-
-    return date >= firstDayOfWeek && date <= lastDayOfWeek;
+    const weekDays = [];
+    for (let i = 0; i < 5; i++) {
+      const day = new Date(firstDayOfWeek);
+      day.setDate(firstDayOfWeek.getDate() + i);
+      weekDays.push(day.toISOString().split('T')[0]); // Save as yyyy-mm-dd format
+    }
+    return weekDays;
   };
 
   const fetchEmployeeEvaluations = async () => {
@@ -56,8 +59,9 @@ const TopEmployeePerformance = () => {
             `http://localhost:4000/api/task/getCompletedTasksByEmployeeIdDate/${employeeId}`
           );
 
+          const weekDays = getWeekDays();
           const weeklyTaskPoints = taskResponse.data
-            .filter((task) => isDateInCurrentWeek(task.createdAt))
+            .filter((task) => weekDays.includes(task.createdAt.split('T')[0])) // Match date part only (yyyy-mm-dd)
             .reduce((sum, task) => sum + task.pointsGained, 0);
 
           return {
