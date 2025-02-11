@@ -371,14 +371,37 @@ export default function EmployeeTaskBoard() {
   const fetchData = async () => {
     try {
       const response = await axios.get(`/api/task/getTaskByEmpId/${currentUser._id}`);
-
-      setTask(response.data);
-      console.log("tasks");
-      console.log(response.data);
+  
+      // Get today's date and yesterday's date in local time
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
+  
+      // Format the dates to match your task's `createdAt` field (e.g., YYYY-MM-DD)
+      const formatDate = (date) => {
+        return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+      };
+  
+      const todayFormatted = formatDate(today);
+      const yesterdayFormatted = formatDate(yesterday);
+  
+      // Filter tasks: Show only tasks created today or any pending tasks from yesterday
+      const filteredTasks = response.data.filter(task => {
+        const taskCreatedAt = new Date(task.createdAt); // Assuming `createdAt` is in ISO format
+        const taskDate = formatDate(taskCreatedAt);
+  
+        return taskDate === todayFormatted || (taskDate === yesterdayFormatted && task.status === 'pending');
+      });
+  
+      setTask(filteredTasks);
+      console.log("filtered tasks for today and pending tasks from yesterday");
+      console.log(filteredTasks);
     } catch (error) {
       console.log(error);
     }
   };
+  
+  
 
   const handleRowClick = (params, event) => {
     setPopoverContent(params.row);
