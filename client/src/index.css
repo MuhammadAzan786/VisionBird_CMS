@@ -68,47 +68,6 @@ I added the following code to the index.css file: */
 .css-19ev9o5-MuiPaper-root{
   height: auto !important;
 }
-@media (min-width: 600px) {
-  .css-zbaamk-MuiGrid-root{
-    flex-basis: 30%;
-  }
-  .css-zbaamk-MuiGrid-root {
-      flex-grow: 1 !important;
-      max-width: 100% !important;
-  }
-}
-@media (min-width: 1000px) {
-  .css-1equabv-MuiGrid-root{
-    flex-grow: 1 !important;
-    max-width: 30% !important;
-  }
-  .css-zbaamk-MuiGrid-root {
-      flex-grow: 1 !important;
-      max-width: 30% !important;
-  }
-}
-
-
-/* to solve the issue of the responsiveness at the leave/loan form section*/
-@media (max-width: 700px) {
-  .css-12itpog-MuiPaper-root{
-    padding: 30px !important;
-  }
-  .css-16jurb0{
-    padding: 0px !important;
-  }
-}
-@media (max-width: 600px) {
-  .css-12itpog-MuiPaper-root{
-    padding: 10px !important;
-  }
-  .css-16jurb0{
-    padding: 0px !important;
-  }
-  .css-168ikf9-MuiStack-root{
-    padding: 5px !important;
-  }
-}
 
 /*to solve the issue in employee avaluation*/
 .css-4muqlg-MuiGrid-root{
@@ -126,9 +85,108 @@ I added the following code to the index.css file: */
 
 
 
-@media (max-width: 900px) {
-.css-1i3rjxp-MuiGrid-root>.MuiGrid-item,
-.css-1i3rjxp-MuiGrid-root{
-  padding-left: 0px !important;
+
+
+@media (min-width: 1000px) {
+  .css-1equabv-MuiGrid-root{
+    flex-grow: 1 !important;
+    max-width: 30% !important;
+  }
+  .css-zbaamk-MuiGrid-root {
+      flex-grow: 1 !important;
+      max-width: 30% !important;
+  }
+  .css-168ikf9-MuiStack-root{
+    padding: 20px !important;
+  }
 }
+
+@media (max-width: 900px) {
+  .css-1i3rjxp-MuiGrid-root>.MuiGrid-item,
+  .css-1i3rjxp-MuiGrid-root{
+    padding-left: 0px !important;
+  }
+  .css-168ikf9-MuiStack-root{
+    padding: 0px !important;
+  }
+  .css-heg063-MuiTabs-flexContainer {
+    overflow-x: scroll !important;
+    scrollbar-width: thin; /* For Firefox */
+    scrollbar-color: #ccc transparent; /* Thumb color & track color */
+  }
+  
+  /* Webkit-based browsers (Chrome, Edge, Safari) */
+  .css-heg063-MuiTabs-flexContainer::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .css-heg063-MuiTabs-flexContainer::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .css-heg063-MuiTabs-flexContainer::-webkit-scrollbar-thumb {
+    background: #bdbdbd;
+    border-radius: 4px;
+  }
+  
+  .css-heg063-MuiTabs-flexContainer::-webkit-scrollbar-thumb:hover {
+    background: #9e9e9e;
+  }
+  
+}
+  
+  
+/* to solve the issue of the responsiveness at the leave/loan form section*/
+@media (max-width: 700px) {
+  .css-12itpog-MuiPaper-root{
+    padding: 30px !important;
+  }
+  .css-16jurb0{
+    padding: 0px !important;
+  }
+  .css-19kzrtu{
+    padding: 0px !important;
+  }
+
+}
+@media (min-width: 600px) {
+  .css-zbaamk-MuiGrid-root{
+    flex-basis: 30%;
+  }
+  .css-zbaamk-MuiGrid-root {
+      flex-grow: 1 !important;
+      max-width: 100% !important;
+  }
+}
+@media (max-width: 600px) {
+  .css-12itpog-MuiPaper-root{
+    padding: 10px !important;
+  }
+  .css-16jurb0{
+    padding: 0px !important;
+  }
+  .css-168ikf9-MuiStack-root{
+    padding: 5px !important;
+  }
+  .css-19kzrtu{
+    padding: 0px !important;
+  }
+  .css-efocca{
+    padding: 0px !important;
+  }
+  .css-11lq3yg-MuiGrid-root{
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 20px !important;
+  }
+  .css-1osj8n2-MuiGrid-root{
+    max-width: 100% !important;
+    flex-basis: 100% !important;
+  }
+  .css-1gejpqg-MuiGrid-root{
+    max-width: 100% !important;
+    flex-basis: 100% !important;
+  }
 }

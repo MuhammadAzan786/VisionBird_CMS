@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "../../utils/axiosInterceptor";
 import { Box, Typography, Button, Paper, Backdrop } from "@mui/material";
+
+import { Download, Edit, Delete } from "@mui/icons-material";
 import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 import { usePDF } from "react-to-pdf";
@@ -206,58 +208,58 @@ const EmployeeProfile = () => {
                 alignItems={"flex-end"}
               >
                 {currentUser.role == "admin" && (
-                  <Box
-                    sx={{
-                      background: color,
-                      height: "250px",
-                    }}
-                    display={"flex"}
-                    justifyContent={"flex-end"}
-                    alignItems={"flex-end"}
-                  >
-                    <Button
-                      sx={{
-                        display: { xs: "none", md: "block" },
-                        margin: 1,
-                        fontWeight: 700,
-                        fontSize: 15,
-                        bgcolor: "white",
-                      }}
-                      disableRipple
-                      color="success"
-                      variant="outlined"
-                      onClick={() => toPDF()}
-                    >
-                      Download Profile
-                    </Button>
-                    <Button
-                      sx={{
-                        display: { xs: "none", md: "block" },
-                        margin: 1,
-                        fontWeight: 700,
-                        fontSize: 15,
-                        bgcolor: "white",
-                      }}
-                      variant="outlined"
-                      onClick={handleEdit}
-                    >
-                      Update Profile
-                    </Button>
-                    <Button
-                      sx={{
-                        display: { xs: "none", md: "block" },
-                        margin: 1,
-                        fontWeight: 700,
-                        fontSize: 15,
-                        bgcolor: "white",
-                      }}
-                      color="error"
-                      variant="outlined"
-                      onClick={handleDelete}
-                    >
-                      Delete Profile
-                    </Button>
-                  </Box>
+              <Box
+              sx={{
+                background: color,
+                height: "250px",
+              }}
+              display={"flex"}
+              justifyContent={"flex-end"}
+              alignItems={"flex-end"}
+            >
+              <Button
+                sx={{
+                  display: { xs: "none", md: "block" },
+                  margin: 1,
+                  fontWeight: 700,
+                  fontSize: 15,
+                  bgcolor: "white",
+                }}
+                disableRipple
+                color="success"
+                variant="outlined"
+                onClick={() => toPDF()}
+              >
+                <Download />
+              </Button>
+              <Button
+                sx={{
+                  display: { xs: "none", md: "block" },
+                  margin: 1,
+                  fontWeight: 700,
+                  fontSize: 15,
+                  bgcolor: "white",
+                }}
+                variant="outlined"
+                onClick={handleEdit}
+              >
+                <Edit />
+              </Button>
+              <Button
+                sx={{
+                  display: { xs: "none", md: "block" },
+                  margin: 1,
+                  fontWeight: 700,
+                  fontSize: 15,
+                  bgcolor: "white",
+                }}
+                color="error"
+                variant="outlined"
+                onClick={handleDelete}
+              >
+                <Delete />
+              </Button>
+            </Box>
                 )}
               </Box>
 
@@ -346,14 +348,14 @@ const EmployeeProfile = () => {
                         onClick={() => toPDF()}
                         color="success"
                       >
-                        Download Profile
+                             <Download />
                       </Button>
                       <Button
                         sx={{ margin: 1 }}
                         variant="contained"
                         onClick={handleEdit}
                       >
-                        Update Profile
+                         <Edit />
                       </Button>
                       <Button
                         sx={{ margin: 1 }}
@@ -361,7 +363,7 @@ const EmployeeProfile = () => {
                         color="error"
                         onClick={handleDelete}
                       >
-                        Delete Profile
+                           <Delete />
                       </Button>
                     </Box>
                   )}
