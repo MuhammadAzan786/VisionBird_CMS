@@ -76,6 +76,7 @@ const EmployeesTable = ({ searchTerm }) => {
     {
       field: "employeeName",
       headerName: "Employee",
+      minWidth: 200,
       flex: 1,
       renderCell: ({ row }) => (
         <EmployeeNameCell src={row.employeeProImage?.secure_url} userId={row.employeeID} name={row.employeeName} />
@@ -84,22 +85,27 @@ const EmployeesTable = ({ searchTerm }) => {
     {
       field: "email",
       headerName: "Email",
+      minWidth: 200,
       flex: 1,
+
     },
     {
       field: "employeeDesignation",
       headerName: "Designation",
+      minWidth: 200,
       flex: 1,
     },
     {
       field: "qualification",
       headerName: "Qualification",
+      minWidth: 200,
       flex: 1,
     },
 
     {
       field: "role",
       headerName: "Role",
+      minWidth: 200,
       flex: 1,
       renderCell: (params) => (
         <CustomChip
@@ -114,6 +120,7 @@ const EmployeesTable = ({ searchTerm }) => {
   const employeeStatus = {
     field: "employeeStatus",
     headerName: "Status",
+    minWidth: 200,
     flex: 1,
     renderCell: (params) => {
       const { id } = params.row;
@@ -169,7 +176,7 @@ const EmployeesTable = ({ searchTerm }) => {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          height: "50vh",
+          height: "auto",
           gap: 2,
         }}
       >
@@ -188,7 +195,7 @@ const EmployeesTable = ({ searchTerm }) => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          height: "50vh",
+          height: "auto",
           padding: 2,
         }}
       >

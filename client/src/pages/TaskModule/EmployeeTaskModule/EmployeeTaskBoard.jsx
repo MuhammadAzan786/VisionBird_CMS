@@ -125,6 +125,7 @@ const columns = [
   {
     field: "taskTicketNo",
     headerName: "# Ticket",
+    minWidth: 200,
     flex: 1,
     headerAlign: "center",
     editable: false,
@@ -138,6 +139,7 @@ const columns = [
     field: "AssignedBy",
     headerName: "Assigned By",
     editable: false,
+    minWidth: 200,
     flex: 2,
     headerAlign: "center",
     align: "center",
@@ -152,6 +154,7 @@ const columns = [
   {
     field: "TaskPriority",
     headerName: "Task Priority",
+    minWidth: 200,
     flex: 1,
     editable: true,
     headerAlign: "center",
@@ -161,6 +164,7 @@ const columns = [
   {
     field: "TimeSlots",
     headerName: "Elapsed Time",
+    minWidth: 200,
     flex: 2,
     editable: true,
     headerAlign: "center",
@@ -290,6 +294,7 @@ const columns = [
   {
     field: "Action",
     headerName: "Action",
+    minWidth: 200,
     flex: 1,
     editable: false,
     headerAlign: "center",

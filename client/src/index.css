@@ -106,9 +106,7 @@ I added the following code to the index.css file: */
   .css-1i3rjxp-MuiGrid-root{
     padding-left: 0px !important;
   }
-  .css-168ikf9-MuiStack-root{
-    padding: 0px !important;
-  }
+
   .css-heg063-MuiTabs-flexContainer {
     overflow-x: scroll !important;
     scrollbar-width: thin; /* For Firefox */
