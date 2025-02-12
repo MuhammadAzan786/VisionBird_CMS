@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "../../utils/axiosInterceptor";
 import { Box, Typography, Avatar, Button, Paper } from "@mui/material";
+import { Download, Edit, Delete } from "@mui/icons-material";
 import Grid from "@mui/material/Grid";
 import { usePDF } from "react-to-pdf";
 import { useMessage } from "../../components/MessageContext";
@@ -197,7 +198,7 @@ const InterneeProfile = () => {
                   disableRipple
                   onClick={() => toPDF()}
                 >
-                  Download Profile
+             <Download />
                 </Button>
                 <Button
                   sx={{
@@ -210,7 +211,7 @@ const InterneeProfile = () => {
                   variant="outlined"
                   onClick={handleEdit}
                 >
-                  Update Profile
+             <Edit />
                 </Button>
                 <Button
                   sx={{
@@ -224,7 +225,7 @@ const InterneeProfile = () => {
                   variant="outlined"
                   onClick={handleDelete}
                 >
-                  Delete Profile
+                                 <Delete />
                 </Button>
               </Box>
             )}
@@ -313,14 +314,14 @@ const InterneeProfile = () => {
                   onClick={() => toPDF()}
                   color="success"
                 >
-                  Download Profile
+                       <Download />
                 </Button>
                 <Button
                   sx={{ margin: 1 }}
                   variant="contained"
                   onClick={handleEdit}
                 >
-                  Update Profile
+                          <Edit />
                 </Button>
                 <Button
                   sx={{ margin: 1 }}
@@ -328,7 +329,7 @@ const InterneeProfile = () => {
                   color="error"
                   onClick={handleDelete}
                 >
-                  Delete Profile
+                      <Delete />
                 </Button>
               </Box>
             </Box>
