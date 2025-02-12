@@ -82,9 +82,21 @@ I added the following code to the index.css file: */
   margin-top: -16px !important;
   margin-right: 16px !important;
 }
+.css-1i3rjxp-MuiGrid-root{
+  padding-left: 0px !important;
+  margin-top: 0px !important;
+}
 
+@media (max-width: 1100px) {
 
-
+  .css-1i3rjxp-MuiGrid-root{
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .css-1fyyp8j-MuiGrid-root{
+    max-width: 100% !important;
+  }
+}
 
 
 @media (min-width: 1000px) {
