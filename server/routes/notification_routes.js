@@ -7,6 +7,13 @@ const auth = require("../Middlewares/auth");
 
 router.post("/create", notificationController.createNotification);
 router.get("/user/:id", notificationController.getUserNotifications);
+router.get("/tasknotifications/:id", notificationController.getTaskNotifications);
+
+// Manager route to get task completion notifications
+router.get("/manager/taskcompleted/:id", notificationController.getManagerTaskCompletedNotifications);
+
+// Employee route to get assigned task notifications
+router.get("/employee/taskassigned/:id", notificationController.getEmployeeAssignedTaskNotifications);
 router.delete(
   "/delete/:id",
   auth,

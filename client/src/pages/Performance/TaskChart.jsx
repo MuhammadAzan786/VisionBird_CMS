@@ -69,7 +69,7 @@ const TaskChart = ({ _currentUser }) => {
     
         setDailyPoints(pointsData);
       } catch (err) {
-        setError("Failed to fetch data");
+        setError("There is no data to show.");
       } finally {
         setLoading(false);
       }
@@ -81,6 +81,8 @@ const TaskChart = ({ _currentUser }) => {
 
   const weekDays = generateWeekDays();
   const maxY = Math.max(...dailyPoints, 10) + 10; // Ensure maxY is at least 10
+
+  const totalPoints = dailyPoints.reduce((sum, points) => sum + points, 0);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
@@ -99,13 +101,17 @@ const TaskChart = ({ _currentUser }) => {
                 data: dailyPoints,
                 label: "Total Points Earned",
                 color: "#1a237e",
-              }]}
-              height={300}
+              }] }
+              height={500}
             />
           </Box>
         ) : (
           <Typography>No daily points available</Typography>
         )}
+
+        <Typography  sx={{ mt: 2 }}>
+          Total Points Earned This Week: {totalPoints}
+        </Typography>
       </Box>
     </>
   );

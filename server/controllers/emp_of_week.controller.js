@@ -70,12 +70,12 @@ const postEvaluations = async (req, res) => {
           total_points: employeeOfTheWeek.totalPoints,
         });
 
-        // const notificationData = await TaskNotification.create({
-        //   employee_id: employeeId,
-        //   manager_id: managerId,
-        //   Task_id: taskId,
-        //   message: `${managerName} has accepted the Pause request of Task ${ticketNumber}`,
-        // });
+        //  const notificationData = await TaskNotification.create({
+        //    employee_id: employeeId,
+        //    manager_id: managerId,
+        //    Task_id: taskId,
+        //    message: `${managerName} has accepted the Pause request of Task ${ticketNumber}`,
+        //  });
         const notificationData = await eowNotification.create({
           name: employeeOfTheWeek.name,
           //employee: employeeOfTheWeek.name,
@@ -164,10 +164,6 @@ const calculateEmployeeOfTheWeek = async (weekNo) => {
     return null;
   }
 };
-
-
-
-
 
 // * Function to get the week number
 const getWeekNumber = (date) => {

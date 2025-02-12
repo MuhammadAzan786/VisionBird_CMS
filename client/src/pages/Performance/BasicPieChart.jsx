@@ -54,7 +54,7 @@ const BasicPieChart = ({ _currentUser }) => {
       }
     } catch (err) {
       console.error("Error fetching employee data:", err);
-      setError("Failed to fetch data");
+      setError("There is no data to show.");
     } finally {
       setLoading(false);
     }

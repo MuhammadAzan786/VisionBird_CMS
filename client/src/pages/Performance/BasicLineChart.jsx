@@ -57,7 +57,7 @@ const BasicLineChart = ({ _currentUser }) => {
         setDailyPoints(pointsData);
       } catch (err) {
         console.error("Error fetching employee data:", err);
-        setError("Failed to fetch data");
+        setError("There is no data to show.");
       } finally {
         setLoading(false);
       }
@@ -68,7 +68,7 @@ const BasicLineChart = ({ _currentUser }) => {
 
   const weekDays = generateWeekDays();
   const maxY = Math.max(...dailyPoints) + 10;
-
+  const totalPoints = dailyPoints.reduce((sum, points) => sum + points, 0);
   if (loading) return <p>Loading...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
 
@@ -93,6 +93,10 @@ const BasicLineChart = ({ _currentUser }) => {
         ) : (
           <Typography>No daily points available</Typography>
         )}
+        
+                <Typography  sx={{ mt: 2 }}>
+                  Total Points Earned This Week: {totalPoints}
+                </Typography>
       </Box>
     </>
   );

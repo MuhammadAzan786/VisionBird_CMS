@@ -37,14 +37,14 @@ const ViewPerformance = () => {
           <BasicLineChart _currentUser={currentUser._id} />
           </Paper>
         </Grid>
-        <Grid item xs={12}  md={6}>
+        <Grid item xs={12}  >
           <Paper>
           <TaskChart _currentUser={currentUser._id} />
           </Paper>
         </Grid>
-        <Grid item xs={12}  md={6}>
+        <Grid item xs={12}  >
           <Paper>
-          <Top5EmployeesTable />
+          <Top5EmployeesTable _currentUser={currentUser._id}/>
           </Paper>
         </Grid>
       </Grid>

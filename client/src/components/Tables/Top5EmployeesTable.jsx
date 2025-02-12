@@ -1,38 +1,29 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
-import { Container, Typography, CircularProgress } from "@mui/material";
+import { Typography, CircularProgress } from "@mui/material";
 import axios from "../../utils/axiosInterceptor";
 import { useState, useEffect } from "react";
 
+const getWeekNumber = (date) => {
+  const startDate = new Date(date.getFullYear(), 0, 1);
+  const days = Math.floor((date - startDate) / (24 * 60 * 60 * 1000));
+  return Math.ceil((days + startDate.getDay() + 1) / 7);
+};
+
 const columns = [
   { field: "EmployeeName", headerName: "Employee Name", width: 180 },
-  { field: "TotalWeekPoints", headerName: "Total Points", width: 150 },
+  { field: "TotalWeekPoints", headerName: "Evaluation Points", width: 150 },
+  { field: "CompletedTasks", headerName: "Completed Tasks", width: 150 },
+  { field: "CompletedTasksPoints", headerName: "Points", width: 150 },
+  { field: "TotalPoints", headerName: "Total Points", width: 150 },
 ];
 
-const TopEmployeePerformance = () => {
+const TopEmployeePerformance = ({ _currentUser }) => {
   const [weekNo, setWeekNo] = useState(null);
   const [topEmployees, setTopEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const getWeekNumber = (date) => {
-    const startDate = new Date(date.getFullYear(), 0, 1);
-    const days = Math.floor((date - startDate) / (24 * 60 * 60 * 1000));
-    return Math.ceil((days + startDate.getDay() + 1) / 7);
-  };
-
-  const getWeekDays = () => {
-    const today = new Date();
-    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1)); // Monday
-    const weekDays = [];
-    for (let i = 0; i < 5; i++) {
-      const day = new Date(firstDayOfWeek);
-      day.setDate(firstDayOfWeek.getDate() + i);
-      weekDays.push(day.toISOString().split('T')[0]); // Save as yyyy-mm-dd format
-    }
-    return weekDays;
-  };
 
   const fetchEmployeeEvaluations = async () => {
     setLoading(true);
@@ -42,6 +33,7 @@ const TopEmployeePerformance = () => {
       setLoading(false);
       return;
     }
+
     try {
       const response = await axios.get("/api/employee/get_employee_ids");
       const employeeIds = response.data;
@@ -54,20 +46,9 @@ const TopEmployeePerformance = () => {
               params: { employee_id: employeeId, week_no: weekNo },
             }
           );
-          
-          const taskResponse = await axios.get(
-            `/api/task/getCompletedTasksByEmployeeIdDate/${employeeId}`
-          );
-
-          const weekDays = getWeekDays();
-          const weeklyTaskPoints = taskResponse.data
-            .filter((task) => weekDays.includes(task.createdAt.split('T')[0])) // Match date part only (yyyy-mm-dd)
-            .reduce((sum, task) => sum + task.pointsGained, 0);
-
           return {
             employeeId,
             evaluations: evaluationResponse.data.evaluations || [],
-            additionalPoints: weeklyTaskPoints,
           };
         })
       );
@@ -75,31 +56,26 @@ const TopEmployeePerformance = () => {
       const formattedRows = evaluations
         .filter((evaluation) => evaluation.evaluations.length > 0)
         .map((evaluation) => {
-          const { evaluations, additionalPoints } = evaluation;
+          const { evaluations } = evaluation;
           let totalPoints = evaluations.reduce(
             (sum, singleEvaluation) => sum + singleEvaluation.total_points,
             0
           );
-          totalPoints += additionalPoints;
 
           return {
+            employeeId: evaluation.employeeId,
             EmployeeName: evaluations[0]?.employee?.name || "Unknown Employee",
             TotalWeekPoints: totalPoints,
+            dailyTasks: Array(5).fill(0),
+            dailyPoints: Array(5).fill(0),
           };
         });
 
       const sortedEmployees = formattedRows.sort(
         (a, b) => b.TotalWeekPoints - a.TotalWeekPoints
       );
-      const topFiveEmployees = sortedEmployees
-        .slice(0, 5)
-        .map((employee, index) => ({
-          id: index,
-          EmployeeName: employee.EmployeeName,
-          TotalWeekPoints: employee.TotalWeekPoints,
-        }));
 
-      setTopEmployees(topFiveEmployees);
+      setTopEmployees(sortedEmployees.slice(0, 5)); // Store top 5 employees
     } catch (error) {
       console.error(
         "Error fetching employee evaluations:",
@@ -111,10 +87,38 @@ const TopEmployeePerformance = () => {
     }
   };
 
+  const fetchDailyTasksAndPoints = async (employeeId) => {
+    try {
+      const response = await axios.get(
+        `/api/task/getCompletedTasksByEmployeeIdDate/${employeeId}`
+      );
+      const tasks = response.data || [];
+
+      const taskCountByDay = Array(5).fill(0);
+      const pointsData = Array(5).fill(0);
+
+      tasks.forEach((task) => {
+        if (task.taskcompleteStatus === "completed" && task.updatedAt) {
+          const updatedAtDate = new Date(task.updatedAt);
+          const dayOfWeek = updatedAtDate.getDay(); // 0 = Sunday, 1 = Monday
+
+          if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+            taskCountByDay[dayOfWeek - 1] += 1;
+            pointsData[dayOfWeek - 1] += task.pointsGained;
+          }
+        }
+      });
+
+      return { taskCountByDay, pointsData };
+    } catch (error) {
+      console.error("Error fetching daily tasks and points:", error);
+      return { taskCountByDay: Array(5).fill(0), pointsData: Array(5).fill(0) };
+    }
+  };
+
   useEffect(() => {
     const currentDate = new Date();
-    const currentWeekNo = getWeekNumber(currentDate);
-    setWeekNo(currentWeekNo);
+    setWeekNo(getWeekNumber(currentDate));
   }, []);
 
   useEffect(() => {
@@ -123,15 +127,30 @@ const TopEmployeePerformance = () => {
     }
   }, [weekNo]);
 
+  useEffect(() => {
+    const updateEmployeeData = async () => {
+      const updatedEmployees = await Promise.all(
+        topEmployees.map(async (employee) => {
+          const { taskCountByDay, pointsData } = await fetchDailyTasksAndPoints(employee.employeeId);
+          return {
+            ...employee,
+            dailyTasks: taskCountByDay,
+            dailyPoints: pointsData,
+          };
+        })
+      );
+      setTopEmployees(updatedEmployees);
+    };
+
+    if (topEmployees.length > 0) {
+      updateEmployeeData();
+    }
+  }, [topEmployees]);
+
   return (
     <Box sx={{ width: "100%", p: 1, bgcolor: "background.paper" }}>
       {loading ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          height="100%"
-        >
+        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
           <CircularProgress />
         </Box>
       ) : error ? (
@@ -143,14 +162,29 @@ const TopEmployeePerformance = () => {
           No employee data available for this week.
         </Typography>
       ) : (
-        <DataGrid
-          rows={topEmployees}
-          columns={columns}
-          pageSizeOptions={[5]}
-          disableRowSelectionOnClick
-          pagination={false}
-          sx={{ height: "300px" }}
-        />
+        <>
+          <Typography  gutterBottom>
+              Week : {weekNo}
+          </Typography>
+          <DataGrid
+            rows={topEmployees.map((employee, index) => ({
+              id: index,
+              EmployeeName: employee.EmployeeName,
+              TotalWeekPoints: employee.TotalWeekPoints,
+              CompletedTasks: employee.dailyTasks.reduce((acc, task) => acc + task, 0),
+              CompletedTasksPoints: employee.dailyPoints.reduce((acc, point) => acc + point, 0),
+              TotalPoints:
+                employee.TotalWeekPoints +
+                employee.dailyPoints.reduce((acc, point) => acc + point, 0),
+            }))}
+            columns={columns}
+            pageSize={5}
+            disableRowSelectionOnClick
+            pagination={false}
+            sx={{ height: "auto" }}
+          />
+          
+        </>
       )}
     </Box>
   );

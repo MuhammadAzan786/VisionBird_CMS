@@ -12,7 +12,7 @@ const Notifications = () => {
   }
 
   if (status === "failed") {
-    toast.error("faaaail");
+    toast.error("failed to fetch notifications");
   }
 
   return (

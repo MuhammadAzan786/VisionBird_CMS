@@ -62,6 +62,12 @@ I added the following code to the index.css file: */
   flex-grow: 1 !important;
   max-width: 100% !important;
 }
+.css-1dhssdk-MuiTypography-root{
+  font-size: 2rem !important;
+}
+.css-19ev9o5-MuiPaper-root{
+  height: auto !important;
+}
 @media (min-width: 600px) {
   .css-zbaamk-MuiGrid-root{
     flex-basis: 30%;

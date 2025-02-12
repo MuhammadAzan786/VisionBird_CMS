@@ -57,7 +57,7 @@ const DetailedBarChart = ({ _currentUser }) => {
         }
     } catch (err) {
         console.error("Error fetching employee tasks:", err);
-        setError("Failed to fetch data");
+        setError("There is no data to show.");
     } finally {
         setLoading(false);
     }
@@ -69,6 +69,8 @@ const DetailedBarChart = ({ _currentUser }) => {
 
   const weekDays = generateWeekDays(); // Monday to Friday
   const maxY = Math.max(...dailyTasks) + 10; // Add a margin for visual clarity (e.g., +10)
+  const totalCompletedTasks = dailyTasks.reduce((acc, count) => acc + count, 0); // Sum up completed tasks
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -97,6 +99,9 @@ const DetailedBarChart = ({ _currentUser }) => {
             No tasks completed this week 
           </Typography>
         )}
+        <Typography sx={{ mt: 2 }}>
+          Total Completed Tasks: {totalCompletedTasks}
+        </Typography>
       </Box>
     </>
   );
