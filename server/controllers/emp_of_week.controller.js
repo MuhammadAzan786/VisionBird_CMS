@@ -66,6 +66,7 @@ const postEvaluations = async (req, res) => {
         await EmpOfWeekWinners.create({
           week_no: weekNo,
           employee_id: employeeOfTheWeek.id,
+          employee_id: employeeOfTheWeek.employeeID,
           employee_name: employeeOfTheWeek.name,
           total_points: employeeOfTheWeek.totalPoints,
         });

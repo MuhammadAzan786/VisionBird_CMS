@@ -22,14 +22,14 @@ const columns = [
         }}
       >
         <span>{params.row.Mondaytotal} pts</span>
-        <span>{params.row.Mondaylate}</span>
+
       </div>
     ),
   },
-  { field: "Tuesday", headerName: "Tuesday", width: 200 },
-  { field: "Wednesday", headerName: "Wednesday", width: 200 },
-  { field: "Thursday", headerName: "Thursday", width: 200 },
-  { field: "Friday", headerName: "Friday", width: 200 },
+  { field: "Tuesday", headerName: "Tuesday", width: '200' },
+  { field: "Wednesday", headerName: "Wednesday", width: '200' },
+  { field: "Thursday", headerName: "Thursday", width: '200' },
+  { field: "Friday", headerName: "Friday", width: '200' },
   { field: "TotalWeekPoints", headerName: "Total Week Points", width: 206 },
 ];
 const EmployeePerformance = () => {
