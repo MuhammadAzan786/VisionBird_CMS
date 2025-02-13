@@ -21,7 +21,7 @@ const columns = [
           justifyContent: "space-between",
         }}
       >
-        <span>{params.row.Mondaytotal} pts</span>
+        <span>{params.row.Mondaytotal} </span>
 
       </div>
     ),

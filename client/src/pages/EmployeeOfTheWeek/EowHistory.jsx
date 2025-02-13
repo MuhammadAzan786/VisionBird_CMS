@@ -12,26 +12,37 @@ const columns = [
     align: "left",
     renderCell: (params) => {
       const imageUrl = params.row.employeeProImage?.secure_url;
+
       return (
-        <Box display="flex" alignItems="left">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={params.row.name}
-              style={{ width: 32, height: 32, borderRadius: "50%", marginRight: "8px" }}
-            />
-          ) : (
-            <Avatar sx={{ width: 32, height: 32, marginRight: "8px" }} />
-          )}
-          <Typography>{params.row.name}</Typography>
+        <Box display="flex" alignItems="center">
+          {/* Box for Employee Image */}
+          <Box display="flex" alignItems="center" justifyContent="center" marginRight="8px">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={params.row.name}
+                style={{ width: 32, height: 32, borderRadius: "50%" }}
+              />
+            ) : (
+              <Avatar sx={{ width: 32, height: 32 }} />
+            )}
+          </Box>
+
+          {/* Box for Employee Name and ID */}
+          <Box display="flex" flexDirection="column" alignItems="flex-start">
+            <Typography variant="body2">{params.row.name}</Typography>
+            <Typography variant="caption" color="textSecondary">
+              {params.row.employeeID}
+            </Typography>
+          </Box>
         </Box>
       );
     },
   },
-  { field: "employeeID", headerName: "Employee ID", flex: 2, headerAlign: "left", align: "left" },
+  
   { field: "weekNo", headerName: "Week No", flex: 1, headerAlign: "left", align: "left" },
   { field: "pointsGained", headerName: "Task Points", flex: 1, headerAlign: "left", align: "left" },
-  { field: "completedTasks", headerName: "Completed Tasks", flex: 1, headerAlign: "left", align: "left" }, // New column for completed tasks
+  { field: "completedTasks", headerName: "Completed Tasks", flex: 1, headerAlign: "left", align: "left" },
   { field: "totalPoints", headerName: "Total Points", flex: 1, headerAlign: "left", align: "left" },
   { field: "awardDate", headerName: "Award Date", flex: 1.5, headerAlign: "left", align: "left" },
 ];

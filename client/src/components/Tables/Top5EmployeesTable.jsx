@@ -17,22 +17,31 @@ const columns = [
     headerName: "Employee Name",
     width: 250,
     renderCell: (params) => {
-      const imageUrl = params.row.employeeProImage.secure_url;
-      console.log("Employee image URL:", imageUrl); // Log the URL to confirm
-
+      const imageUrl = params.row.employeeProImage?.secure_url;
+  
       return (
         <Box display="flex" alignItems="center">
-          <img
-            src={imageUrl}
-            alt={params.row.EmployeeName}
-            style={{ width: 32, height: 32, borderRadius: "50%", marginRight: "8px" }}
-          />
-          <Typography>{params.row.EmployeeName}</Typography>
+          {/* Box for Employee Image */}
+          <Box display="flex" alignItems="center" justifyContent="center" marginRight="8px">
+            <img
+              src={imageUrl}
+              alt={params.row.EmployeeName}
+              style={{ width: 32, height: 32, borderRadius: "50%" }}
+            />
+          </Box>
+  
+          {/* Box for Employee Name and ID */}
+          <Box display="flex" flexDirection="column" alignItems="flex-start">
+            <Typography variant="body2">{params.row.EmployeeName}</Typography>
+            <Typography variant="caption" color="textSecondary">
+              {params.row.employee_ID}
+            </Typography>
+          </Box>
         </Box>
       );
     },
   },
-  { field: "employee_ID", headerName: "Employee ID", width: 200 },
+
   { field: "TotalWeekPoints", headerName: "Evaluation Points", width: 200 },
   { field: "CompletedTasks", headerName: "Completed Tasks", width: 200 },
   { field: "CompletedTasksPoints", headerName: "Points", width: 200 },
