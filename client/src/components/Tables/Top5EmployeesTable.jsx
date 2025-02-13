@@ -1,7 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
-import { Typography, CircularProgress } from "@mui/material";
+import { Typography, CircularProgress, Avatar } from "@mui/material";
 import axios from "../../utils/axiosInterceptor";
 import { useState, useEffect } from "react";
 
@@ -12,14 +12,34 @@ const getWeekNumber = (date) => {
 };
 
 const columns = [
-  { field: "EmployeeName", headerName: "Employee Name", width: 180 },
-  { field: "TotalWeekPoints", headerName: "Evaluation Points", width: 150 },
-  { field: "CompletedTasks", headerName: "Completed Tasks", width: 150 },
-  { field: "CompletedTasksPoints", headerName: "Points", width: 150 },
-  { field: "TotalPoints", headerName: "Total Points", width: 150 },
+  {
+    field: "EmployeeName",
+    headerName: "Employee Name",
+    width: 250,
+    renderCell: (params) => {
+      const imageUrl = params.row.employeeProImage.secure_url;
+      console.log("Employee image URL:", imageUrl); // Log the URL to confirm
+
+      return (
+        <Box display="flex" alignItems="center">
+          <img
+            src={imageUrl}
+            alt={params.row.EmployeeName}
+            style={{ width: 32, height: 32, borderRadius: "50%", marginRight: "8px" }}
+          />
+          <Typography>{params.row.EmployeeName}</Typography>
+        </Box>
+      );
+    },
+  },
+  { field: "employee_ID", headerName: "Employee ID", width: 200 },
+  { field: "TotalWeekPoints", headerName: "Evaluation Points", width: 200 },
+  { field: "CompletedTasks", headerName: "Completed Tasks", width: 200 },
+  { field: "CompletedTasksPoints", headerName: "Points", width: 200 },
+  { field: "TotalPoints", headerName: "Total Points", width: 200 },
 ];
 
-const TopEmployeePerformance = ({ _currentUser }) => {
+const TopEmployeePerformance = () => {
   const [weekNo, setWeekNo] = useState(null);
   const [topEmployees, setTopEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,9 +66,16 @@ const TopEmployeePerformance = ({ _currentUser }) => {
               params: { employee_id: employeeId, week_no: weekNo },
             }
           );
+          // Fetch employee details to get the profile image
+          const employeeResponse = await axios.get(`/api/employee/get_employee/${employeeId}`);
+          const employeeProImage = employeeResponse.data?.employeeProImage || {};
+          const employeID = employeeResponse.data?.employeeID || "Unknown Employee ID";
+
           return {
             employeeId,
             evaluations: evaluationResponse.data.evaluations || [],
+            employeeProImage,
+            employeID,
           };
         })
       );
@@ -56,7 +83,7 @@ const TopEmployeePerformance = ({ _currentUser }) => {
       const formattedRows = evaluations
         .filter((evaluation) => evaluation.evaluations.length > 0)
         .map((evaluation) => {
-          const { evaluations } = evaluation;
+          const { evaluations, employeeProImage, employeID } = evaluation;
           let totalPoints = evaluations.reduce(
             (sum, singleEvaluation) => sum + singleEvaluation.total_points,
             0
@@ -65,6 +92,8 @@ const TopEmployeePerformance = ({ _currentUser }) => {
           return {
             employeeId: evaluation.employeeId,
             EmployeeName: evaluations[0]?.employee?.name || "Unknown Employee",
+            employeeProImage, // Now include the profile image
+            employee_ID: employeID, // Include the employee ID
             TotalWeekPoints: totalPoints,
             dailyTasks: Array(5).fill(0),
             dailyPoints: Array(5).fill(0),
@@ -163,13 +192,15 @@ const TopEmployeePerformance = ({ _currentUser }) => {
         </Typography>
       ) : (
         <>
-          <Typography  gutterBottom>
-              Week : {weekNo}
+          <Typography gutterBottom>
+            Week : {weekNo}
           </Typography>
           <DataGrid
             rows={topEmployees.map((employee, index) => ({
               id: index,
               EmployeeName: employee.EmployeeName,
+              employeeProImage: employee.employeeProImage,
+              employee_ID: employee.employee_ID,
               TotalWeekPoints: employee.TotalWeekPoints,
               CompletedTasks: employee.dailyTasks.reduce((acc, task) => acc + task, 0),
               CompletedTasksPoints: employee.dailyPoints.reduce((acc, point) => acc + point, 0),
@@ -183,7 +214,6 @@ const TopEmployeePerformance = ({ _currentUser }) => {
             pagination={false}
             sx={{ height: "auto" }}
           />
-          
         </>
       )}
     </Box>
