@@ -232,4 +232,8 @@ I added the following code to the index.css file: */
   .css-8wbz3t-MuiButtonBase-root-MuiButton-root{
     width: 100% !important;
   }
+  .css-19jlpil-MuiButtonBase-root-MuiButton-root,
+  .css-1ycpemr-MuiButtonBase-root-MuiButton-root{
+    width: 100% !important;
+  }
 }
