@@ -8,6 +8,7 @@ const columns = [
     field: "name",
     headerName: "Employee Name",
     flex: 2,
+    minWidth: 200,
     headerAlign: "left",
     align: "left",
     renderCell: (params) => {
@@ -40,11 +41,11 @@ const columns = [
     },
   },
   
-  { field: "weekNo", headerName: "Week No", flex: 1, headerAlign: "left", align: "left" },
-  { field: "pointsGained", headerName: "Task Points", flex: 1, headerAlign: "left", align: "left" },
-  { field: "completedTasks", headerName: "Completed Tasks", flex: 1, headerAlign: "left", align: "left" },
-  { field: "totalPoints", headerName: "Total Points", flex: 1, headerAlign: "left", align: "left" },
-  { field: "awardDate", headerName: "Award Date", flex: 1.5, headerAlign: "left", align: "left" },
+  { field: "weekNo",    minWidth: 200, headerName: "Week No", flex: 1, headerAlign: "left", align: "left" },
+  { field: "pointsGained",    minWidth: 200, headerName: "Task Points", flex: 1, headerAlign: "left", align: "left" },
+  { field: "completedTasks",    minWidth: 200, headerName: "Completed Tasks", flex: 1, headerAlign: "left", align: "left" },
+  { field: "totalPoints",    minWidth: 200, headerName: "Total Points", flex: 1, headerAlign: "left", align: "left" },
+  { field: "awardDate",     minWidth: 200,headerName: "Award Date", flex: 1.5, headerAlign: "left", align: "left" },
 ];
 
 export default function EowHistory() {
