@@ -50,7 +50,7 @@ const ActiveInterneesTable = ({ searchTerm }) => {
       ),
     },
     { field: "designation", headerName: "Designation", width: 250 },
-    { field: "email", headerName: "Email", width: 260 },
+    { field: "email", headerName: "Email", width: 300 },
     {
       field: "internshipFrom",
       headerName: "Internship From",

@@ -216,4 +216,20 @@ I added the following code to the index.css file: */
     max-width: 100% !important;
     flex-basis: 100% !important;
   }
+  .css-k3gutg{
+    display: flex ;
+    flex-direction: column !important;
+  }
+  .css-11ze7cv{
+    width: 100% !important;
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+  }
+  .css-1hkijp4{
+    width: 100% !important;
+    text-align: center !important;
+  }
+  .css-8wbz3t-MuiButtonBase-root-MuiButton-root{
+    width: 100% !important;
+  }
 }

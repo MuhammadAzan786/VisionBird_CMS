@@ -37,6 +37,7 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
     {
       field: "employeeName",
       headerName: "Employee",
+      minWidth: 300,
       flex: 1,
       renderCell: ({ row }) => (
         <EmployeeNameCell
@@ -49,16 +50,19 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
     {
       field: "email",
       headerName: "Email",
+      minWidth: 300,
       flex: 1,
     },
     {
       field: "employeeDesignation",
       headerName: "Designation",
+      minWidth: 200,
       flex: 1,
     },
     {
       field: "qualification",
       headerName: "Qualification",
+      minWidth: 200,
       flex: 1,
     },
 
@@ -66,6 +70,7 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
       field: "role",
       headerName: "Role",
       flex: 1,
+      minWidth: 200,
       renderCell: (params) => (
         <CustomChip
           label={WordCaptitalize(params.value)}
