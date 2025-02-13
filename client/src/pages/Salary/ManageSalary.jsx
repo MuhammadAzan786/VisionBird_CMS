@@ -49,7 +49,7 @@ const SalaryReportTable = () => {
             gap: 1,
           }}
         >
-          <Avatar src={params.row.emp_img} alt="avatar" sx={{ border: "5px solid #F5F5F5", width: 50, height: 50 }} />
+          <Avatar src={params.row.emp_img?.secure_url} alt="avatar" sx={{ border: "5px solid #F5F5F5", width: 50, height: 50 }} />
           <Stack sx={{ alignItems: "start" }}>
             <Typography fontWeight={500} fontSize={15}>
               {params.row.name}

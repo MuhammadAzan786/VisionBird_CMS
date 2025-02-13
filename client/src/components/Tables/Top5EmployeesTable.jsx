@@ -23,16 +23,16 @@ const columns = [
         <Box display="flex" alignItems="center">
           {/* Box for Employee Image */}
           <Box display="flex" alignItems="center" justifyContent="center" marginRight="8px">
-            <img
+            <Avatar
               src={imageUrl}
               alt={params.row.EmployeeName}
-              style={{ width: 32, height: 32, borderRadius: "50%" }}
+              sx={{ border: "5px solid #F5F5F5", width: 50, height: 50 }} 
             />
           </Box>
   
           {/* Box for Employee Name and ID */}
           <Box display="flex" flexDirection="column" alignItems="flex-start">
-            <Typography variant="body2">{params.row.EmployeeName}</Typography>
+            <Typography variant="body2" fontWeight={500} >{params.row.EmployeeName}</Typography>
             <Typography variant="caption" color="textSecondary">
               {params.row.employee_ID}
             </Typography>
@@ -42,10 +42,10 @@ const columns = [
     },
   },
 
-  { field: "TotalWeekPoints", headerName: "Evaluation Points", width: 200 },
-  { field: "CompletedTasks", headerName: "Completed Tasks", width: 200 },
-  { field: "CompletedTasksPoints", headerName: "Points", width: 200 },
-  { field: "TotalPoints", headerName: "Total Points", width: 200 },
+  { field: "TotalWeekPoints", headerName: "Evaluation Points", width: 200 ,headerAlign: "center", align: "center" },
+  { field: "CompletedTasks", headerName: "Completed Tasks", width: 200 ,headerAlign: "center", align: "center" },
+  { field: "CompletedTasksPoints", headerName: "Points", width: 200 ,headerAlign: "center", align: "center" },
+  { field: "TotalPoints", headerName: "Total Points", width: 200 ,headerAlign: "center", align: "center" },
 ];
 
 const TopEmployeePerformance = () => {

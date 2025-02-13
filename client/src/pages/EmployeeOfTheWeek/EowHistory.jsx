@@ -1,6 +1,7 @@
 import { Box, TextField, Typography, Paper, Avatar } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axiosInterceptor";
 
 const columns = [
@@ -19,10 +20,10 @@ const columns = [
           {/* Box for Employee Image */}
           <Box display="flex" alignItems="center" justifyContent="center" marginRight="8px">
             {imageUrl ? (
-              <img
+             <Avatar 
                 src={imageUrl}
                 alt={params.row.name}
-                style={{ width: 32, height: 32, borderRadius: "50%" }}
+                sx={{ border: "5px solid #F5F5F5", width: 50, height: 50 }} 
               />
             ) : (
               <Avatar sx={{ width: 32, height: 32 }} />
@@ -31,7 +32,7 @@ const columns = [
 
           {/* Box for Employee Name and ID */}
           <Box display="flex" flexDirection="column" alignItems="flex-start">
-            <Typography variant="body2">{params.row.name}</Typography>
+            <Typography variant="body2" fontWeight={500} >{params.row.name}</Typography>
             <Typography variant="caption" color="textSecondary">
               {params.row.employeeID}
             </Typography>
@@ -41,17 +42,22 @@ const columns = [
     },
   },
   
-  { field: "weekNo",    minWidth: 200, headerName: "Week No", flex: 1, headerAlign: "left", align: "left" },
-  { field: "pointsGained",    minWidth: 200, headerName: "Task Points", flex: 1, headerAlign: "left", align: "left" },
-  { field: "completedTasks",    minWidth: 200, headerName: "Completed Tasks", flex: 1, headerAlign: "left", align: "left" },
-  { field: "totalPoints",    minWidth: 200, headerName: "Total Points", flex: 1, headerAlign: "left", align: "left" },
-  { field: "awardDate",     minWidth: 200,headerName: "Award Date", flex: 1.5, headerAlign: "left", align: "left" },
+  { field: "weekNo",    minWidth: 100, headerName: "Week No", flex: 1, headerAlign: "center", align: "center" },
+  { field: "pointsGained",    minWidth: 100, headerName: "Task Points", flex: 1, headerAlign: "center", align: "center" },
+  { field: "completedTasks",    minWidth: 100, headerName: "Completed Tasks", flex: 1, headerAlign: "center", align: "center" },
+  { field: "totalPoints",    minWidth: 100, headerName: "Total Points", flex: 1, headerAlign: "center", align: "center" },
+  { field: "awardDate",     minWidth: 100,headerName: "Award Date", flex: 1.5, headerAlign: "center", align: "center" },
 ];
 
 export default function EowHistory() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
 
+  const navigateTo = (employee) => {
+    navigate(`/employee-profile/${employee.id}`);
+  };
+  
   const fetchData = async () => {
     try {
       // Fetch evaluations and employee data in parallel
@@ -160,6 +166,11 @@ export default function EowHistory() {
         columns={columns}
         getRowId={(row) => row.id}
         pageSizeOptions={[10]}
+        onRowDoubleClick={navigateTo}
+                
+        sx={{
+          cursor: "pointer",
+        }}
         disableRowSelectionOnClick
       />
     </Paper>
