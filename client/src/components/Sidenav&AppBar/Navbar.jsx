@@ -94,6 +94,10 @@ const Navbar = ({
           label: "Create Team",
           path: "/create-team",
         },
+        {
+          label: "Teams",
+          path: "/teams",
+        }
       ],
     },
 

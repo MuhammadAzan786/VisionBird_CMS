@@ -66,6 +66,7 @@ import Notifications from "./pages/Notifications/Notifications";
 import EmployeeLeaveHistory from "./pages/Leaves/EmployeeLeaveHistory";
 import LeaveHistory from "./pages/Leaves/LeaveHistory";
 import CreateTeam from "./pages/Teams/CreateTeam";
+import Teams from "./pages/Teams/Teams";
 import UploadDocuments from "./pages/EmployeeDocuments/UploadDocuments";
 
 const App = () => {
@@ -157,6 +158,7 @@ const App = () => {
             <Route path="/manage-internees" element={<ManageInternees />} />
             <Route path="/create-employee" element={<CreateEmployeeForm />} />
             <Route path="/create-team" element={<CreateTeam />} />
+            <Route path="/teams" element={<Teams />} />
             <Route path="/uploadDocuments" element={<UploadDocuments />} />
             <Route path="/create-internee" element={<CreateInterneeForm />} />
             <Route

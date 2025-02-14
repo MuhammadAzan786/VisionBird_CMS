@@ -89,8 +89,11 @@ I added the following code to the index.css file: */
 .css-106gv53-MuiDataGrid-root,
 .css-f8hybe-MuiDataGrid-root,
 .css-nxjy9b-MuiDataGrid-root{
-  height: auto !important;
+ 
   min-height: 200px !important;
+}
+.css-204u17-MuiDataGrid-main{
+  min-height: 400px !important;
 }
 @media (max-width: 1100px) {
 
