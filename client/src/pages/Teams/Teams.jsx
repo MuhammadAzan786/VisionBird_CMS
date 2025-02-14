@@ -111,7 +111,7 @@ const Teams = () => {
                   <Avatar
                     src={imageUrl}
                     alt={employeeName}
-                    sx={{ border: "5px solid #F5F5F5", width: 30, height: 30, marginRight: "8px" }}
+                    sx={{ border: "5px solid #F5F5F5", width: 50, height: 50, marginRight: "8px" }}
                   />
                   <Box display="flex" flexDirection="column" alignItems="flex-start">
                     <Typography variant="body2" fontWeight={500}>{employeeName}</Typography>
