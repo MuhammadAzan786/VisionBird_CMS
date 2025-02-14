@@ -143,19 +143,15 @@ const Teams = () => {
         <Box display="flex" justifyContent="center" alignItems="center" height="100%">
           <CircularProgress />
         </Box>
-      ) : error ? (
-        <Typography color="error" align="center">{error}</Typography>
-      ) : teams.length === 0 ? (
-        <Typography variant="body1" align="center">No team data available.</Typography>
       ) : (
         <DataGrid
-          rows={teams}
+          rows={teams.length > 0 ? teams : []} // Always show table with column names
           columns={columns}
           pageSize={5}
           disableRowSelectionOnClick
           pagination={false}
-       
           getRowHeight={() => 'auto'} // Set row height to auto
+          noRowsLabel="No rows available"
           sx={{
             height: "auto",
             '& .MuiDataGrid-cell': {
@@ -164,6 +160,7 @@ const Teams = () => {
             '& .MuiDataGrid-row': {
               paddingTop: '8px', 
               paddingBottom: '8px', 
+
             }
           }}
         />
