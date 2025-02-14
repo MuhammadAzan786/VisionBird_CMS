@@ -130,7 +130,7 @@ const Teams = () => {
       headerName: "Actions",
       width: 100,
       renderCell: (params) => (
-        <IconButton color="error" onClick={() => handleDelete(params.row.id)}>
+        <IconButton color="error" onClick={() => handleDelete(params.row.id)} style={{border: "5px solid #F5F5F5" }}>
           <DeleteIcon />
         </IconButton>
       ),
