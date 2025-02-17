@@ -4,6 +4,7 @@ import { Paper, Typography, Avatar } from "@mui/material";
 import axios from "../../utils/axiosInterceptor";
 import { useState, useEffect } from "react";
 
+
 const columns = [
   {
     field: "EmployeeName",
@@ -44,6 +45,7 @@ const columns = [
 ];
 
 const EmployeePerformance = () => {
+
   const [weekNo, setWeekNo] = useState(null);
   const [rows, setRows] = useState([]);
 
@@ -58,6 +60,7 @@ const EmployeePerformance = () => {
       console.error("Week number is not set yet.");
       return;
     }
+    
     try {
       const response = await axios.get("/api/employee/get_employee_ids"); // Fetch only employee IDs
       const employeeIds = response.data;
@@ -65,7 +68,7 @@ const EmployeePerformance = () => {
       // Fetch employee details along with evaluation data
       const evaluations = await Promise.all(
         employeeIds.map(async (employeeId) => {
-          const [employeeResponse, evaluationResponse] = await Promise.all([
+          const [employeeResponse, evaluationResponse ] = await Promise.all([
             axios.get(`/api/employee/get_employee/${employeeId}`), // Fetch employee details
             axios.get("/api/empOfWeek/evaluations/employee/emp_week", {
               params: {
@@ -73,11 +76,18 @@ const EmployeePerformance = () => {
                 week_no: weekNo,
               },
             }), // Fetch employee's evaluation data for the week
+
+            //  axios.get(`/api/task/getCompletedTasksByEmployeeIdDate/${employeeId}`,{
+            //    params: {
+            //      date: new Date().toISOString().split('T')[0],
+            //    },
+            //  }), // Fetch employee's completed tasks
+            
           ]);
 
           const employeeDetails = employeeResponse.data;
           const evaluationsData = evaluationResponse.data.evaluations || [];
-
+          
           // Return combined data for each employee
           return {
             employeeId,
@@ -153,6 +163,7 @@ const EmployeePerformance = () => {
   }, [weekNo]);
 
   return (
+    <>
     <Paper>
       <Box sx={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
         <Typography variant="h6">Performance Analytics</Typography>
@@ -180,6 +191,8 @@ const EmployeePerformance = () => {
         />
       </Box>
     </Paper>
+
+   </>
   );
 };
 

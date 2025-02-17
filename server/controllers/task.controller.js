@@ -156,7 +156,27 @@ const getCompletedTasksByEmployeeIdDate = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+//Task History
+const completedTaskHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    // Fetch all completed tasks for the given employee ID
+    const data = await Task.find({
+      employee_obj_id: id,
+      taskcompleteStatus: "completed",
+    }).sort({ updatedAt: -1 }); // Sort by most recent tasks first
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ message: "No Completed Tasks Found" });
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error fetching completed task history for employee:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 
 //Get  Late Tasks By EmployeeId According to date
@@ -707,5 +727,6 @@ module.exports = {
   get_all_task_types,
   add_new_task_types,
   taskCompleteStatusUpdate,
-  getPendingTasksByEmpId
+  getPendingTasksByEmpId,
+  completedTaskHistory
 };

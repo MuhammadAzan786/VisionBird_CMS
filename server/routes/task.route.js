@@ -13,6 +13,7 @@ const {
   getTasksByDate,
   getAssignedTasksByEmployeeIdDate,
   getCompletedTasksByEmployeeIdDate,
+  completedTaskHistory,
   getLateTasksByEmployeeIdDate,
   pauseRequest,
   pauseRequestAccepted,
@@ -73,6 +74,13 @@ router.get(
   auth,
   authorizeRoles("admin", "manager", "employee"),
   getCompletedTasksByEmployeeIdDate
+);
+//Get Task History
+router.get(
+  "/completedTaskHistory/:id",
+  auth,
+  authorizeRoles("admin", "manager", "employee"),
+  completedTaskHistory
 );
 // * Get Completed Tasks from Employee Id and date
 router.get(

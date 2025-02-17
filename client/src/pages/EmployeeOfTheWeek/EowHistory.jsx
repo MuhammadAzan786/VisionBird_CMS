@@ -85,45 +85,47 @@ export default function EowHistory() {
 
       // Map over each evaluation item and fetch tasks for each employee
       const evaluationsWithTaskData = await Promise.all(
-        evaluationsArray.map(async (item) => {
-          try {
-            const taskResponse = await axios.get(
-              `/api/task/getCompletedTasksByEmployeeIdDate/${item.employee_id}`
-            );
-            const completedTasks = taskResponse.data || [];
-            const totalTaskPoints = completedTasks.reduce(
-              (sum, task) =>
-                task.taskcompleteStatus === "completed" ? sum + task.pointsGained : sum,
-              0
-            );
-            return {
-              id: item.employee_id,
-              name: item.employee_name,
-              employeeID: employeeMap[item.employee_id]?.employeeID || item.employee_id,
-              employeeProImage: employeeMap[item.employee_id]?.employeeProImage || {},
-              weekNo: item.week_no,
-              totalPoints: item.total_points + totalTaskPoints,
-              pointsGained: totalTaskPoints,
-              completedTasks: completedTasks.filter(task => task.taskcompleteStatus === "completed").length, // Count completed tasks
-              awardDate: new Date(item.award_date).toLocaleDateString(),
-            };
-          } catch (taskError) {
-            console.error(`Error fetching tasks for employee ${item.employee_id}:`, taskError);
-            // Return the evaluation data without task info if task API fails
-            return {
-              id: item.employee_id,
-              name: item.employee_name,
-              employeeID: employeeMap[item.employee_id]?.employeeID || item.employee_id,
-              employeeProImage: employeeMap[item.employee_id]?.employeeProImage || {},
-              weekNo: item.week_no,
-              totalPoints: item.total_points,
-              pointsGained: 0,
-              completedTasks: 0, // No completed tasks if there is an error fetching task data
-              awardDate: new Date(item.award_date).toLocaleDateString(),
-            };
-          }
-        })
+        evaluationsArray
+          .filter((item) => item.employee_id) // Ensure employee_id exists
+          .map(async (item) => {
+            try {
+              const taskResponse = await axios.get(
+                `/api/task/completedTaskHistory/${item.employee_id}`
+              );
+              const completedTasks = taskResponse.data || [];
+              const totalTaskPoints = completedTasks.reduce(
+                (sum, task) =>
+                  task.taskcompleteStatus === "completed" ? sum + task.pointsGained : sum,
+                0
+              );
+              return {
+                id: item.employee_id,
+                name: item.employee_name,
+                employeeID: employeeMap[item.employee_id]?.employeeID || item.employee_id,
+                employeeProImage: employeeMap[item.employee_id]?.employeeProImage || {},
+                weekNo: item.week_no,
+                totalPoints: item.total_points + totalTaskPoints,
+                pointsGained: totalTaskPoints,
+                completedTasks: completedTasks.filter(task => task.taskcompleteStatus === "completed").length,
+                awardDate: new Date(item.award_date).toLocaleDateString(),
+              };
+            } catch (taskError) {
+              console.error(`Error fetching tasks for employee ${item.employee_id}:`, taskError);
+              return {
+                id: item.employee_id,
+                name: item.employee_name,
+                employeeID: employeeMap[item.employee_id]?.employeeID || item.employee_id,
+                employeeProImage: employeeMap[item.employee_id]?.employeeProImage || {},
+                weekNo: item.week_no,
+                totalPoints: item.total_points,
+                pointsGained: 0,
+                completedTasks: 0,
+                awardDate: new Date(item.award_date).toLocaleDateString(),
+              };
+            }
+          })
       );
+      
 
       console.log("Formatted Rows:", evaluationsWithTaskData);
       setRows(evaluationsWithTaskData);
@@ -173,6 +175,8 @@ export default function EowHistory() {
         }}
         disableRowSelectionOnClick
       />
+
     </Paper>
+
   );
 }

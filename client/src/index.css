@@ -122,6 +122,9 @@ I added the following code to the index.css file: */
   .css-168ikf9-MuiStack-root{
     padding: 20px !important;
   }
+  .css-zbaamk-MuiGrid-root{
+    max-width: 25% !important;
+  }
 }
 
 @media (max-width: 910px) {
@@ -166,6 +169,11 @@ I added the following code to the index.css file: */
     width: 100% !important;
     margin-left: 0px !important;
   }
+  .css-mhc70k-MuiGrid-root{
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
 }
   
   
@@ -192,6 +200,14 @@ I added the following code to the index.css file: */
   }
 }
 @media (max-width: 600px) {
+.css-1lnbf0p-MuiButtonBase-root-MuiButton-root{
+  width: 100% !important;
+}
+.css-1idn90j-MuiGrid-root{
+  width: 100% !important;
+}
+}
+@media (max-width: 600px) {
   .css-12itpog-MuiPaper-root{
     padding: 10px !important;
   }
@@ -212,7 +228,7 @@ I added the following code to the index.css file: */
     flex-direction: column !important;
     justify-content: center !important;
     align-items: center !important;
-    padding: 20px !important;
+
   }
   .css-1osj8n2-MuiGrid-root{
     max-width: 100% !important;
@@ -241,5 +257,22 @@ I added the following code to the index.css file: */
   .css-19jlpil-MuiButtonBase-root-MuiButton-root,
   .css-1ycpemr-MuiButtonBase-root-MuiButton-root{
     width: 100% !important;
+  }
+}
+@media (min-width: 1000px) {
+  .css-zbaamk-MuiGrid-root{
+    max-width: 30% !important;
+  }
+}
+
+.css-1b5xkzu-MuiPaper-root-MuiPopover-paper-MuiMenu-paper{
+  padding: 5px !important;
+}
+
+@media (max-width: 910px) {
+  .css-1b3l6lk-MuiGrid-root{
+    width: 100% !important;
+    flex-basis: 100% !important;
+    max-width: 100% !important;
   }
 }
