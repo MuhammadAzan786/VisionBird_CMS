@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "../../utils/axiosInterceptor";
 import { Box, Typography, Avatar, Button, Paper } from "@mui/material";
+import { Download, Edit, Delete } from "@mui/icons-material";
 import Grid from "@mui/material/Grid";
 import { usePDF } from "react-to-pdf";
 import { useMessage } from "../../components/MessageContext";
 import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
-import { Link as RouterLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
 import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
@@ -19,21 +19,17 @@ import ContactMailOutlinedIcon from "@mui/icons-material/ContactMailOutlined";
 import SmartphoneOutlinedIcon from "@mui/icons-material/SmartphoneOutlined";
 import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import CreditScoreOutlinedIcon from "@mui/icons-material/CreditScoreOutlined";
-import LocalPoliceOutlinedIcon from "@mui/icons-material/LocalPoliceOutlined";
-import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
 import ManageAccountsOutlinedIcon from "@mui/icons-material/ManageAccountsOutlined";
 import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
 import HandshakeOutlinedIcon from "@mui/icons-material/HandshakeOutlined";
-import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
-import CurrencyExchangeOutlinedIcon from "@mui/icons-material/CurrencyExchangeOutlined";
-import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { useQueryClient } from "@tanstack/react-query";
-import ViewDocuments from "../../components/ViewDocuments";
+import PsychologyIcon from "@mui/icons-material/Psychology";
 import ViewDocumentInternee from "../../components/ViewDocumentInternee";
+import AccessibleIcon from "@mui/icons-material/Accessible";
 import toast from "react-hot-toast";
+import { saveAs } from "file-saver";
+import { FolderZipOutlined } from "@mui/icons-material";
+import JSZip from "jszip";
 
 const InterneeProfile = () => {
   const { currentUser } = useSelector((state) => state.user);
@@ -44,6 +40,52 @@ const InterneeProfile = () => {
   const navigate = useNavigate();
 
   const location = useLocation();
+  const downloadZip = async () => {
+    console.log("clicked", user);
+    console.log("clicked", user);
+
+    const projects = [
+      ...user.appointmentFile,
+      user.interneeProImage,
+      ...user.experienceLetter,
+      ...user.cnicFile,
+      ...user.interneeCv,
+    ];
+
+    // Create a new JSZip instance
+    const zip = new JSZip();
+    const folder = zip.folder(`${user.firstName}_Documents`);
+
+    // Function to handle file addition to the zip
+    const addFileToZip = async (fileUrl, fileName) => {
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+      folder.file(fileName, blob);
+    };
+
+    // Iterate through each project (either object with secure_url or array of objects with secure_url)
+    for (const project of projects) {
+      // If it's a single object (like employeeProImage) with a 'secure_url'
+      if (project?.secure_url) {
+        const fileName = project?.secure_url.split("/").pop();
+        await addFileToZip(project?.secure_url, fileName);
+      }
+      // If it's an array of objects (like policeCertificateUpload[], cnicScanCopy[], etc.)
+      else if (Array.isArray(project)) {
+        for (const item of project) {
+          if (item?.secure_url) {
+            const fileName = item?.secure_url.split("/").pop();
+            await addFileToZip(item?.secure_url, fileName);
+          }
+        }
+      }
+    }
+
+    // Generate the ZIP file and trigger the download
+    await zip.generateAsync({ type: "blob" }).then(function (blob) {
+      saveAs(blob, `${user.firstName}_Documents.zip`);
+    });
+  };
 
   const isActive = (path) => location.pathname === path;
 
@@ -123,7 +165,7 @@ const InterneeProfile = () => {
   return (
     <Grid width={"100%"}>
       <Grid p={3} ref={targetRef}>
-        <Grid bgcolor={"white"} component={Paper} elevation={3} mb={4}>
+        <Grid bgcolor={"white"} component={Paper} mb={2}>
           <Box
             sx={{
               background: color,
@@ -156,7 +198,7 @@ const InterneeProfile = () => {
                   disableRipple
                   onClick={() => toPDF()}
                 >
-                  Download Profile
+             <Download />
                 </Button>
                 <Button
                   sx={{
@@ -169,7 +211,7 @@ const InterneeProfile = () => {
                   variant="outlined"
                   onClick={handleEdit}
                 >
-                  Update Profile
+             <Edit />
                 </Button>
                 <Button
                   sx={{
@@ -183,7 +225,7 @@ const InterneeProfile = () => {
                   variant="outlined"
                   onClick={handleDelete}
                 >
-                  Delete Profile
+                                 <Delete />
                 </Button>
               </Box>
             )}
@@ -272,14 +314,14 @@ const InterneeProfile = () => {
                   onClick={() => toPDF()}
                   color="success"
                 >
-                  Download Profile
+                       <Download />
                 </Button>
                 <Button
                   sx={{ margin: 1 }}
                   variant="contained"
                   onClick={handleEdit}
                 >
-                  Update Profile
+                          <Edit />
                 </Button>
                 <Button
                   sx={{ margin: 1 }}
@@ -287,416 +329,362 @@ const InterneeProfile = () => {
                   color="error"
                   onClick={handleDelete}
                 >
-                  Delete Profile
+                      <Delete />
                 </Button>
               </Box>
             </Box>
           </Box>
         </Grid>
 
-        <Grid container p={5} elevation={3} component={Paper} gap={2}>
-          <Grid item xs={12} component={Paper} p={2}>
-            <Button
-              sx={{
-                color: "white",
-                backgroundColor: "#1976d2",
-                marginRight: 2,
-                ":hover": {
-                  color: "white",
-
-                  backgroundColor: "rgba(25, 118, 210, 0.5)",
-                },
-              }}
-              component={RouterLink}
-              to={`/internee-profile/${id}`}
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <Paper
+              sx={{ p: 3, display: "flex", flexDirection: "column", gap: 1 }}
             >
-              Profile
-            </Button>
-            {/* <Button
-        sx={{
-          color:"#5F6A6A",marginRight:2,
-          ":hover":{
-            color:'white',
-            backgroundColor: "rgba(25, 118, 210, 0.5)"
-          
-          }
-        }}
-        component={RouterLink}
-        to={`/portfolio/${id}`}
-      >
-        Portfolio
-      </Button>
-      {currentUser._id === id ? (
-        <Button
-          sx={{ 
-            
-          color: isActive(`/employeetaskboard/${id}`) ? '#1976d2' : '#5F6A6A',
-          ":hover":{
-            color:'white',
-            backgroundColor: "rgba(25, 118, 210, 0.5)"
-          
-          }
-        
-        }}
-          
-          
-          component={RouterLink}
-          to={`/employeetaskboard/${id}`}
-        >
-          Tasks
-        </Button>
-      ) : (
-        <Button
-          sx={{ 
-            ":hover":{
-            color:'white',
-            backgroundColor: "rgba(25, 118, 210, 0.5)"
-          
-          },
-          color: isActive(`/employeetaskviewPause/${id}`) ? '#1976d2' : '#5F6A6A' }}
-          component={RouterLink}
-          to={`/employeetaskviewPause/${id}`}
-        >
-          Tasks
-        </Button>
-      )}
-
-     */}
-          </Grid>
-
-          <Grid
-            xs={12}
-            md={5.85}
-            item
-            component={Paper}
-            elevation={3}
-            p={3}
-            mt={2}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-            }}
-          >
-            <Grid item>
-              <Typography fontSize={20} color={"#BFC9CA "}>
+              <Typography fontSize={20} color="#BFC9CA">
                 Personal Info
               </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <CreditCardOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Cnic:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {user.cnic}
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <CakeOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Date of Birth:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {dateOfBirth}
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <ManOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Gender:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {user.gender}
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <VolunteerActivismOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Marital Status:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {user.maritalStatus}
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <EscalatorWarningOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Father Name:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {user.fatherName}
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <AutoStoriesOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Qualification:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {user.qualification}
-              </Typography>
-            </Grid>
-          </Grid>
+              <Grid item display="flex" alignItems="center">
+                <CreditCardOutlinedIcon
+                  sx={{ marginRight: 1, color: "#5F6A6A" }}
+                />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Cnic:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.cnic}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <CakeOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Date of Birth:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {dateOfBirth}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <ManOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Gender:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.gender}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <VolunteerActivismOutlinedIcon
+                  sx={{ marginRight: 1, color: "#5F6A6A" }}
+                />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Marital Status:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.maritalStatus}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <EscalatorWarningOutlinedIcon
+                  sx={{ marginRight: 1, color: "#5F6A6A" }}
+                />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Father Name:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.fatherName}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <AutoStoriesOutlinedIcon
+                  sx={{ marginRight: 1, color: "#5F6A6A" }}
+                />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Qualification:
+                </Typography>
 
-          <Grid
-            xs={12}
-            md={5.85}
-            item
-            component={Paper}
-            elevation={3}
-            p={2}
-            mt={2}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-            }}
-          >
-            <Grid item>
-              <Typography fontSize={20} color={"#BFC9CA "}>
-                Contact Info
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <ContactMailOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Mail Address:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {user.mailingAddress}
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <SmartphoneOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Mobile #:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {user.mobile}
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <LocalPhoneOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Gardian Number:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {user.otherMobile}
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <EscalatorWarningOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Gardian Relation:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {user.whosMobile}
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <EmailOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Email:
-              </Typography>
-              <Typography fontSize={13} color={"#212F3D"}>
-                {user.email}
-              </Typography>
-            </Grid>
-          </Grid>
-          <Grid
-            xs={12}
-            md={5.85}
-            item
-            component={Paper}
-            elevation={3}
-            mt={2}
-            p={2}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-            }}
-          >
-            <Grid item>
-              <Typography fontSize={20} color={"#BFC9CA "}>
-                Employee Info
-              </Typography>
-            </Grid>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.qualification}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <AccessibleIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Disability:
+                </Typography>
 
-            <Grid item display={"flex"} alignItems={"center"}>
-              <HandshakeOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Date of Joining:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {internshipfrom}
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <EventAvailableOutlinedIcon
-                sx={{ marginRight: 1, color: "#5F6A6A" }}
-              />
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                {" "}
-                Ending Date :
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {internshipto}
-              </Typography>
-            </Grid>
-          </Grid>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.disability}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <PsychologyIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Disability Type:
+                </Typography>
 
-          <Grid
-            xs={12}
-            md={5.85}
-            item
-            component={Paper}
-            elevation={3}
-            p={2}
-            mt={2}
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-            }}
-          >
-            <Grid item>
-              <Typography fontSize={20} color={"#BFC9CA "}>
-                Questionnaire
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Added on Slack:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {user.slack}
-              </Typography>
-            </Grid>
-            <Grid item display={"flex"} alignItems={"center"}>
-              <Typography
-                fontSize={15}
-                fontWeight={600}
-                marginRight={1}
-                color={"#212F3D"}
-              >
-                Rules policy check:
-              </Typography>
-              <Typography fontSize={15} color={"#212F3D"}>
-                {user.rules}
-              </Typography>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid
-          container
-          spacing={2}
-          component={Paper}
-          sx={{ borderRadius: "5px" }}
-          mt={2}
-          p={3}
-        >
-          <Grid item xs={12}>
-            <Typography
+                {user.disability === "yes" && (
+                  <Typography>{user.disabilityType}</Typography>
+                )}
+
+                {user.disability === "no" && <Typography>------</Typography>}
+              </Grid>
+            </Paper>
+            {/* Employee Info Section */}
+            <Paper
               sx={{
-                fontWeight: "600",
-                fontSize: "20px",
-                color: "#3b4056",
-                mb: 5,
+                p: 3,
+                mt: 2,
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
               }}
             >
-              Upload Documents
-            </Typography>
-            {user && <ViewDocumentInternee values={user} />}
+              <Typography fontSize={20} color="#BFC9CA">
+                Employee Info
+              </Typography>
+              <Grid item display="flex" alignItems="center">
+                <HandshakeOutlinedIcon
+                  sx={{ marginRight: 1, color: "#5F6A6A" }}
+                />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Date of Joining:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {internshipfrom}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <EventAvailableOutlinedIcon
+                  sx={{ marginRight: 1, color: "#5F6A6A" }}
+                />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Ending Date:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {internshipto}
+                </Typography>
+              </Grid>
+            </Paper>
+          </Grid>
+
+          {/* Column 2 */}
+          <Grid item xs={12} md={6}>
+            {/* Contact Info Section */}
+            <Paper
+              sx={{
+                p: 3,
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
+              }}
+            >
+              <Typography fontSize={20} color="#BFC9CA">
+                Contact Info
+              </Typography>
+              <Grid item display="flex" alignItems="center">
+                <ContactMailOutlinedIcon
+                  sx={{ marginRight: 1, color: "#5F6A6A" }}
+                />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Mail Address:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.mailingAddress}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <SmartphoneOutlinedIcon
+                  sx={{ marginRight: 1, color: "#5F6A6A" }}
+                />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Mobile #:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.mobile}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <LocalPhoneOutlinedIcon
+                  sx={{ marginRight: 1, color: "#5F6A6A" }}
+                />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Guardian Number:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.otherMobile}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <EscalatorWarningOutlinedIcon
+                  sx={{ marginRight: 1, color: "#5F6A6A" }}
+                />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Guardian Relation:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.whosMobile}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <EmailOutlinedIcon sx={{ marginRight: 1, color: "#5F6A6A" }} />
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Email:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.email}
+                </Typography>
+              </Grid>
+            </Paper>
+            {/* Questionnaire Section */}
+            <Paper
+              sx={{
+                p: 3,
+                mt: 2,
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
+              }}
+            >
+              <Typography fontSize={20} color="#BFC9CA">
+                Questionnaire
+              </Typography>
+              <Grid item display="flex" alignItems="center">
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Added on Slack:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.slack}
+                </Typography>
+              </Grid>
+              <Grid item display="flex" alignItems="center">
+                <Typography
+                  fontSize={15}
+                  fontWeight={600}
+                  marginRight={1}
+                  color="#212F3D"
+                >
+                  Rules policy check:
+                </Typography>
+                <Typography fontSize={15} color="#212F3D">
+                  {user.rules}
+                </Typography>
+              </Grid>
+            </Paper>
+          </Grid>
+        </Grid>
+
+        <Grid item xs={12}>
+          <Grid container gap={2} component={Paper} p={5} mt={2}>
+            <Grid item xs={12}>
+              <Grid container>
+                <Grid item xs={6}>
+                  <Typography
+                    sx={{
+                      fontWeight: "600",
+
+                      color: "#3b4056",
+                      mb: 3,
+                    }}
+                    fontSize={20}
+                    color={"#BFC9CA "}
+                  >
+                    Documents
+                  </Typography>
+                </Grid>
+                <Grid item xs={6} sx={{ textAlign: "right" }}>
+                  <Button
+                    variant="contained"
+                    endIcon={<FolderZipOutlined />}
+                    onClick={downloadZip}
+                  >
+                    Download All
+                  </Button>
+                </Grid>
+              </Grid>
+
+              {user && <ViewDocumentInternee values={user} />}
+            </Grid>
           </Grid>
         </Grid>
       </Grid>

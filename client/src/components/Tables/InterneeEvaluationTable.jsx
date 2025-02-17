@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {  Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import PersonSearchIcon from "@mui/icons-material/PersonSearch";
 import AddIcon from "@mui/icons-material/Add";
 import TalentAquisition from "../../pages/InterviewEvaluation/components/TalentAquisition";
@@ -16,11 +16,9 @@ import AppearedEvaluations from "../../pages/InterviewEvaluation/AppearedEvaluat
 import NotAppearedEvaluations from "../../pages/InterviewEvaluation/NotAppearedEvaluations";
 
 const InterneeEvaluationTable = () => {
-
   const [searchTerm, setSearchTerm] = useState("");
   const [talentModalOpen, setTalentModalOpen] = useState(false);
   const [tabValue, setTabValue] = useState("pending_evaluations");
-  console.log("searchTerm", searchTerm);
 
   const handleTabValue = (event, newValue) => {
     setTabValue(newValue);
@@ -40,9 +38,10 @@ const InterneeEvaluationTable = () => {
       <Modal open={talentModalOpen} onClose={handleTalentModalClose}>
         <TalentAquisition />
       </Modal>
-      <Paper>
-        <Grid container>
-          <Grid item md={6}>
+      <Paper sx={{ padding: 2, borderRadius: 2 }}>
+        <Grid container spacing={2} alignItems="center">
+          {/* Search Field Section */}
+          <Grid item xs={12} sm={6}>
             <TextField
               label="Search"
               variant="outlined"
@@ -50,19 +49,47 @@ const InterneeEvaluationTable = () => {
               size="small"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              sx={{ borderRadius: "5px" }} // Rounded corners for the input
+              sx={{ borderRadius: "5px" }}
             />
             <FormHelperText sx={{ marginTop: 1, color: "text.secondary" }}>
-              Search by name, contact number (e.g., 0310-7747768), or CNIC (e.g., 34201-8603239-7).
+              Search by name, contact number (e.g., 0310-7747768), or CNIC
+              (e.g., 34201-8603239-7).
             </FormHelperText>
           </Grid>
-          <Grid item md={6}>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-              <Button component={Link} to={"/evaluation-form"} variant="outlined" size="large">
+
+          {/* Button Section */}
+          <Grid item xs={12} sm={6}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: { xs: "center", sm: "flex-end" },
+                gap: 1,
+                mb: 1,
+              }}
+            >
+              <Button
+                component={Link}
+                to="/evaluation-form"
+                variant="outlined"
+                size="large"
+                sx={{ textTransform: "none" }}
+              >
                 <AddIcon sx={{ mr: 1 }} /> Evaluation Form
               </Button>
-
-              <Button onClick={toggleTalentAquistion} variant="contained" size="large">
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: { xs: "center", sm: "flex-end" },
+                gap: 1,
+              }}
+            >
+              <Button
+                onClick={toggleTalentAquistion}
+                variant="contained"
+                size="large"
+                sx={{ textTransform: "none" }}
+              >
                 <PersonSearchIcon sx={{ mr: 1 }} /> Talent Acquisition
               </Button>
             </Box>

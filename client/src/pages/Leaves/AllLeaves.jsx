@@ -6,21 +6,30 @@ import CustomOverlay from "../../components/Styled/CustomOverlay";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { initializeSocket } from "../../redux/socketSlice";
+
 export default function AllLeaves({ table }) {
-  //const [allLeaves, setAllLeave] = useState([]);
   const socket = useSelector((state) => state.socket.socket);
   const currentUser = useSelector((state) => state.user);
   const quryClient = useQueryClient();
   const dispatch = useDispatch();
+
   useEffect(() => {
     if (socket) {
-      socket.on("notification", (data) => {
+      socket.on("notification", () => {
+        quryClient.invalidateQueries("All leaves");
+      });
+      socket.on("leaveStatusChanges", () => {
+        quryClient.invalidateQueries("All leaves");
+      });
+      socket.on("leaveSent", () => {
         quryClient.invalidateQueries("All leaves");
       });
 
       return () => {
-        socket.off("notification", (data) => {
-          // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
+        socket.off("notification", () => {});
+        socket.off("leaveStatusChanges", () => {});
+        socket.off("leaveSent", () => {
+          quryClient.invalidateQueries("All leaves");
         });
       };
     } else {
@@ -35,9 +44,20 @@ export default function AllLeaves({ table }) {
       return response.data;
     },
   });
-  // console.log(query);
 
-  // Handle Loading and Error States
+  useEffect(() => {
+    if (socket) {
+      socket.on("notification", () => {
+        queryClient.invalidateQueries("All leaves");
+      });
+      return () => {
+        socket.off("notification", () => {});
+      };
+    } else {
+      dispatch(initializeSocket(currentUser));
+    }
+  }, [socket, dispatch, currentUser]);
+
   if (query.isLoading) {
     return <CustomOverlay open={true} />;
   }
@@ -47,25 +67,22 @@ export default function AllLeaves({ table }) {
     return;
   }
 
-  console.log("query res", query.data);
-
   const ManagerPendingLeaves = query.data.filter((item) => {
-    return item.status === "Pending" && item.from.role === "manager";
+    return item.status === "Pending" && item.from?.role === "manager";
   });
-  console.log("mannn", ManagerPendingLeaves);
-  const MannagerAllLeave = query.data.filter((item) => {
-    return item.from.role === "manager";
-  });
-  const employeePendingLeaves = query.data.filter((item) => {
-    return item.status === "Pending" && item.from.role === "employee";
-  });
-  const employeeAllLeave = query.data.filter((item) => {
-    return item.from.role === "employee";
-  });
-  console.log("table", table);
-  console.log("all lever of emp", employeeAllLeave);
 
-  console.log("all lever of man", ManagerPendingLeaves);
+  const MannagerAllLeave = query.data.filter((item) => {
+    return item.from?.role === "manager";
+  });
+
+  const employeePendingLeaves = query.data.filter((item) => {
+    return item.status === "Pending" && item.from?.role === "employee";
+  });
+
+  const employeeAllLeave = query.data.filter((item) => {
+    return item.from?.role === "employee";
+  });
+
   return (
     <>
       <LeavesTable

@@ -1,28 +1,39 @@
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
-import { Paper, Typography } from "@mui/material";
+import { Paper, Typography, Avatar } from "@mui/material";
 import axios from "../../utils/axiosInterceptor";
 import { useState, useEffect } from "react";
+
+
 const columns = [
   {
     field: "EmployeeName",
     headerName: "Employee Name",
     width: 240,
+    renderCell: (params) => {
+      const { employeeName, employeeImage, employeeID } = params.row;
+      return (
+        <Box display="flex" alignItems="center">
+          <Avatar
+            src={employeeImage || '/path/to/default-image.jpg'}
+            alt={employeeName}
+            sx={{ border: "5px solid #F5F5F5", width: 50, height: 50, marginRight: "8px" }}
+          />
+          <Box display="flex" flexDirection="column" alignItems="flex-start">
+            <Typography variant="body2" fontWeight={500}>{employeeName || "Employee Name" }</Typography>
+            <Typography variant="caption" color="textSecondary">{employeeID || "Employee ID "}</Typography>
+          </Box>
+        </Box>
+      );
+    }
   },
   {
     field: "Monday",
     headerName: "Monday",
     width: 240,
     renderCell: (params) => (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
-      >
-        <span>{params.row.Mondaytotal} pts</span>
-        <span>{params.row.Mondaylate}</span>
+      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <span>{params.row.Mondaytotal}</span>
       </div>
     ),
   },
@@ -32,67 +43,86 @@ const columns = [
   { field: "Friday", headerName: "Friday", width: 200 },
   { field: "TotalWeekPoints", headerName: "Total Week Points", width: 206 },
 ];
+
 const EmployeePerformance = () => {
+
   const [weekNo, setWeekNo] = useState(null);
   const [rows, setRows] = useState([]);
+
   const getWeekNumber = (date) => {
     const startDate = new Date(date.getFullYear(), 0, 1);
     const days = Math.floor((date - startDate) / (24 * 60 * 60 * 1000));
     return Math.ceil((days + startDate.getDay() + 1) / 7);
   };
+
   const fetchEmployeeEvaluations = async () => {
     if (!weekNo) {
       console.error("Week number is not set yet.");
-      return; // Early return if weekNo is not available
+      return;
     }
+    
     try {
       const response = await axios.get("/api/employee/get_employee_ids"); // Fetch only employee IDs
       const employeeIds = response.data;
-      console.log("employeeIds", employeeIds);
+
+      // Fetch employee details along with evaluation data
       const evaluations = await Promise.all(
         employeeIds.map(async (employeeId) => {
-          console.log("fetching  ", weekNo);
-          const evaluationResponse = await axios.get(
-            "/api/empOfWeek/evaluations/employee/emp_week",
-            {
+          const [employeeResponse, evaluationResponse ] = await Promise.all([
+            axios.get(`/api/employee/get_employee/${employeeId}`), // Fetch employee details
+            axios.get("/api/empOfWeek/evaluations/employee/emp_week", {
               params: {
-                // Use params to send query parameters
                 employee_id: employeeId,
                 week_no: weekNo,
               },
-            }
-          );
-          console.log(evaluationResponse.data);
+            }), // Fetch employee's evaluation data for the week
+
+            //  axios.get(`/api/task/getCompletedTasksByEmployeeIdDate/${employeeId}`,{
+            //    params: {
+            //      date: new Date().toISOString().split('T')[0],
+            //    },
+            //  }), // Fetch employee's completed tasks
+            
+          ]);
+
+          const employeeDetails = employeeResponse.data;
+          const evaluationsData = evaluationResponse.data.evaluations || [];
+          
+          // Return combined data for each employee
           return {
             employeeId,
-            evaluations: evaluationResponse.data.evaluations || [],
+            employeeName: employeeDetails.employeeName,
+            employeeImage: employeeDetails.employeeProImage?.secure_url || "", // Get profile image URL
+            employeeID: employeeDetails.employeeID,
+            evaluations: evaluationsData,
           };
         })
       );
+
       let counter = 0;
       const formattedRows = evaluations
         .filter((evaluation) => evaluation.evaluations.length > 0)
         .map((evaluation) => {
-          const { employeeId, evaluations } = evaluation;
+          const { employeeName, employeeImage, employeeID, evaluations } = evaluation;
+
           // Create an object to accumulate points for each day
           const weeklyData = {
             id: counter++,
-            EmployeeName: evaluations[0].employee.name, // Use the name from the first evaluation
+            EmployeeName: employeeName,
+            employeeImage: employeeImage,
+            employeeID: employeeID,
             Mondaytotal: 0,
-            Mondaylate: 0,
             Tuesday: 0,
             Wednesday: 0,
             Thursday: 0,
             Friday: 0,
             TotalWeekPoints: 0,
           };
-          // Iterate over each evaluation to accumulate points by day
+
+          // Accumulate points by day
           evaluations.forEach((singleEvaluation) => {
-            // Renamed eval to singleEvaluation
             const evaluationDate = new Date(singleEvaluation.evaluation_date);
-            const dayName = evaluationDate.toLocaleDateString("en-US", {
-              weekday: "long",
-            });
+            const dayName = evaluationDate.toLocaleDateString("en-US", { weekday: "long" });
 
             switch (dayName) {
               case "Monday":
@@ -111,42 +141,39 @@ const EmployeePerformance = () => {
                 weeklyData.Friday += singleEvaluation.total_points;
                 break;
               default:
-                break; // Handle cases for Saturday/Sunday or any other days as needed
+                break;
             }
-            // Add to the total points for the week
             weeklyData.TotalWeekPoints += singleEvaluation.total_points;
           });
+
           return weeklyData;
         });
+
       setRows(formattedRows);
-      console.log("formattedRows", formattedRows);
     } catch (error) {
       console.error("Error fetching employee evaluations:", error);
     }
   };
+
   useEffect(() => {
     const currentDate = new Date();
     const currentWeekNo = getWeekNumber(currentDate);
     setWeekNo(currentWeekNo);
-    fetchEmployeeEvaluations(); // Fetch data for every employee of the current week
+    fetchEmployeeEvaluations();
   }, [weekNo]);
+
   return (
+    <>
     <Paper>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "20px",
-        }}
-      >
-        <Typography variant="h6">Perfomance Analytics</Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
+        <Typography variant="h6">Performance Analytics</Typography>
         <Typography variant="h6">Week No : {weekNo}</Typography>
       </Box>
 
       <Box sx={{ height: "85vh", width: "100%" }}>
         <DataGrid
           rows={rows}
-          getRowId={(row) => row.EmployeeName}
+          getRowId={(row) => row.employeeID} // Ensure unique row ID for each employee
           columns={columns}
           initialState={{
             pagination: {
@@ -164,6 +191,8 @@ const EmployeePerformance = () => {
         />
       </Box>
     </Paper>
+
+   </>
   );
 };
 

@@ -12,6 +12,7 @@ const viewData = async (req, res) => {
     const search = req.query.search || "";
 
     const interviewData = await interview.find({
+      response: "appeared",
       $or: [
         { name: { $regex: search, $options: "i" } },
         { contact: { $regex: search, $options: "i" } },
@@ -89,7 +90,6 @@ const pending_Evaluations = async (req, res) => {
         { CNIC: { $regex: search, $options: "i" } },
       ],
     });
-    console.log("Interview data fetched successfully:", interviewData);
     res.status(200).json({
       message:
         interviewData.length === 0
@@ -114,7 +114,6 @@ const appeared_Evaluations = async (req, res) => {
         { CNIC: { $regex: search, $options: "i" } },
       ],
     });
-    console.log("Interview data fetched successfully:", interviewData);
     res.status(200).json({
       message:
         interviewData.length === 0
@@ -138,7 +137,6 @@ const not_appeared_Evaluations = async (req, res) => {
         { CNIC: { $regex: search, $options: "i" } },
       ],
     });
-    console.log("Interview data fetched successfully:", interviewData);
     res.status(200).json({
       message:
         interviewData.length === 0
@@ -176,8 +174,6 @@ const deleteData = async (req, res) => {
           segments.slice(7, segments.length - 1).join("/") +
           "/" +
           segments.pop().split(".")[0];
-
-        console.log("Public ID before deletion:", publicId);
 
         try {
           // Delete the file from Cloudinary
@@ -365,6 +361,34 @@ const update_record_when_appeared = async (req, res) => {
   }
 };
 
+const update_interviewCalled_status = async (req, res) => {
+  try {
+    const { interviewCalled, interviewCall, interviewTime } = req.body;
+
+    // If interviewCalled is "no", reset interviewCall and interviewTime
+    const updateData = {
+      interviewCalled,
+      interviewCall: interviewCalled === "no" ? null : interviewCall,
+      interviewTime: interviewCalled === "no" ? "" : interviewTime,
+    };
+
+    // Update document in database
+    const updatedInterview = await interview.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedInterview) {
+      return res.status(404).json({ message: "Interview not found" });
+    }
+
+    res.status(200).json(updatedInterview);
+  } catch (error) {
+    console.error("Error updating interview status:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 module.exports = {
   viewData,
   viewDataById,
@@ -377,4 +401,5 @@ module.exports = {
   appeared_Evaluations,
   not_appeared_Evaluations,
   update_record_when_appeared,
+  update_interviewCalled_status,
 };

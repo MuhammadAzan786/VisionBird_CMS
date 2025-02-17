@@ -1,6 +1,7 @@
 import {
   Avatar,
   Box,
+  Button,
   Grid,
   IconButton,
   List,
@@ -10,14 +11,28 @@ import {
   ListItemText,
   styled,
   Tab,
+  Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { customColors } from "../theme/colors";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Close, InsertDriveFile } from "@mui/icons-material";
+import {
+  Close,
+  DeleteOutline,
+  DescriptionOutlined,
+  DocumentScannerOutlined,
+  DownloadOutlined,
+  FolderZip,
+  FolderZipOutlined,
+  InsertDriveFile,
+  VisibilityOutlined,
+} from "@mui/icons-material";
 
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { saveAs } from "file-saver";
+import toast from "react-hot-toast";
+import { downloadFile } from "../utils/download/downloadFile";
+import { Link } from "react-router-dom";
 
 const ViewDocuments = ({ values }) => {
   console.log("in docxxxxxx");
@@ -32,6 +47,7 @@ const ViewDocuments = ({ values }) => {
   const handleTabValue = (event, newValue) => {
     setTabValue(newValue);
   };
+  const allowedFileTypes = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp"];
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} md={6} lg={5}>
@@ -47,52 +63,111 @@ const ViewDocuments = ({ values }) => {
             alignItems: "center",
             position: "relative",
             backgroundColor: customColors.mainAlpha,
+            cursor: "pointer",
+            transition: "all 0.4s", // You can keep general transition if you want for other properties
+            "&:hover .hoverContent": {
+              opacity: 1, // Make the hover content visible
+              visibility: "visible", // Ensure visibility when hovered
+            },
           }}
         >
-          {/* <PictureAsPdfIcon/> */}
-          {image?.original_file_name?.split(".").pop() === "pdf" ? (
-            <PictureAsPdfIcon
-              sx={{ fontSize: "10rem", cursor: "pointer" }}
-              onClick={() => {
-                if (!image?.secure_url) {
-                  console.error("No URL available to save.");
-                  return;
-                }
+          <Box
+            sx={{
+              position: "relative",
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {/* If the image is a PDF */}
+            {!allowedFileTypes.includes(
+              image?.original_file_name?.split(".").pop()
+            ) ? (
+              <DescriptionOutlined
+                sx={{
+                  fontSize: "20rem",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  if (!image?.secure_url) {
+                    console.error("No URL available to save.");
+                    return;
+                  }
 
-                // Extract the file extension
-                const fileExtension = image.original_file_name
-                  ?.split(".")
-                  .pop()
-                  .toLowerCase();
+                  // Extract file extension
+                  const fileExtension = image.original_file_name
+                    ?.split(".")
+                    .pop()
+                    .toLowerCase();
 
-                // Check if the file is a valid type to save
-                const allowedFileTypes = [
-                  "txt",
-                  "pdf",
-                  "xlsx",
-                  "xls",
-                  "doc",
-                  "docx",
-                ];
-                if (allowedFileTypes.includes(fileExtension)) {
-                  const link = document.createElement("a");
-                  link.href = image.secure_url; // File URL
-                  link.download =
-                    image.original_file_name || `download.${fileExtension}`; // File name for saving
-                  document.body.appendChild(link); // Append link to DOM
-                  link.click(); // Trigger click to download the file
-                  document.body.removeChild(link); // Clean up the DOM
-                } else {
-                  console.error("Unsupported file type or not a document.");
-                }
+                  // Allowed file types for image
+
+                  if (!allowedFileTypes.includes(fileExtension)) {
+                    const url = image.secure_url; // File URL
+                    downloadFile(url);
+                  } else {
+                    toast.error("Unsupported file type or not a document.");
+                  }
+                }}
+              />
+            ) : (
+              <img
+                style={{
+                  objectFit: "contain",
+                  height: "100%",
+                  width: "100%", // Ensure it scales properly
+                }}
+                src={image?.secure_url}
+                alt="Uploaded content"
+              />
+            )}
+            <Box
+              className="hoverContent"
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: customColors.mainAlpha,
+                color: "white",
+                padding: "10px",
+                opacity: 0, // Initially hidden
+                visibility: "hidden", // Initially hidden
+                transition: "opacity 0.4s ease-in-out", // Apply opacity transition with ease-in-out
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
-            />
-          ) : (
-              <img style={{
-                objectFit: 'contain',
-                height:"100%"
-            }} src={image?.secure_url} alt="Uploaded content" />
-          )}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  height: "100%",
+                  alignItems: "end",
+                  justifyContent: "start",
+                }}
+              >
+                <IconButton
+                  sx={{
+                    fontSize: "3rem", // Adjusted for better visibility
+                    margin: "10px",
+                    color: customColors.main,
+                    backgroundColor: "white",
+                    "&:hover": {
+                      backgroundColor: customColors.main,
+                      color: "white",
+                    },
+                  }}
+                  onClick={() => downloadFile(image?.secure_url)}
+                >
+                  <DownloadOutlined sx={{ fontSize: "2.6rem" }} />
+                </IconButton>
+              </Box>
+            </Box>
+          </Box>
         </Box>
       </Grid>
       <Grid item xs={12} md={6} lg={7}>
@@ -117,6 +192,7 @@ const ViewDocuments = ({ values }) => {
                 value="cnicScanCopy"
                 sx={{ letterSpacing: 1 }}
               />
+              <Tab label="CV" value="employeeCv" sx={{ letterSpacing: 1 }} />
               <Tab
                 label="Police Certificate"
                 value="policeCertificateUpload"
@@ -149,33 +225,25 @@ const ViewDocuments = ({ values }) => {
             value="cnicScanCopy"
             sx={{ padding: "0", height: "100%" }}
           >
-            {/* {values.cnicScanCopy.length > 0 && ( */}
-            <MediaList
-              data={values.cnicScanCopy}
-              setImage={setImage}
-              // handleDelete={handleDelete}
-            />
-            {/* )} */}
+            <MediaList data={values.cnicScanCopy} setImage={setImage} />
+          </CustomTabPanel>
+
+          <CustomTabPanel
+            value="employeeCv"
+            sx={{ padding: "0", height: "100%" }}
+          >
+            <MediaList data={values.employeeCv} setImage={setImage} />
           </CustomTabPanel>
 
           <CustomTabPanel value="policeCertificateUpload" sx={{ padding: "0" }}>
-            {/* {values.policeCertificateUpload.length > 0 && ( */}
             <MediaList
               data={values.policeCertificateUpload}
               setImage={setImage}
-              // handleDelete={handleDelete}
             />
-            {/* )} */}
           </CustomTabPanel>
 
           <CustomTabPanel value="degreesScanCopy" sx={{ padding: "0" }}>
-            {/* {values.degreesScanCopy.length > 0 && ( */}
-            <MediaList
-              data={values.degreesScanCopy}
-              setImage={setImage}
-              // handleDelete={handleDelete}
-            />
-            {/* )} */}
+            <MediaList data={values.degreesScanCopy} setImage={setImage} />
           </CustomTabPanel>
         </TabContext>
       </Grid>
@@ -184,8 +252,9 @@ const ViewDocuments = ({ values }) => {
 };
 
 const MediaList = ({ data, handleDelete, setImage }) => {
+  const allowedFileTypes = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp"];
   return (
-    <Box sx={{ marginTop: "20px" }}>
+    <Box>
       <List>
         {data.map((item, index) => (
           <ListItem
@@ -201,7 +270,9 @@ const MediaList = ({ data, handleDelete, setImage }) => {
               mb: 2,
             }}
           >
-            {item.resource_type === "image" ? (
+            {allowedFileTypes.includes(
+              item?.original_file_name?.split(".").pop()
+            ) ? (
               <ListItemAvatar>
                 <Avatar
                   src={item.secure_url}

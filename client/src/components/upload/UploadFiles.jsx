@@ -18,10 +18,16 @@ import { useState } from "react";
 import { customColors } from "../../theme/colors";
 import { cloudinaryConfig } from "../../utils/cloudinaryConfig";
 import { AXIOS_CLODUDINARY } from "../../utils/axios/axiosCloudinary";
-
 import CustomOverlay from "../../components/Styled/CustomOverlay";
 
-const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName, tempFilesRef, deletedFilesRef }) => {
+const UploadFiles = ({
+  values,
+  setFieldValue,
+  parentFolder = "Other",
+  folderName,
+  tempFilesRef,
+  deletedFilesRef,
+}) => {
   const [tabValue, setTabValue] = useState("employeeProImage");
   const [progress, setProgress] = useState();
   const handleTabValue = (event, newValue) => {
@@ -41,16 +47,23 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
         formData.append("upload_preset", cloudinaryConfig.upload_preset);
 
         try {
-          const response1 = await AXIOS_CLODUDINARY.post("/auto/upload", formData, {
-            onUploadProgress: (progressEvent) => {
-              const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          const response1 = await AXIOS_CLODUDINARY.post(
+            "/auto/upload",
+            formData,
+            {
+              onUploadProgress: (progressEvent) => {
+                const percentage = Math.round(
+                  (progressEvent.loaded * 100) / progressEvent.total
+                );
 
-              setProgress(percentage);
-            },
-          });
+                setProgress(percentage);
+              },
+            }
+          );
           console.log("Axios Response", response1.data);
 
-          const { secure_url, resource_type, public_id, context } = response1.data;
+          const { secure_url, resource_type, public_id, context } =
+            response1.data;
 
           tempFilesRef.current.push(public_id);
 
@@ -69,7 +82,9 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
 
     setProgress(0);
 
-    const successfulUploads = cloudinaryResponses.filter((response) => response !== null);
+    const successfulUploads = cloudinaryResponses.filter(
+      (response) => response !== null
+    );
 
     console.log("Succesfull uplaods", successfulUploads);
 
@@ -95,7 +110,9 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
 
     const currentData = values[tabValue];
     if (Array.isArray(currentData)) {
-      const updatedData = currentData.filter((item) => item.public_id !== public_id);
+      const updatedData = currentData.filter(
+        (item) => item.public_id !== public_id
+      );
       setFieldValue(tabValue, updatedData);
     } else {
       // this case is for profile image
@@ -126,6 +143,7 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
             multiple={tabValue !== "employeeProImage"}
             onChange={(event) => {
               sendtoCloudinary(event.target.files);
+              event.target.value = null;
             }}
             style={{
               position: "absolute",
@@ -162,9 +180,22 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
 
             <TabList onChange={handleTabValue}>
               <Tab label="Profile image" value="employeeProImage" />
-              <Tab label="CNIC" value="cnicScanCopy" sx={{ letterSpacing: 1 }} />
-              <Tab label="Police Certificate" value="policeCertificateUpload" sx={{ letterSpacing: 1 }} />
-              <Tab label="Qualification" value="degreesScanCopy" sx={{ letterSpacing: 1 }} />
+              <Tab
+                label="CNIC"
+                value="cnicScanCopy"
+                sx={{ letterSpacing: 1 }}
+              />
+              <Tab label="CV" value="employeeCv" sx={{ letterSpacing: 1 }} />
+              <Tab
+                label="Police Certificate"
+                value="policeCertificateUpload"
+                sx={{ letterSpacing: 1 }}
+              />
+              <Tab
+                label="Qualification"
+                value="degreesScanCopy"
+                sx={{ letterSpacing: 1 }}
+              />
             </TabList>
           </Box>
 
@@ -174,7 +205,10 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
             <Box sx={{ marginTop: "20px" }}>
               <List>
                 {Object.keys(values.employeeProImage).length > 0 && (
-                  <MediaList data={[values.employeeProImage]} handleDelete={handleDelete} />
+                  <MediaList
+                    data={[values.employeeProImage]}
+                    handleDelete={handleDelete}
+                  />
                 )}
                 {progress > 0 && <CustomOverlay open={true} />}
               </List>
@@ -184,7 +218,26 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
           <CustomTabPanel value="cnicScanCopy">
             <Box sx={{ marginTop: "20px" }}>
               <List>
-                {values.cnicScanCopy.length > 0 && <MediaList data={values.cnicScanCopy} handleDelete={handleDelete} />}
+                {values.cnicScanCopy.length > 0 && (
+                  <MediaList
+                    data={values.cnicScanCopy}
+                    handleDelete={handleDelete}
+                  />
+                )}
+                {progress > 0 && <CustomOverlay open={true} />}
+              </List>
+            </Box>
+          </CustomTabPanel>
+
+          <CustomTabPanel value="employeeCv">
+            <Box sx={{ marginTop: "20px" }}>
+              <List>
+                {values.employeeCv?.length > 0 && (
+                  <MediaList
+                    data={values.employeeCv}
+                    handleDelete={handleDelete}
+                  />
+                )}
                 {progress > 0 && <CustomOverlay open={true} />}
               </List>
             </Box>
@@ -192,14 +245,20 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
 
           <CustomTabPanel value="policeCertificateUpload">
             {values.policeCertificateUpload.length > 0 && (
-              <MediaList data={values.policeCertificateUpload} handleDelete={handleDelete} />
+              <MediaList
+                data={values.policeCertificateUpload}
+                handleDelete={handleDelete}
+              />
             )}
             {progress > 0 && <CustomOverlay open={true} />}
           </CustomTabPanel>
 
           <CustomTabPanel value="degreesScanCopy">
             {values.degreesScanCopy.length > 0 && (
-              <MediaList data={values.degreesScanCopy} handleDelete={handleDelete} />
+              <MediaList
+                data={values.degreesScanCopy}
+                handleDelete={handleDelete}
+              />
             )}
             {progress > 0 && <CustomOverlay open={true} />}
           </CustomTabPanel>
@@ -210,6 +269,7 @@ const UploadFiles = ({ values, setFieldValue, parentFolder = "Other", folderName
 };
 
 const MediaList = ({ data, handleDelete }) => {
+  const allowedFileTypes = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp"];
   return (
     <>
       {data.map((item, index) => {
@@ -223,14 +283,24 @@ const MediaList = ({ data, handleDelete }) => {
               mb: 2,
             }}
             secondaryAction={
-              <IconButton edge="end" sx={{ color: "red" }} onClick={() => handleDelete(item.public_id)}>
+              <IconButton
+                edge="end"
+                sx={{ color: "red" }}
+                onClick={() => handleDelete(item.public_id)}
+              >
                 <Close />
               </IconButton>
             }
           >
-            {item.resource_type === "image" ? (
+            {allowedFileTypes.includes(
+              item?.original_file_name?.split(".").pop()
+            ) ? (
               <ListItemAvatar>
-                <Avatar src={item.secure_url} alt={item.original_file_name} sx={{ borderRadius: 2 }} />
+                <Avatar
+                  src={item.secure_url}
+                  alt="asd"
+                  sx={{ borderRadius: 2 }}
+                />
               </ListItemAvatar>
             ) : (
               <ListItemIcon>

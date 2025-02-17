@@ -14,12 +14,16 @@ module.exports = {
         const rawFiles = deletedFiles.filter((file) => file.includes("."));
 
         if (images.length > 0) {
-          await cloudinary.api.delete_resources(images, { resource_type: "image" });
+          await cloudinary.api.delete_resources(images, {
+            resource_type: "image",
+          });
           console.log("Emp Add, Images Deleted");
         }
 
         if (rawFiles.length > 0) {
-          await cloudinary.api.delete_resources(rawFiles, { resource_type: "raw" });
+          await cloudinary.api.delete_resources(rawFiles, {
+            resource_type: "raw",
+          });
           console.log("Emp Add, Raw Files Deleted");
         }
       }
@@ -56,13 +60,39 @@ module.exports = {
     }
   },
 
+  // ! Get All the Employee with search option
+  get_all_employees: async (req, res) => {
+    const search = req.query.search || "";
+    try {
+      const employees = await Employee.find({
+        $or: [
+          { employeeName: { $regex: search, $options: "i" } },
+          { employeeID: { $regex: search, $options: "i" } },
+        ],
+      });
+
+      if (employees.length === 0) {
+        return res
+          .status(200)
+          .json({ message: "No employees found", employees: [] });
+      }
+      res.status(200).json(employees);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  // ! Get All the Employee with search option
   get_managers: async (req, res) => {
     try {
       const managers = await Employee.find({ role: "manager" });
       res.status(200).json(managers);
     } catch (error) {
       console.error("Error fetching managers:", error);
-      res.status(500).json({ error: "An error occurred while fetching managers" });
+      res
+        .status(500)
+        .json({ error: "An error occurred while fetching managers" });
     }
   },
 
@@ -90,11 +120,18 @@ module.exports = {
       // For Getting Folder Name Later On
       const { employeeProImage } = deletedEmployee;
 
-      const folderName = employeeProImage.public_id.split("/").slice(0, -1).join("/");
+      const folderName = employeeProImage.public_id
+        .split("/")
+        .slice(0, -1)
+        .join("/");
       console.log("folderName", folderName);
 
-      await cloudinary.api.delete_resources_by_prefix(folderName, { resource_type: "image" });
-      await cloudinary.api.delete_resources_by_prefix(folderName, { resource_type: "raw" });
+      await cloudinary.api.delete_resources_by_prefix(folderName, {
+        resource_type: "image",
+      });
+      await cloudinary.api.delete_resources_by_prefix(folderName, {
+        resource_type: "raw",
+      });
       await cloudinary.api.delete_folder(folderName);
 
       console.log("Employee deleted Successfully");
@@ -123,20 +160,28 @@ module.exports = {
         const rawFiles = deletedFiles.filter((file) => file.includes("."));
 
         if (images.length > 0) {
-          await cloudinary.api.delete_resources(images, { resource_type: "image" });
+          await cloudinary.api.delete_resources(images, {
+            resource_type: "image",
+          });
           console.log("Emp Add, Images Deleted");
         }
 
         if (rawFiles.length > 0) {
-          await cloudinary.api.delete_resources(rawFiles, { resource_type: "raw" });
+          await cloudinary.api.delete_resources(rawFiles, {
+            resource_type: "raw",
+          });
           console.log("Emp Add, Raw Files Deleted");
         }
       }
 
       // Update the document with only the changed fields
-      const updatedEmployee = await Employee.findByIdAndUpdate(userId, updateData, {
-        new: true,
-      });
+      const updatedEmployee = await Employee.findByIdAndUpdate(
+        userId,
+        updateData,
+        {
+          new: true,
+        }
+      );
 
       res.status(200).json(updatedEmployee);
     } catch (error) {
@@ -156,7 +201,9 @@ module.exports = {
       // Delete all posts associated with the user
       await Post.deleteMany({ employee_obj_id: userId });
 
-      res.status(200).json({ message: "Employee and its all posts deleted successfully" });
+      res
+        .status(200)
+        .json({ message: "Employee and its all posts deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -180,11 +227,16 @@ module.exports = {
     try {
       const employees = await Employee.find({
         role: { $in: ["employee", "manager"] },
-        $or: [{ employeeName: { $regex: search, $options: "i" } }, { employeeID: { $regex: search, $options: "i" } }],
+        $or: [
+          { employeeName: { $regex: search, $options: "i" } },
+          { employeeID: { $regex: search, $options: "i" } },
+        ],
       });
 
       if (employees.length === 0) {
-        return res.status(200).json({ message: "No employees found", employees: [] });
+        return res
+          .status(200)
+          .json({ message: "No employees found", employees: [] });
       }
 
       res.status(200).json(employees);
@@ -208,7 +260,10 @@ module.exports = {
     try {
       const search = req.query.search || "";
       const employees = await Employee.find({
-        $or: [{ employeeName: { $regex: search, $options: "i" } }, { employeeID: { $regex: search, $options: "i" } }],
+        $or: [
+          { employeeName: { $regex: search, $options: "i" } },
+          { employeeID: { $regex: search, $options: "i" } },
+        ],
       });
       res.status(200).json(employees);
     } catch (error) {
@@ -224,7 +279,9 @@ module.exports = {
       console.log("deleting document", public_id);
       const result = await cloudinary.uploader.destroy(public_id);
       if (result.result === "ok") {
-        return res.status(200).json({ message: "Document deleted successfully" });
+        return res
+          .status(200)
+          .json({ message: "Document deleted successfully" });
       } else {
         return res.status(400).json({ message: "Failed to delete document" });
       }
@@ -249,12 +306,16 @@ module.exports = {
       const rawFiles = parsedData.filter((file) => file.includes("."));
 
       if (images.length > 0) {
-        await cloudinary.api.delete_resources(images, { resource_type: "image" });
+        await cloudinary.api.delete_resources(images, {
+          resource_type: "image",
+        });
         console.log("Emp Add, Images Deleted");
       }
 
       if (rawFiles.length > 0) {
-        await cloudinary.api.delete_resources(rawFiles, { resource_type: "raw" });
+        await cloudinary.api.delete_resources(rawFiles, {
+          resource_type: "raw",
+        });
         console.log("Emp Add, Raw Files Deleted");
       }
 
@@ -315,11 +376,16 @@ module.exports = {
       const employees = await Employee.find({
         employeeStatus: "active",
         role: { $in: ["employee", "manager"] },
-        $or: [{ employeeName: { $regex: search, $options: "i" } }, { employeeID: { $regex: search, $options: "i" } }],
+        $or: [
+          { employeeName: { $regex: search, $options: "i" } },
+          { employeeID: { $regex: search, $options: "i" } },
+        ],
       });
 
       if (employees.length === 0) {
-        return res.status(200).json({ message: "No active employees found", employees: [] });
+        return res
+          .status(200)
+          .json({ message: "No active employees found", employees: [] });
       }
 
       res.status(200).json(employees);
@@ -336,11 +402,16 @@ module.exports = {
       const employees = await Employee.find({
         employeeStatus: "inactive",
         role: { $in: ["employee", "manager"] },
-        $or: [{ employeeName: { $regex: search, $options: "i" } }, { employeeID: { $regex: search, $options: "i" } }],
+        $or: [
+          { employeeName: { $regex: search, $options: "i" } },
+          { employeeID: { $regex: search, $options: "i" } },
+        ],
       });
 
       if (employees.length === 0) {
-        return res.status(200).json({ message: "No inactive employees found", employees: [] });
+        return res
+          .status(200)
+          .json({ message: "No inactive employees found", employees: [] });
       }
 
       res.status(200).json(employees);

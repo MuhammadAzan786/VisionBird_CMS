@@ -9,13 +9,12 @@ export default function EmployeeLeaves() {
   const [employeePendingLeaves, setEmployeePendingLeaves] = useState([]);
   const { currentUser } = useSelector((state) => state.user);
   const id = currentUser._id;
+  console.log("currentUser", currentUser);
   const socket = useSelector((state) => state.socket.socket);
   const dispatch = useDispatch();
   const getLeaves = () => {
     axios
-      .get(`/api/leave/employee-leaves/${id}`, {
-        withCredentials: true,
-      })
+      .get(`/api/leave/employee-leaves/${id}`)
       .then((response) => {
         setEmployeeLeaves(response.data);
         const pending = response.data.filter((item) => {
@@ -26,7 +25,7 @@ export default function EmployeeLeaves() {
         setEmployeePendingLeaves(pending);
       })
       .catch((error) => {
-        console.error("Error fetching leave history:", error);
+        console.error("Error fetching Employee leave history:", error);
       });
   };
   useEffect(() => {
@@ -37,9 +36,16 @@ export default function EmployeeLeaves() {
       socket.on("notification", () => {
         getLeaves();
       });
+      socket.on("leaveStatusChanges", () => {
+        getLeaves();
+      });
       return () => {
         socket.off("notification", () => {
           // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
+        });
+
+        socket.off("leaveStatusChanges", () => {
+          getLeaves();
         });
       };
     } else {

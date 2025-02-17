@@ -4,6 +4,8 @@ import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
 import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
+import FolderIcon from "@mui/icons-material/Folder";
+import GroupsIcon from "@mui/icons-material/Groups";
 import {
   AssignmentOutlined,
   DashboardOutlined,
@@ -66,6 +68,36 @@ const Navbar = ({
           label: "Advance Applications",
           path: "/advance-applications",
         },
+      ],
+    },
+    {
+      label: "Employee Documents",
+      icon: <FolderIcon />,
+      path: "/pay-salaries",
+      collapsable: true,
+      open: false,
+      children: [
+        {
+          label: "Upload Documents",
+          path: "/uploadDocuments",
+        },
+      ],
+    },
+    {
+      label: "Teams",
+      icon: <GroupsIcon />,
+      path: "/create-team",
+      collapsable: true,
+      open: false,
+      children: [
+        {
+          label: "Create Team",
+          path: "/create-team",
+        },
+        {
+          label: "Teams",
+          path: "/teams",
+        }
       ],
     },
 
@@ -150,6 +182,10 @@ const Navbar = ({
         {
           label: "Employee Leaves",
           path: "/Employee-leavesHistory",
+        },
+        {
+          label: "Leave History",
+          path: "/leaveHistory",
         },
       ],
     },
@@ -258,6 +294,10 @@ const Navbar = ({
         { label: "Apply For Leave", path: "/leave-form" },
         { label: "My Leaves", path: "/my-leaves" },
         { label: "Employee Leaves", path: "/employee-leaves" },
+        {
+          label: "Leave History",
+          path: "/leaveHistory",
+        },
       ],
     },
   ];
@@ -307,7 +347,11 @@ const Navbar = ({
       collapsable: true,
       children: [
         { label: "Apply For Leave", path: "/leave-form" },
-        { label: "Leave History", path: "/my-leaves" },
+        { label: "My Leaves", path: "/my-leaves" },
+        {
+          label: "Leave History",
+          path: "/leaveHistory",
+        },
       ],
     },
   ];

@@ -16,7 +16,9 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
 
   const fetchEmployees = async ({ queryKey }) => {
     const [, searchTerm] = queryKey;
-    const response = await axios.get(`/api/employee/get_inactive_employees?search=${searchTerm || ""}`);
+    const response = await axios.get(
+      `/api/employee/get_inactive_employees?search=${searchTerm || ""}`
+    );
     return response.data;
   };
 
@@ -35,24 +37,32 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
     {
       field: "employeeName",
       headerName: "Employee",
+      minWidth: 300,
       flex: 1,
       renderCell: ({ row }) => (
-        <EmployeeNameCell src={row.employeeProImage?.secure_url} userId={row.employeeID} name={row.employeeName} />
+        <EmployeeNameCell
+          src={row.employeeProImage?.secure_url}
+          userId={row.employeeID}
+          name={row.employeeName}
+        />
       ),
     },
     {
       field: "email",
       headerName: "Email",
+      minWidth: 300,
       flex: 1,
     },
     {
       field: "employeeDesignation",
       headerName: "Designation",
+      minWidth: 200,
       flex: 1,
     },
     {
       field: "qualification",
       headerName: "Qualification",
+      minWidth: 200,
       flex: 1,
     },
 
@@ -60,7 +70,14 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
       field: "role",
       headerName: "Role",
       flex: 1,
-      renderCell: (params) => <CustomChip label={WordCaptitalize(params.value)} size="small" status={params.value} />,
+      minWidth: 200,
+      renderCell: (params) => (
+        <CustomChip
+          label={WordCaptitalize(params.value)}
+          size="small"
+          status={params.value}
+        />
+      ),
     },
   ];
 
@@ -112,7 +129,6 @@ const InActiveEmployeesTable = ({ searchTerm }) => {
       columns={employeeColumns}
       onRowDoubleClick={navigateTo}
       pagination
-      autoPageSize
       sx={{
         cursor: "pointer",
       }}

@@ -1,31 +1,3 @@
-// import { useState, useEffect } from "react";
-// import axios from "../../utils/axiosInterceptor";
-// import { useSelector } from "react-redux";
-// import LeavesTable from "./leavesTable/LeavesTable";
-
-// export default function MyLeaves() {
-//   const [allLeaves, setAllLeaves] = useState([]);
-//   const { currentUser } = useSelector((state) => state.user);
-//   const id = currentUser._id;
-
-//   useEffect(() => {
-//     axios
-//       .get(`/api/leave/my-leaves/${id}`)
-//       .then((response) => {
-//         setAllLeaves(response.data);
-//       })
-//       .catch((error) => {
-//         console.error("Error fetching leave history:", error);
-//       });
-//   }, [id]);
-
-//   return (
-//     <>
-//       <LeavesTable allLeaves={allLeaves} />
-//     </>
-//   );
-// }
-
 import { useState, useEffect } from "react";
 import axios from "../../utils/axiosInterceptor";
 import { useDispatch, useSelector } from "react-redux";
@@ -41,7 +13,7 @@ export default function MyLeaves() {
   const dispatch = useDispatch();
   const getLeaves = () => {
     axios
-      .get(`/api/leave/my-leaves/${id}`)
+      .get(`/api/leave/my-all-leaves/${id}`)
       .then((response) => {
         setAllLeaves(response.data);
         const pending = response.data.filter((item) => {
@@ -62,12 +34,19 @@ export default function MyLeaves() {
   console.log("myy all", allLeaves);
   useEffect(() => {
     if (socket) {
-      socket.on("notification", (data) => {
+      socket.on("notification", () => {
         getLeaves();
       });
+      socket.on("leaveSent", () => {
+        getLeaves();
+      });
+
       return () => {
-        socket.off("notification", (data) => {
+        socket.off("notification", () => {
           // console.log(`Employee of the Week: ${data.employee} with ${data.points} points!`);
+        });
+        socket.off("leaveSent", () => {
+          getLeaves();
         });
       };
     } else {
@@ -77,10 +56,7 @@ export default function MyLeaves() {
 
   return (
     <>
-      <LeavesTable
-        allLeaves={allLeaves || []}
-        pendingLeaves={employeePendingLeaves || []}
-      />
+      <LeavesTable allLeaves={allLeaves || []} pendingLeaves={employeePendingLeaves || []} />
     </>
   );
 }

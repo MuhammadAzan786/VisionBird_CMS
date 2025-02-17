@@ -34,6 +34,7 @@ const ActiveEmployeesTable = ({ searchTerm }) => {
     {
       field: "employeeName",
       headerName: "Employee",
+      minWidth: 300,
       flex: 1,
       renderCell: ({ row }) => (
         <EmployeeNameCell src={row.employeeProImage?.secure_url} userId={row.employeeID} name={row.employeeName} />
@@ -43,22 +44,26 @@ const ActiveEmployeesTable = ({ searchTerm }) => {
       field: "email",
       headerName: "Email",
       flex: 1,
+      minWidth: 300,
     },
     {
       field: "employeeDesignation",
       headerName: "Designation",
       flex: 1,
+      minWidth: 200,
     },
     {
       field: "qualification",
       headerName: "Qualification",
       flex: 1,
+      minWidth: 200,
     },
 
     {
       field: "role",
       headerName: "Role",
       flex: 1,
+      minWidth: 200,
       renderCell: (params) => <CustomChip label={WordCaptitalize(params.value)} size="small" status={params.value} />,
     },
   ];
@@ -111,7 +116,6 @@ const ActiveEmployeesTable = ({ searchTerm }) => {
       columns={employeeColumns}
       onRowDoubleClick={navigateTo}
       pagination
-      autoPageSize
       sx={{
         cursor: "pointer",
       }}

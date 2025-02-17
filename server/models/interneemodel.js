@@ -4,7 +4,11 @@ const { Schema } = mongoose;
 const interneeSchema = new Schema({
   firstName: { type: String, required: true, match: /^[a-zA-Z\s]+$/ },
   fatherName: { type: String, required: true, match: /^[a-zA-Z\s]+$/ },
-  cnic: { type: String, required: true, match: /^\d{5}-\d{7}-\d$/ },
+  cnic: {
+    type: String,
+    default: "00000-0000000-0",
+    set: (value) => (value && value.trim() !== "" ? value : "00000-0000000-0"),
+  },
   dob: {
     type: Date,
     required: true,
@@ -76,6 +80,15 @@ const interneeSchema = new Schema({
     resource_type: { type: String },
   },
   appointmentFile: {
+    type: [Object],
+    required: false,
+    default: [],
+    public_id: { type: String },
+    secure_url: { type: String },
+    original_file_name: { type: String },
+    resource_type: { type: String },
+  },
+  interneeCv: {
     type: [Object],
     required: false,
     default: [],

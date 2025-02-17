@@ -11,15 +11,16 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import BadgeIcon from "@mui/icons-material/Badge";
 import SchoolIcon from "@mui/icons-material/School";
 import WorkIcon from "@mui/icons-material/Work";
-import Avatar from "@mui/material/Avatar";
-
-import AssignmentIcon from "@mui/icons-material/Assignment";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import StarIcon from "@mui/icons-material/Star";
-import EventIcon from "@mui/icons-material/Event";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import DescriptionIcon from "@mui/icons-material/Description";
 import LoadingAnim from "../../components/LoadingAnim";
+import { useQueryClient } from "@tanstack/react-query";
 
 const EvaluationPage = () => {
   const { showMessage } = useMessage();
@@ -27,6 +28,8 @@ const EvaluationPage = () => {
   const navigate = useNavigate();
   const [evaluation, setEvaluation] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [show, setShow] = useState(false);
+  const queryClient = useQueryClient();
 
   const handleSuccess = () => {
     showMessage("success", "Evaluation Deleted successfully!");
@@ -40,7 +43,14 @@ const EvaluationPage = () => {
     try {
       const response = await axios.get(`/api/interview/${id}`);
       setEvaluation(response.data);
-      console.log("Evaluation fetched successfully:", response.data);
+      if (
+        response.data.response === "pending" ||
+        response.data.response === "notAppeared"
+      ) {
+        setShow(false);
+      } else {
+        setShow(true);
+      }
     } catch (error) {
       console.error("Error fetching evaluation data:", error);
     }
@@ -48,7 +58,6 @@ const EvaluationPage = () => {
 
   useEffect(() => {
     getEvaluation();
-    console.log(evaluation);
   }, [id]);
 
   const handleDelete = async () => {
@@ -58,6 +67,17 @@ const EvaluationPage = () => {
       .then(() => {
         handleSuccess();
         setLoading(false);
+        queryClient
+          .invalidateQueries({
+            queryKey: ["pending_evaluations"],
+            exact: false,
+          })
+          .then(() => {
+            console.log("Query invalidation completed successfully.");
+          })
+          .catch((error) => {
+            console.error("Error invalidating queries:", error.message);
+          });
         navigate("/interview-evaluation");
       })
       .catch((error) => {
@@ -80,8 +100,8 @@ const EvaluationPage = () => {
   const appliedOn = evaluation?.appliedOn
     ? dateformat(evaluation.appliedOn)
     : "N/A";
-  const interviewCall = evaluation?.testRating
-    ? dateformat(evaluation.testRating)
+  const interviewCall = evaluation?.interviewCall
+    ? dateformat(evaluation.interviewCall)
     : "N/A";
   return (
     <Box p={3}>
@@ -247,6 +267,75 @@ const EvaluationPage = () => {
                 </Grid>
               </Grid>
             </Grid>
+            <Grid container gap={1} direction="column">
+              {/* Block for "appeared" */}
+              {evaluation.response === "appeared" && (
+                <Grid item mt={2} p={4} component={Paper}>
+                  <Grid container gap={1} direction="column">
+                    <Grid item>
+                      <Typography
+                        variant="h4"
+                        fontSize={20}
+                        fontWeight={700}
+                        gutterBottom
+                      >
+                        Remarks
+                      </Typography>
+                    </Grid>
+                    <Grid item>
+                      <Grid
+                        fontWeight={600}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "start",
+                          gap: 0.5,
+                          color: "text.secondary",
+                        }}
+                      >
+                        <Typography variant="body1" component={"span"}>
+                          {evaluation.remarks}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              )}
+
+              {/* Block for "notAppeared" */}
+              {evaluation.response === "notAppeared" && (
+                <Grid item mt={2} p={4} component={Paper}>
+                  <Grid container gap={1} direction="column">
+                    <Grid item>
+                      <Typography
+                        variant="h4"
+                        fontSize={20}
+                        fontWeight={700}
+                        gutterBottom
+                      >
+                        Remarks
+                      </Typography>
+                    </Grid>
+                    <Grid item>
+                      <Grid
+                        fontWeight={600}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "start",
+                          gap: 0.5,
+                          color: "text.secondary",
+                        }}
+                      >
+                        <Typography variant="body1" component={"span"}>
+                          {evaluation.remarks}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              )}
+            </Grid>
           </Grid>
         </Grid>
 
@@ -268,51 +357,118 @@ const EvaluationPage = () => {
                 </Grid>
                 {[
                   {
-                    icon: <AssignmentIcon color="secondary" />,
+                    icon: <WorkIcon color="secondary" />, // Briefcase icon for the position
                     label: "Applying For",
                     value: evaluation.applyFor,
                   },
                   {
-                    icon: <AssignmentIcon color="secondary" />,
+                    icon: <SchoolIcon color="secondary" />, // Graduation cap for internship type
                     label: "Internship Type",
                     value: evaluation.internshipType,
                   },
                   {
-                    icon: <EventIcon color="info" />,
+                    icon: <CalendarTodayIcon color="info" />, // Calendar icon for applied date
                     label: "Applied On",
                     value: appliedOn,
                   },
                   {
-                    icon: <EventIcon color="info" />,
-                    label: "Interview Call",
+                    icon:
+                      evaluation.interviewCalled === "yes" ? (
+                        <CheckCircleIcon color="success" />
+                      ) : (
+                        <CancelIcon color="error" />
+                      ), // Green check for "Yes", red cross for "No"
+                    label: "Called For Interview",
+                    value: evaluation.interviewCalled,
+                  },
+                  evaluation.interviewCalled === "yes" && {
+                    icon: <EventAvailableIcon color="info" />, // Event icon for interview date
+                    label: "Interview Date",
                     value: interviewCall,
                   },
-                ].map(({ icon, label, value }, index) => (
-                  <Grid
-                    item
-                    key={index}
-                    sx={{ color: "text.secondary" }}
-                    fontWeight={600}
-                  >
+                  evaluation.interviewCalled === "yes" && {
+                    icon: <AccessTimeIcon color="info" />, // Clock icon for interview time
+                    label: "Interview Time",
+                    value: evaluation.interviewTime,
+                  },
+                ]
+                  .filter(Boolean)
+                  .map(({ icon, label, value }, index) => (
                     <Grid
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "start",
-                        gap: 0.5,
-                      }}
+                      item
+                      key={index}
+                      sx={{ color: "text.secondary" }}
+                      fontWeight={600}
                     >
-                      {icon} {label}:{" "}
-                      <Typography variant="body1" component={"span"}>
-                        {value}
-                      </Typography>
+                      <Grid
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "start",
+                          gap: 0.5,
+                        }}
+                      >
+                        {icon} {label}:{" "}
+                        <Typography variant="body1" component={"span"}>
+                          {value}
+                        </Typography>
+                      </Grid>
                     </Grid>
-                  </Grid>
-                ))}
+                  ))}
               </Grid>
             </Grid>
 
             {/* RATING Section */}
+            {show && (
+              <Grid item mt={2} p={4} component={Paper}>
+                <Grid container direction="column" gap={1}>
+                  <Grid item>
+                    <Typography
+                      variant="h4"
+                      fontSize={20}
+                      fontWeight={700}
+                      gutterBottom
+                    >
+                      RATING
+                    </Typography>
+                  </Grid>
+                  {[
+                    {
+                      label: "Interview Rating",
+                      value: evaluation.interviewRating,
+                    },
+                    { label: "Test Rating", value: evaluation.testRating },
+                  ].map(({ label, value }, index) => (
+                    <Grid
+                      item
+                      key={index}
+                      sx={{ color: "text.secondary" }}
+                      fontWeight={600}
+                    >
+                      <Grid
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "start",
+                          gap: 0.5,
+                        }}
+                      >
+                        <StarIcon sx={{ color: "#faaf00" }} />{" "}
+                        {/* Adjust the color as needed */}
+                        <Typography
+                          sx={{ color: "text.secondary", fontWeight: 600 }}
+                        >
+                          {label}:
+                        </Typography>
+                        <Rating value={Number(value) || 0} readOnly />
+                      </Grid>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Grid>
+            )}
+
+            {/* DOCUMENTS Section */}
             <Grid item mt={2} p={4} component={Paper}>
               <Grid container direction="column" gap={1}>
                 <Grid item>
@@ -322,23 +478,56 @@ const EvaluationPage = () => {
                     fontWeight={700}
                     gutterBottom
                   >
-                    RATING
+                    DOCUMENTS
                   </Typography>
                 </Grid>
-                {[
-                  {
-                    label: "Interview Rating",
-                    value: evaluation.interviewRating,
-                  },
-                  { label: "Test Rating", value: evaluation.testRating },
-                  { label: "Overall Rating", value: evaluation.overallRating },
-                ].map(({ label, value }, index) => (
+                <Grid item>
                   <Grid
-                    item
-                    key={index}
-                    sx={{ color: "text.secondary" }}
                     fontWeight={600}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "start",
+                      gap: 0.5,
+                      color: "text.secondary",
+                    }}
                   >
+                    <a href={evaluation.CvUpload} target="_blank">
+                      <Button
+                        sx={{
+                          color: "primary",
+                          textTransform: "capitalize",
+                          fontWeight: 600,
+                          fontSize: 14,
+                          borderRadius: 4,
+                          "&:hover": {},
+                        }}
+                      >
+                        <DescriptionIcon sx={{ color: "#1976d2" }} />{" "}
+                        {/* Adjust color */}
+                        Open Resume/Cv
+                      </Button>
+                    </a>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+            {/* STIPEND Section */}
+
+            {show && (
+              <Grid item mt={2} p={4} component={Paper}>
+                <Grid container direction="column" gap={2}>
+                  <Grid item>
+                    <Typography
+                      variant="h4"
+                      fontSize={20}
+                      fontWeight={700}
+                      gutterBottom
+                    >
+                      Stipend / Salary
+                    </Typography>
+                  </Grid>
+                  <Grid item sx={{ color: "text.secondary" }} fontWeight={600}>
                     <Grid
                       sx={{
                         display: "flex",
@@ -347,100 +536,21 @@ const EvaluationPage = () => {
                         gap: 0.5,
                       }}
                     >
-                      <StarIcon sx={{ color: "#faaf00" }} />{" "}
-                      {/* Adjust the color as needed */}
-                      <Typography
-                        sx={{ color: "text.secondary", fontWeight: 600 }}
-                      >
-                        {label}:
+                      {/* <AttachMoneyIcon sx={{ color: "#4caf50" }} />{" "} */}
+                      {/* Green color */}
+                      {/* Expected Stipend / Salary:{" "} */}
+                      <Typography variant="body1" component={"span"}>
+                        RS : {evaluation.expectedSalary}
                       </Typography>
-                      <Rating value={Number(value) || 0} readOnly />
                     </Grid>
                   </Grid>
-                ))}
-              </Grid>
-            </Grid>
-
-            {/* STIPEND Section */}
-            <Grid item mt={2} p={4} component={Paper}>
-              <Grid container direction="column" gap={2}>
-                <Grid item>
-                  <Typography
-                    variant="h4"
-                    fontSize={20}
-                    fontWeight={700}
-                    gutterBottom
-                  >
-                    STIPEND
-                  </Typography>
-                </Grid>
-                <Grid item sx={{ color: "text.secondary" }} fontWeight={600}>
-                  <Grid
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "start",
-                      gap: 0.5,
-                    }}
-                  >
-                    <AttachMoneyIcon sx={{ color: "#4caf50" }} />{" "}
-                    {/* Green color */}
-                    Expected Stipend:{" "}
-                    <Typography variant="body1" component={"span"}>
-                      {evaluation.expectedStipend}
-                    </Typography>
-                  </Grid>
                 </Grid>
               </Grid>
-            </Grid>
+            )}
           </Grid>
         </Grid>
       </Grid>
 
-      {/* DOCUMENTS Section */}
-      <Grid item mt={2} p={4} component={Paper}>
-        <Grid container direction="column" gap={1}>
-          <Grid item>
-            <Typography
-              variant="h4"
-              fontSize={20}
-              fontWeight={700}
-              gutterBottom
-            >
-              DOCUMENTS
-            </Typography>
-          </Grid>
-          <Grid item>
-            <Grid
-              fontWeight={600}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "start",
-                gap: 0.5,
-                color: "text.secondary",
-              }}
-            >
-              <a href={evaluation.CvUpload} target="_blank">
-                <Button
-                  sx={{
-                    color: "primary",
-                    textTransform: "capitalize",
-                    fontWeight: 600,
-                    fontSize: 14,
-                    borderRadius: 4,
-                    "&:hover": {},
-                  }}
-                >
-                  <DescriptionIcon sx={{ color: "#1976d2" }} />{" "}
-                  {/* Adjust color */}
-                  Open Resume/Cv
-                </Button>
-              </a>
-            </Grid>
-          </Grid>
-        </Grid>
-      </Grid>
       {loading && (
         <Backdrop
           sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}

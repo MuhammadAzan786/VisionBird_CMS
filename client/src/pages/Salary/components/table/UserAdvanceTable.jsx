@@ -5,8 +5,8 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { WordCaptitalize } from "../../../../utils/common";
-import { CustomDataGrid } from "../styled/CustomDataGrid";
 import { CustomChip } from "../../../../components/Styled/CustomChip";
+import { DataGrid } from "@mui/x-data-grid";
 
 const colStyle = {
   headerAlign: "center",
@@ -20,12 +20,9 @@ const UserAdvanceTable = () => {
 
   const fetchApplications = async () => {
     try {
-      const res = await axios.post(
-        "/api/advance_payments/user/advance-applications/?type=salary",
-        {
-          currentUser,
-        }
-      );
+      const res = await axios.post("/api/advance_payments/user/advance-applications/?type=salary", {
+        currentUser,
+      });
       return res.data;
     } catch (error) {
       console.log(error);
@@ -64,13 +61,7 @@ const UserAdvanceTable = () => {
       width: 180,
       ...colStyle,
       cellClassName: "text-red-500 font-medium",
-      renderCell: (params) => (
-        <>
-          {params.value > 1
-            ? `${params.value} Months`
-            : `${params.value} Month`}
-        </>
-      ),
+      renderCell: (params) => <>{params.value > 1 ? `${params.value} Months` : `${params.value} Month`}</>,
     },
     {
       field: "request_date",
@@ -118,14 +109,13 @@ const UserAdvanceTable = () => {
         } else if (params.value === "approved") {
           icon = <CheckCircle />;
         }
-        const label =
-          params.value.charAt(0).toUpperCase() + params.value.slice(1);
+        const label = params.value.charAt(0).toUpperCase() + params.value.slice(1);
         return <CustomChip label={label} status={params.value} icon={icon} />;
       },
     },
   ];
   return (
-    <CustomDataGrid
+    <DataGrid
       rows={rows}
       columns={columns}
       rowHeight={80}
@@ -136,8 +126,6 @@ const UserAdvanceTable = () => {
   );
 };
 
-const monthCell = (params) => (
-  <>{params.value > 1 ? `${params.value} Months` : `${params.value} Month`}</>
-);
+const monthCell = (params) => <>{params.value > 1 ? `${params.value} Months` : `${params.value} Month`}</>;
 
 export default UserAdvanceTable;

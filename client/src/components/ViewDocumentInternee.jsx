@@ -14,9 +14,17 @@ import {
 import React, { useEffect, useState } from "react";
 import { customColors } from "../theme/colors";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { Close, InsertDriveFile } from "@mui/icons-material";
+import {
+  Close,
+  DescriptionOutlined,
+  DownloadOutlined,
+  InsertDriveFile,
+} from "@mui/icons-material";
 
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import toast from "react-hot-toast";
+import { saveAs } from "file-saver";
+import { downloadFile } from "../utils/download/downloadFile";
 
 const ViewDocumentInternee = ({ values }) => {
   console.log("in docxxxxxx");
@@ -24,7 +32,7 @@ const ViewDocumentInternee = ({ values }) => {
   console.log(values.interneeProImage);
   const [tabValue, setTabValue] = useState("interneeProImage");
   const [image, setImage] = useState({});
-
+  const allowedFileTypes = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp"];
   useEffect(() => {
     setImage(values?.interneeProImage);
   }, [values]);
@@ -46,35 +54,112 @@ const ViewDocumentInternee = ({ values }) => {
             alignItems: "center",
             position: "relative",
             backgroundColor: customColors.mainAlpha,
+            cursor: "pointer",
+            transition: "all 0.4s", // You can keep general transition if you want for other properties
+            "&:hover .hoverContent": {
+              opacity: 1, // Make the hover content visible
+              visibility: "visible", // Ensure visibility when hovered
+            },
           }}
         >
-          {/* <PictureAsPdfIcon/> */}
-          {image?.original_file_name?.split(".").pop() === "pdf" ? (
-            <PictureAsPdfIcon
-              sx={{ fontSize: "10rem", cursor: "pointer" }}
-              onClick={() => {
-                if (!image?.secure_url) {
-                  console.error("No URL available to download.");
-                  return;
-                }
-                const link = document.createElement("a");
-                link.href = image.secure_url; // Ensure this is the correct URL for downloading the file
-                link.download = image.original_file_name || "download.pdf"; // Use original file name or default to "download.pdf"
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+          <Box
+            sx={{
+              position: "relative",
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {/* If the image is a PDF */}
+
+            {!allowedFileTypes.includes(
+              image?.original_file_name?.split(".").pop()
+            ) ? (
+              <DescriptionOutlined
+                sx={{
+                  fontSize: "20rem",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  if (!image?.secure_url) {
+                    console.error("No URL available to save.");
+                    return;
+                  }
+
+                  // Extract file extension
+                  const fileExtension = image.original_file_name
+                    ?.split(".")
+                    .pop()
+                    .toLowerCase();
+
+                  // Allowed file types for image
+
+                  if (!allowedFileTypes.includes(fileExtension)) {
+                    const url = image.secure_url; // File URL
+                    downloadFile(url);
+                  } else {
+                    toast.error("Unsupported file type or not a document.");
+                  }
+                }}
+              />
+            ) : (
+              <img
+                style={{
+                  objectFit: "contain",
+                  height: "100%",
+                  width: "100%", // Ensure it scales properly
+                }}
+                src={image?.secure_url}
+                alt="Uploaded content"
+              />
+            )}
+            <Box
+              className="hoverContent"
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: customColors.mainAlpha,
+                color: "white",
+                padding: "10px",
+                opacity: 0, // Initially hidden
+                visibility: "hidden", // Initially hidden
+                transition: "opacity 0.4s ease-in-out", // Apply opacity transition with ease-in-out
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
               }}
-            />
-          ) : (
-            <img
-              style={{
-                objectFit: "contain",
-                height: "100%",
-              }}
-              src={image?.secure_url}
-              alt="Uploaded content"
-            />
-          )}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  height: "100%",
+                  alignItems: "end",
+                  justifyContent: "start",
+                }}
+              >
+                <IconButton
+                  sx={{
+                    fontSize: "3rem", // Adjusted for better visibility
+                    margin: "10px",
+                    color: customColors.main,
+                    backgroundColor: "white",
+                    "&:hover": {
+                      backgroundColor: customColors.main,
+                      color: "white",
+                    },
+                  }}
+                  onClick={() => downloadFile(image?.secure_url)}
+                >
+                  <DownloadOutlined sx={{ fontSize: "2.6rem" }} />
+                </IconButton>
+              </Box>
+            </Box>
+          </Box>
         </Box>
       </Grid>
       <Grid item xs={12} md={6} lg={7}>
@@ -94,6 +179,7 @@ const ViewDocumentInternee = ({ values }) => {
 
             <TabList onChange={handleTabValue}>
               <Tab label="Profile image" value="interneeProImage" />
+              <Tab label="CV" value="interneeCv" sx={{ letterSpacing: 1 }} />
               <Tab label="CNIC" value="cnicFile" sx={{ letterSpacing: 1 }} />
               <Tab
                 label="Experience Letter"
@@ -121,34 +207,21 @@ const ViewDocumentInternee = ({ values }) => {
           </CustomTabPanel>
 
           <CustomTabPanel value="cnicFile">
-            {/* {values.cnicFile.length > 0 && ( */}
-            <MediaList
-              data={values.cnicFile}
-              setImage={setImage}
-              // handleDelete={handleDelete}
-            />
-            {/* )} */}
+            <MediaList data={values.cnicFile} setImage={setImage} />
+          </CustomTabPanel>
+
+          <CustomTabPanel value="interneeCv">
+            <MediaList data={values.interneeCv} setImage={setImage} />
           </CustomTabPanel>
 
           <CustomTabPanel value="experienceLetter">
-            {/* {values.experienceLetter.length > 0 && ( */}
-            <MediaList
-              data={values.experienceLetter}
-              setImage={setImage}
-              // handleDelete={handleDelete}
-            />
-            {/* )} */}
+            <MediaList data={values.experienceLetter} setImage={setImage} />
           </CustomTabPanel>
 
           <CustomTabPanel value="appointmentFile">
-            {/* {values.appointmentFile.length > 0 && ( */}
-            <MediaList
-              data={values.appointmentFile}
-              setImage={setImage}
-              // handleDelete={handleDelete}
-            />
-            {/* )} */}
+            <MediaList data={values.appointmentFile} setImage={setImage} />
           </CustomTabPanel>
+          
         </TabContext>
       </Grid>
     </Grid>
@@ -156,6 +229,7 @@ const ViewDocumentInternee = ({ values }) => {
 };
 
 const MediaList = ({ data, handleDelete, setImage }) => {
+  const allowedFileTypes = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp"];
   return (
     <Box sx={{ marginTop: "20px" }}>
       <List>
@@ -173,7 +247,9 @@ const MediaList = ({ data, handleDelete, setImage }) => {
               mb: 2,
             }}
           >
-            {item.resource_type === "image" ? (
+            {allowedFileTypes.includes(
+              item?.original_file_name?.split(".").pop()
+            ) ? (
               <ListItemAvatar>
                 <Avatar
                   src={item.secure_url}

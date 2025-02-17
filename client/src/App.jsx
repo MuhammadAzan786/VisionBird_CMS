@@ -64,6 +64,10 @@ import { clearSocket } from "./redux/socketSlice";
 import { signOut } from "./redux/user/userSlice";
 import Notifications from "./pages/Notifications/Notifications";
 import EmployeeLeaveHistory from "./pages/Leaves/EmployeeLeaveHistory";
+import LeaveHistory from "./pages/Leaves/LeaveHistory";
+import CreateTeam from "./pages/Teams/CreateTeam";
+import Teams from "./pages/Teams/Teams";
+import UploadDocuments from "./pages/EmployeeDocuments/UploadDocuments";
 
 const App = () => {
   const socket = useSelector((state) => state.socket.socket);
@@ -153,6 +157,9 @@ const App = () => {
             <Route path="/manage-employees" element={<ManageEmployees />} />
             <Route path="/manage-internees" element={<ManageInternees />} />
             <Route path="/create-employee" element={<CreateEmployeeForm />} />
+            <Route path="/create-team" element={<CreateTeam />} />
+            <Route path="/teams" element={<Teams />} />
+            <Route path="/uploadDocuments" element={<UploadDocuments />} />
             <Route path="/create-internee" element={<CreateInterneeForm />} />
             <Route
               path="/update-employee-profile/:id"
@@ -265,6 +272,7 @@ const App = () => {
               path="/Employee-leavesHistory"
               element={<AllLeaves table="Employee-leavesHistory" />}
             />
+            <Route path="/leaveHistory" element={<LeaveHistory />} />
 
             <Route path="/view-leave/:id" element={<ViewLeave />} />
             {/* employee of the week Routes */}
@@ -297,22 +305,6 @@ const App = () => {
           },
         }}
       />
-
-      {/* <Snackbar
-        open={!!message}
-        autoHideDuration={3000}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        sx={{ mt: 9, mr: 1 }}
-      >
-        <Alert
-          onClose={handleClose}
-          severity={message?.type || "info"}
-          sx={{ width: "100%" }}
-        >
-          {message?.text || ""}
-        </Alert>
-      </Snackbar> */}
     </>
   );
 };

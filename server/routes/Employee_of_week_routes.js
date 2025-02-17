@@ -27,7 +27,7 @@ router.get("/evaluations/week/:week_no",auth, authorizeRoles('admin','manager'),
 router.get("/evaluations/employee/emp_week",auth, authorizeRoles('admin','manager','employee'), getEvaluationsByEmployeeForWeek);
 
 // GET: Retrieve all evaluations for a specific employee
-router.get("/evaluations/employee/:employee_id",auth, authorizeRoles('admin','manager'),  getEvaluationsByEmployee);
+router.get("/evaluations/employee/:employee_id",auth, authorizeRoles('admin','manager','employee'),  getEvaluationsByEmployee);
 
 // PUT: Update an existing evaluation for a specific week and employee
 router.put("/evaluation/:week_no/:employee_id",auth, authorizeRoles('admin','manager'),  updateEvaluation);

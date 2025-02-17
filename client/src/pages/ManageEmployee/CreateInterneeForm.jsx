@@ -39,11 +39,6 @@ const validationSchema = object().shape({
   fatherName: string()
     .required("Required Name")
     .matches(/^[a-zA-Z\s]+$/, "Only alphabetic characters are allowed"),
-  cnic: string()
-    .required("Required CNIC")
-    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) =>
-      /^\d{5}-\d{7}-\d$/.test(value || "")
-    ),
   dob: string().required("Enter Date"),
   mailingAddress: string().required("Enter Mailing Address"),
   mobile: string()
@@ -112,14 +107,14 @@ const CreateInterneeForm = () => {
         mailingAddress: "",
         mobile: "",
         email: "",
-        gender: "",
-        maritalStatus: "",
+        gender: "male",
+        maritalStatus: "single",
         otherMobile: "",
         whosMobile: "",
-        qualification: "",
+        qualification: "bachelors",
 
-        rules: "",
-        slack: "",
+        rules: "yes",
+        slack: "yes",
 
         internshipFrom: dayjs().format("YYYY-MM-DD"),
         internshipTo: "",
@@ -133,9 +128,8 @@ const CreateInterneeForm = () => {
         cnicFile: [],
         appointmentFile: [],
         experienceLetter: [],
-
-        disability: "",
-        //Ye field formik me nhi hai
+        interneeCv: [],
+        disability: "no",
         disabilityType: "",
       }}
       validationSchema={validationSchema}
@@ -172,6 +166,7 @@ const CreateInterneeForm = () => {
           cnicFile: values.cnicFile,
           appointmentFile: values.appointmentFile,
           experienceLetter: values.experienceLetter,
+          interneeCv: values.interneeCv,
         };
         console.log("Internee Form Data", fieldMap);
         console.log("Deleted Files List", deletedFilesRef.current);
@@ -201,7 +196,6 @@ const CreateInterneeForm = () => {
               container
               spacing={2}
               component={Paper}
-              elevation={2}
               borderRadius={"5px"}
               p={3}
             >
@@ -268,6 +262,9 @@ const CreateInterneeForm = () => {
                   name="cnic"
                   placeholder="XXXXX-XXXXXXX-X"
                   fullWidth
+                  InputProps={{
+                    inputProps: { maxLength: 15 },
+                  }}
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "5px",
@@ -480,7 +477,6 @@ const CreateInterneeForm = () => {
               container
               spacing={2}
               component={Paper}
-              elevation={2}
               borderRadius={"5px"}
               mt={2}
               p={3}
@@ -598,7 +594,6 @@ const CreateInterneeForm = () => {
               container
               spacing={2}
               component={Paper}
-              elevation={2}
               borderRadius={"5px"}
               mt={2}
               p={3}
@@ -698,7 +693,6 @@ const CreateInterneeForm = () => {
               container
               spacing={2}
               component={Paper}
-              elevation={2}
               borderRadius={"5px"}
               mt={2}
               p={3}
@@ -739,7 +733,7 @@ const CreateInterneeForm = () => {
                           },
                         }}
                         labelId="offered _Type"
-                        label="offered_By"
+                        label="offered _Type"
                         variant="outlined"
                         name="offered_By"
                         as={Select}
@@ -934,7 +928,7 @@ const CreateInterneeForm = () => {
                     mb: 5,
                   }}
                 >
-                  Upload Documents
+                  Documents
                 </Typography>
 
                 <UploadFilesInternee

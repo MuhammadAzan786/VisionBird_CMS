@@ -37,25 +37,49 @@ const TaskBoard = () => {
       );
       setAssignTasks(assignedTasks.length);
 
-      const { data: completedTasks } = await axios.get(
-        `/api/task/getCompletedTasksByEmployeeIdDate/${currentUser._id}`
-      );
-      setCompletedTasks(completedTasks.length);
-
-      const { data: inProgressTasks } = await axios.get(
-        `/api/task/getInProgressTasksByEmployeeIdDate/${currentUser._id}`
-      );
-      setInProgressTasks(inProgressTasks.length);
-
       const { data: lateTasks } = await axios.get(
         `/api/task/getLateTasksByEmployeeIdDate/${currentUser._id}`
       );
       setLateTask(lateTasks.length);
+      const { data: completedTasks } = await axios.get(
+        `/api/task/getCompletedTasksByEmployeeIdDate/${currentUser._id}`
+      );
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Start of today
+      
+      // Filter only tasks that were updated today
+      const tasksCompletedToday = completedTasks.filter(task => {
+        const taskDate = new Date(task.updatedAt);
+        taskDate.setHours(0, 0, 0, 0); // Normalize to compare only the date
+        return taskDate.getTime() === today.getTime();
+      });
+      
+      setCompletedTasks(tasksCompletedToday.length);
+      
+  
+      const { data: inProgressTasks } = await axios.get(
+        `/api/task/getPendingTasksByEmpId/${currentUser._id}`
+      );
+      setInProgressTasks(inProgressTasks.length);
+  
+
+
     } catch (error) {
       console.error("Error fetching tasks:", error);
+      if (error.response) {
+        console.error("Response status:", error.response.status);
+        console.error("Response data:", error.response.data);
+      } else if (error.request) {
+        console.error("Request error:", error.request);
+      } else {
+        console.error("Error message:", error.message);
+      }
     }
+    
+    
   };
-
+  
   useEffect(() => {
     fetchTasks();
   }, []);
@@ -142,7 +166,7 @@ const TaskBoard = () => {
               variant="body1"
               sx={{ fontWeight: "450", fontSize: "1.2rem" }}
             >
-              In Progress
+              Pending Tasks
             </Typography>
             <Typography
               sx={{
@@ -223,7 +247,7 @@ const TaskBoard = () => {
                 lineHeight: "13px",
               }}
             >
-              {lateTask ? lateTask : 0} Tasks
+              {lateTask} Tasks
             </Typography>
           </Box>
         </Paper>

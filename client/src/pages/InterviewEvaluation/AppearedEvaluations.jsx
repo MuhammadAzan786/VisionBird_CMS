@@ -19,6 +19,10 @@ import {
   ListItemText,
   Chip,
   Select,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  CircularProgress,
 } from "@mui/material";
 import EmployeeNameCell from "../../components/Grid Cells/EmployeeProfileCell";
 import { truncateText } from "../../utils/common";
@@ -26,17 +30,19 @@ import { truncateText } from "../../utils/common";
 const AppearedEvaluations = ({ searchTerm }) => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
-  console.log("data", data);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [singleRow, setSingleRow] = useState({});
   const [loading, setLoading] = useState(false);
   const navigateTo = (data) => {
     navigate(`/evaluation-page/${data.id}`);
   };
   const fetchData = async () => {
-    console.log("we are in the function");
+    setLoading(true);
     await axios
       .get(`/api/interview/appeared_evaluations?search=${searchTerm || ""}`)
       .then((response) => {
         setData(response.data.interviewData);
+        setLoading(false);
       })
       .catch((error) => {
         console.log("error fetching evaluations :", error);
@@ -45,6 +51,20 @@ const AppearedEvaluations = ({ searchTerm }) => {
   useEffect(() => {
     fetchData();
   }, [searchTerm]);
+
+  const downloadImage = (url) => {
+    saveAs(url, url.split("/").pop());
+  };
+
+  const handleModalChange = (row) => {
+    setIsModalOpen(!isModalOpen);
+    setSingleRow(row);
+  };
+
+  const handleReadClick = (row) => {
+    setIsModalOpen(true);
+    setSingleRow(row);
+  };
 
   const evaluation = [
     {
@@ -86,7 +106,37 @@ const AppearedEvaluations = ({ searchTerm }) => {
         <EmployeeNameCell userId={params.row.email} name={params.value} />
       ),
     },
-
+    {
+      field: "remarks",
+      headerName: "Remarks",
+      width: 200,
+      renderCell: (params) => {
+        if (!params.value) {
+          return <Typography>No Remarks</Typography>;
+        }
+        const truncatevalue = truncateText(params.value);
+        const isValueTruncated = truncatevalue.includes("...");
+        return (
+          <Typography>
+            {truncatevalue}
+            {isValueTruncated && (
+              <Button
+                style={{
+                  fontSize: "13px",
+                  textTransform: "none",
+                  textDecoration: "underline",
+                  padding: 0,
+                  marginTop: "-2px",
+                }}
+                onClick={() => handleReadClick(params.row)}
+              >
+                Read More
+              </Button>
+            )}
+          </Typography>
+        );
+      },
+    },
     {
       field: "contact",
       headerName: "Mobile Number",
@@ -274,11 +324,6 @@ const AppearedEvaluations = ({ searchTerm }) => {
             value={params.value}
             readOnly
           />
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
         </Box>
       ),
     },
@@ -293,33 +338,10 @@ const AppearedEvaluations = ({ searchTerm }) => {
             value={params.value}
             readOnly
           />
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
         </Box>
       ),
     },
-    {
-      field: "overallRating",
-      headerName: "Overall Rating",
-      width: 200,
-      renderCell: (params) => (
-        <Box>
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
-          <Rating
-            name={`rating-${params.row.id}`}
-            value={params.value}
-            readOnly
-          />
-        </Box>
-      ),
-    },
+
     {
       field: "expectedSalary",
       headerName: "Expected Salary",
@@ -380,48 +402,38 @@ const AppearedEvaluations = ({ searchTerm }) => {
         );
       },
     },
-    {
-      field: "remarks",
-      headerName: "Remarks",
-      width: 200,
-      renderCell: (params) => {
-        if (!params.value) {
-          return (
-            <Button
-              variant="contained"
-              onClick={() => handleModalChange(params.row)}
-            >
-              Add Remarks
-            </Button>
-          );
-        }
-        const truncatevalue = truncateText(params.value);
-        const isValueTruncated = truncatevalue.includes("...");
-        return (
-          <Typography>
-            {truncatevalue}
-            {isValueTruncated && (
-              <Button
-                style={{
-                  fontSize: "13px",
-                  textTransform: "none",
-                  textDecoration: "underline",
-                  padding: 0,
-                  marginTop: "-2px",
-                }}
-                onClick={() => handleReadClick(params.row)}
-              >
-                Read More
-              </Button>
-            )}
-          </Typography>
-        );
-      },
-    },
   ];
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "50vh",
+          gap: 2,
+        }}
+      >
+        <CircularProgress />
+        <Typography variant="h6" color="text.secondary">
+          Loading Records...
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <>
+      {isModalOpen && (
+        <RemarksModal
+          row={singleRow}
+          isModalOpen={isModalOpen}
+          setIsModalOpen={setIsModalOpen}
+          setData={setData}
+        />
+      )}
       <DataGrid
         sx={{
           cursor: "pointer",
@@ -518,6 +530,83 @@ ResponseCell.propTypes = {
   id: PropTypes.string,
   field: PropTypes.string,
   value: PropTypes.string,
+};
+
+const RemarksModal = ({ row, isModalOpen, setIsModalOpen, setData }) => {
+  const handleClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const remarks = formData.get("remarks");
+    try {
+      const res = await axios.post(
+        `/api/interview/update_interview_record/${row._id}`,
+        {
+          remarks,
+        }
+      );
+      setIsModalOpen(false);
+      toast.success(res.data.msg);
+
+      setData((prevData) =>
+        prevData.map((item) =>
+          item._id === res.data._id ? { ...item, ...res.data } : item
+        )
+      );
+    } catch (error) {
+      setIsModalOpen(true);
+    }
+  };
+  return (
+    <Dialog
+      open={isModalOpen}
+      onClose={handleClose}
+      PaperProps={{
+        component: "form",
+        onSubmit: handleSubmit,
+      }}
+    >
+      <DialogTitle sx={{ m: 0, p: 2 }}>Your Remarks</DialogTitle>
+      <IconButton
+        sx={(theme) => ({
+          position: "absolute",
+          right: 8,
+          top: 8,
+          color: theme.palette.grey[500],
+        })}
+        onClick={handleClose}
+      >
+        <Close />
+      </IconButton>
+
+      <DialogContent sx={{ minWidth: "500px" }}>
+        {!row.remarks ? (
+          <TextField
+            autoFocus
+            required
+            id="remarks"
+            name="remarks"
+            label="Enter Your Remarks"
+            multiline
+            minRows={3}
+            fullWidth
+          />
+        ) : (
+          <Typography>{row.remarks}</Typography>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+RemarksModal.propTypes = {
+  row: PropTypes.any,
+  isModalOpen: PropTypes.any,
+  setIsModalOpen: PropTypes.any,
+  setData: PropTypes.any,
 };
 
 export default AppearedEvaluations;

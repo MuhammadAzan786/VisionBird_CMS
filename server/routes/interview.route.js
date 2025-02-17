@@ -14,6 +14,7 @@ const {
   not_appeared_Evaluations,
   appeared_Evaluations,
   update_record_when_appeared,
+  update_interviewCalled_status,
 } = require("../controllers/interview.controller");
 const authorizeRoles = require("../Middlewares/authorization");
 const auth = require("../Middlewares/auth");
@@ -43,7 +44,7 @@ router.get(
 );
 
 // // ! to show interview data
-// router.get("/", auth, authorizeRoles("admin", "manager"), viewData);
+router.get("/", auth, authorizeRoles("admin", "manager"), viewData);
 
 // ! to show interview data by a specific id
 router.get("/:id", auth, authorizeRoles("admin", "manager"), viewDataById);
@@ -89,5 +90,7 @@ router.post(
 );
 
 router.put("/update_record_when_appeared/:id", update_record_when_appeared);
+
+router.put("/update_interviewCalled_status/:id", update_interviewCalled_status);
 
 module.exports = router;

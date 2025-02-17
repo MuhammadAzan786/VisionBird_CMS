@@ -1,124 +1,158 @@
-import { Box, Chip, TextField, Typography, Avatar, Paper } from "@mui/material";
+import { Box, TextField, Typography, Paper, Avatar } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axiosInterceptor";
-import topBadge from "/star-medal.png";
-import EmployeeNameCell from "../../components/Grid Cells/EmployeeProfileCell";
-import { CustomChip } from "../../components/Styled/CustomChip";
 
 const columns = [
   {
-    field: "employeeName",
+    field: "name",
     headerName: "Employee Name",
-    width: 200,
-    headerAlign: "center",
-    align: "center",
-    renderCell: ({ row }) => (
-      <EmployeeNameCell src={row.employeeProImage?.secure_url} userId={row.userId} name={row.name} />
-    ),
-  },
-
-  {
-    field: "email",
-    headerName: "Employee Email",
     flex: 2,
-    headerAlign: "center",
-    align: "center",
-  },
-  {
-    field: "employeeDesignation",
-    headerName: "Designation",
-    flex: 1,
-    headerAlign: "center",
-    align: "center",
-    renderCell: (params) => <CustomChip label={params.value} status={params.value} />,
-  },
+    minWidth: 200,
+    headerAlign: "left",
+    align: "left",
+    renderCell: (params) => {
+      const imageUrl = params.row.employeeProImage?.secure_url;
 
-  {
-    field: "weekNo",
-    headerName: "Week No",
-    flex: 1,
-    headerAlign: "center",
-    align: "center",
+      return (
+        <Box display="flex" alignItems="center">
+          {/* Box for Employee Image */}
+          <Box display="flex" alignItems="center" justifyContent="center" marginRight="8px">
+            {imageUrl ? (
+             <Avatar 
+                src={imageUrl}
+                alt={params.row.name}
+                sx={{ border: "5px solid #F5F5F5", width: 50, height: 50 }} 
+              />
+            ) : (
+              <Avatar sx={{ width: 32, height: 32 }} />
+            )}
+          </Box>
+
+          {/* Box for Employee Name and ID */}
+          <Box display="flex" flexDirection="column" alignItems="flex-start">
+            <Typography variant="body2" fontWeight={500} >{params.row.name}</Typography>
+            <Typography variant="caption" color="textSecondary">
+              {params.row.employeeID}
+            </Typography>
+          </Box>
+        </Box>
+      );
+    },
   },
-  {
-    field: "totalPoints",
-    headerName: "Total Points",
-    flex: 1,
-    headerAlign: "center",
-    align: "center",
-  },
+  
+  { field: "weekNo",    minWidth: 100, headerName: "Week No", flex: 1, headerAlign: "center", align: "center" },
+  { field: "pointsGained",    minWidth: 100, headerName: "Task Points", flex: 1, headerAlign: "center", align: "center" },
+  { field: "completedTasks",    minWidth: 100, headerName: "Completed Tasks", flex: 1, headerAlign: "center", align: "center" },
+  { field: "totalPoints",    minWidth: 100, headerName: "Total Points", flex: 1, headerAlign: "center", align: "center" },
+  { field: "awardDate",     minWidth: 100,headerName: "Award Date", flex: 1.5, headerAlign: "center", align: "center" },
 ];
 
 export default function EowHistory() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
-  const [originalRows, setOriginalRows] = useState([]);
   const [searchText, setSearchText] = useState("");
-  const [weekNo, setWeekNo] = useState(null); // Initialize as null for default recent week fetch
-  const [maxPoints, setMaxPoints] = useState(0); // To store the highest points
 
+  const navigateTo = (employee) => {
+    navigate(`/employee-profile/${employee.id}`);
+  };
+  
   const fetchData = async () => {
     try {
-      const weekQueryParam = weekNo ? `?weekNo=${weekNo}` : ""; // If weekNo is provided, append it to the query, else leave it empty for recent data
-      const response = await axios.get(`/api/empOfWeek/allevaluations${weekQueryParam}`);
+      // Fetch evaluations and employee data in parallel
+      const [evaluationsRes, employeesRes] = await Promise.all([
+        axios.get("/api/empOfWeek/allevaluations"),
+        axios.get("/api/employee/all_employees"),
+      ]);
 
-      // Flatten employeeTotals into separate rows
-      const formattedRows = response.data.data.flatMap((item) =>
-        Object.entries(item.employeeTotals).map(([key, employee]) => ({
-          id: key, // Use a unique ID (e.g., employee's key)
-          employeeProImage: employee.employeeProImage?.secure_url,
-          name: employee.name,
-          email: employee.email,
-          totalPoints: employee.totalPoints,
-          weekNo: item.weekNo,
-          employeeDesignation: employee.employeeDesignation,
-        }))
+      console.log("Evaluations API Response:", evaluationsRes.data);
+      console.log("Employees API Response:", employeesRes.data);
+
+      // Assuming evaluations data is in evaluationsRes.data.data (adjust if needed)
+      const evaluationsArray = evaluationsRes.data.data || [];
+      if (evaluationsArray.length === 0) {
+        console.warn("No evaluations found");
+      }
+
+      const employeeMap = employeesRes.data.reduce((acc, employee) => {
+        acc[employee._id] = {
+          employeeID: employee.employeeID,
+          employeeProImage: employee.employeeProImage || {},
+        };
+        return acc;
+      }, {});
+
+      // Map over each evaluation item and fetch tasks for each employee
+      const evaluationsWithTaskData = await Promise.all(
+        evaluationsArray
+          .filter((item) => item.employee_id) // Ensure employee_id exists
+          .map(async (item) => {
+            try {
+              const taskResponse = await axios.get(
+                `/api/task/completedTaskHistory/${item.employee_id}`
+              );
+              const completedTasks = taskResponse.data || [];
+              const totalTaskPoints = completedTasks.reduce(
+                (sum, task) =>
+                  task.taskcompleteStatus === "completed" ? sum + task.pointsGained : sum,
+                0
+              );
+              return {
+                id: item.employee_id,
+                name: item.employee_name,
+                employeeID: employeeMap[item.employee_id]?.employeeID || item.employee_id,
+                employeeProImage: employeeMap[item.employee_id]?.employeeProImage || {},
+                weekNo: item.week_no,
+                totalPoints: item.total_points + totalTaskPoints,
+                pointsGained: totalTaskPoints,
+                completedTasks: completedTasks.filter(task => task.taskcompleteStatus === "completed").length,
+                awardDate: new Date(item.award_date).toLocaleDateString(),
+              };
+            } catch (taskError) {
+              console.error(`Error fetching tasks for employee ${item.employee_id}:`, taskError);
+              return {
+                id: item.employee_id,
+                name: item.employee_name,
+                employeeID: employeeMap[item.employee_id]?.employeeID || item.employee_id,
+                employeeProImage: employeeMap[item.employee_id]?.employeeProImage || {},
+                weekNo: item.week_no,
+                totalPoints: item.total_points,
+                pointsGained: 0,
+                completedTasks: 0,
+                awardDate: new Date(item.award_date).toLocaleDateString(),
+              };
+            }
+          })
       );
+      
 
-      // Find the max points and sort the rows by totalPoints in descending order
-      const highestPoints = Math.max(...formattedRows.map((row) => row.totalPoints));
-      setMaxPoints(highestPoints);
-
-      formattedRows.sort((a, b) => b.totalPoints - a.totalPoints); // b - a for descending order
-
-      // Assign maxPoints value to each row so it can be accessed in renderCell
-      formattedRows.forEach((row) => {
-        row.maxPoints = highestPoints;
-      });
-
-      setRows(formattedRows);
-      setOriginalRows(formattedRows);
+      console.log("Formatted Rows:", evaluationsWithTaskData);
+      setRows(evaluationsWithTaskData);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleSearch = (event) => {
     const value = event.target.value.trim();
     setSearchText(value);
 
     if (value === "") {
-      setWeekNo(null); // When search is empty, fetch the most recent week
+      fetchData(); // Re-fetch all data when search is cleared
     } else {
-      setWeekNo(value); // Otherwise, fetch the data for the entered week number
+      setRows((prevRows) => prevRows.filter((row) => row.weekNo.toString() === value));
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [weekNo]); // Trigger fetch when weekNo changes
-
   return (
     <Paper>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "30px",
-        }}
-      >
-        <Typography variant="h6">Perfomance Analytics</Typography>
+      <Box sx={{ marginBottom: "30px" }}>
+        <Typography variant="h6">Performance Analytics</Typography>
         <TextField
           label="Search Week No"
           variant="outlined"
@@ -129,17 +163,20 @@ export default function EowHistory() {
           sx={{ width: 300 }}
         />
       </Box>
-
       <DataGrid
         rows={rows}
         columns={columns}
-        initialState={{
-          pagination: { paginationModel: { pageSize: 10 } },
-        }}
-        pageSizeOptions={[10]}
-        disableRowSelectionOnClick
         getRowId={(row) => row.id}
+        pageSizeOptions={[10]}
+        onRowDoubleClick={navigateTo}
+                
+        sx={{
+          cursor: "pointer",
+        }}
+        disableRowSelectionOnClick
       />
+
     </Paper>
+
   );
 }

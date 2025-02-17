@@ -29,15 +29,16 @@ const UploadFilesInternee = ({
   deletedFilesRef,
 }) => {
   const [tabValue, setTabValue] = useState("interneeProImage");
+  console.log("tabValue", tabValue);
   const [progress, setProgress] = useState();
   const handleTabValue = (event, newValue) => {
     setTabValue(newValue);
   };
-
+  console.log("values", values);
   const sendtoCloudinary = async (filesList) => {
+    console.log("in sendtoCloudinary");
     const filesArray = Array.from(filesList);
 
-    // Use `map` to return an array of promises
     const cloudinaryResponses = await Promise.all(
       filesArray.map(async (file) => {
         const formData = new FormData();
@@ -45,39 +46,24 @@ const UploadFilesInternee = ({
         formData.append("context", `original_filename=${file.name}`);
         formData.append("folder", `${parentFolder}/${folderName}`);
         formData.append("upload_preset", cloudinaryConfig.upload_preset);
-
-        // try {
-        //   const response = await fetch(cloudinaryConfig.getApiUrl("auto"), {
-        //     method: "POST",
-        //     body: formData,
-        //   });
-
-        //   // Handle the response
-        //   if (!response.ok) {
-        //     throw new Error("Upload failed");
-        //   }
-
-        //   const CloudinaryData = await response.json();
-        //   const { secure_url, resource_type, public_id, context } = CloudinaryData;
-        //   tempFilesRef.current.push(public_id);
-
-        //   return { secure_url, resource_type, public_id, original_file_name: context?.custom?.original_filename };
-        // } catch (error) {
-        //   console.error("Error uploading image:", error);
-        //   return null; // Return `null` if the upload fails, or you can handle the error differently
-        // }
-
         try {
-          const response1 = await AXIOS_CLODUDINARY.post("/auto/upload", formData, {
-            onUploadProgress: (progressEvent) => {
-              const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          const response1 = await AXIOS_CLODUDINARY.post(
+            "/auto/upload",
+            formData,
+            {
+              onUploadProgress: (progressEvent) => {
+                const percentage = Math.round(
+                  (progressEvent.loaded * 100) / progressEvent.total
+                );
 
-              setProgress(percentage);
-            },
-          });
+                setProgress(percentage);
+              },
+            }
+          );
           console.log("Axios Response", response1.data);
 
-          const { secure_url, resource_type, public_id, context } = response1.data;
+          const { secure_url, resource_type, public_id, context } =
+            response1.data;
 
           tempFilesRef.current.push(public_id);
 
@@ -95,7 +81,9 @@ const UploadFilesInternee = ({
     );
 
     setProgress(0);
-    const successfulUploads = cloudinaryResponses.filter((response) => response !== null);
+    const successfulUploads = cloudinaryResponses.filter(
+      (response) => response !== null
+    );
 
     console.log("Succesfull uplaods", successfulUploads);
 
@@ -121,8 +109,11 @@ const UploadFilesInternee = ({
     console.log("Handle Delete! Files to be Deleted: ", deletedFilesRef);
 
     const currentData = values[tabValue];
+    console.log("currentData", currentData);
     if (Array.isArray(currentData)) {
-      const updatedData = currentData.filter((item) => item.public_id !== public_id);
+      const updatedData = currentData.filter(
+        (item) => item.public_id !== public_id
+      );
       setFieldValue(tabValue, updatedData);
     } else {
       // this case is for profile image
@@ -152,7 +143,9 @@ const UploadFilesInternee = ({
             name="file"
             multiple={tabValue !== "interneeProImage"}
             onChange={(event) => {
+              console.log("getting in to sendtoCloudinary");
               sendtoCloudinary(event.target.files);
+              event.target.value = null;
             }}
             style={{
               position: "absolute",
@@ -188,10 +181,23 @@ const UploadFilesInternee = ({
             {/* =======================================Tab List =================================== */}
 
             <TabList onChange={handleTabValue}>
-              <Tab label="Profile image" value="interneeProImage" />
+              <Tab
+                label="Profile image"
+                value="interneeProImage"
+                sx={{ letterSpacing: 1 }}
+              />
+              <Tab label="CV" value="interneeCv" sx={{ letterSpacing: 1 }} />
               <Tab label="CNIC" value="cnicFile" sx={{ letterSpacing: 1 }} />
-              <Tab label="Appointment File" value="appointmentFile" sx={{ letterSpacing: 1 }} />
-              <Tab label="Experince Letter" value="experienceLetter" sx={{ letterSpacing: 1 }} />
+              <Tab
+                label="Appointment File"
+                value="appointmentFile"
+                sx={{ letterSpacing: 1 }}
+              />
+              <Tab
+                label="Experience Letter"
+                value="experienceLetter"
+                sx={{ letterSpacing: 1 }}
+              />
             </TabList>
           </Box>
 
@@ -201,7 +207,10 @@ const UploadFilesInternee = ({
             <Box sx={{ marginTop: "20px" }}>
               <List>
                 {Object.keys(values.interneeProImage).length > 0 && (
-                  <MediaList data={[values.interneeProImage]} handleDelete={handleDelete} />
+                  <MediaList
+                    data={[values.interneeProImage]}
+                    handleDelete={handleDelete}
+                  />
                 )}
                 {progress > 0 && <CustomOverlay open={true} />}
               </List>
@@ -211,7 +220,12 @@ const UploadFilesInternee = ({
           <CustomTabPanel value="cnicFile">
             <Box sx={{ marginTop: "20px" }}>
               <List>
-                {values.cnicFile.length > 0 && <MediaList data={values.cnicFile} handleDelete={handleDelete} />}
+                {values.cnicFile.length > 0 && (
+                  <MediaList
+                    data={values.cnicFile}
+                    handleDelete={handleDelete}
+                  />
+                )}
                 {progress > 0 && <CustomOverlay open={true} />}
               </List>
             </Box>
@@ -221,7 +235,24 @@ const UploadFilesInternee = ({
             <Box sx={{ marginTop: "20px" }}>
               <List>
                 {values.appointmentFile.length > 0 && (
-                  <MediaList data={values.appointmentFile} handleDelete={handleDelete} />
+                  <MediaList
+                    data={values.appointmentFile}
+                    handleDelete={handleDelete}
+                  />
+                )}
+                {progress > 0 && <CustomOverlay open={true} />}
+              </List>
+            </Box>
+          </CustomTabPanel>
+
+          <CustomTabPanel value="interneeCv">
+            <Box sx={{ marginTop: "20px" }}>
+              <List>
+                {values.interneeCv?.length > 0 && (
+                  <MediaList
+                    data={values.interneeCv}
+                    handleDelete={handleDelete}
+                  />
                 )}
                 {progress > 0 && <CustomOverlay open={true} />}
               </List>
@@ -232,7 +263,10 @@ const UploadFilesInternee = ({
             <Box sx={{ marginTop: "20px" }}>
               <List>
                 {values.experienceLetter.length > 0 && (
-                  <MediaList data={values.experienceLetter} handleDelete={handleDelete} />
+                  <MediaList
+                    data={values.experienceLetter}
+                    handleDelete={handleDelete}
+                  />
                 )}
                 {progress > 0 && <CustomOverlay open={true} />}
               </List>
@@ -245,6 +279,7 @@ const UploadFilesInternee = ({
 };
 
 const MediaList = ({ data, handleDelete }) => {
+  const allowedFileTypes = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp"];
   return (
     <>
       {data.map((item, index) => (
@@ -257,14 +292,24 @@ const MediaList = ({ data, handleDelete }) => {
             mb: 2,
           }}
           secondaryAction={
-            <IconButton edge="end" sx={{ color: "red" }} onClick={() => handleDelete(item.public_id)}>
+            <IconButton
+              edge="end"
+              sx={{ color: "red" }}
+              onClick={() => handleDelete(item.public_id)}
+            >
               <Close />
             </IconButton>
           }
         >
-          {item.resource_type === "image" ? (
+          {allowedFileTypes.includes(
+            item?.original_file_name?.split(".").pop()
+          ) ? (
             <ListItemAvatar>
-              <Avatar src={item.secure_url} alt="asd" sx={{ borderRadius: 2 }} />
+              <Avatar
+                src={item.secure_url}
+                alt="asd"
+                sx={{ borderRadius: 2 }}
+              />
             </ListItemAvatar>
           ) : (
             <ListItemIcon>

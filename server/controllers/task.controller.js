@@ -123,22 +123,31 @@ const getInProgressTasksByEmployeeIdDate = async (req, res) => {
 const getCompletedTasksByEmployeeIdDate = async (req, res) => {
   try {
     const { id } = req.params;
-    // Get the current date
-    const currentDate = new Date();
-    const startOfDay = new Date(currentDate.setUTCHours(0, 0, 0, 0));
-    const endOfDay = new Date(currentDate.setUTCHours(23, 59, 59, 999));
+    
+    // Get the start of the week (Monday) and today
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Adjust if it's Sunday
 
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() + diffToMonday);
+    startOfWeek.setUTCHours(0, 0, 0, 0); // Set to the start of Monday
+
+    const endOfToday = new Date(today);
+    endOfToday.setUTCHours(23, 59, 59, 999); // End of today
+
+    // Fetch tasks updated from Monday to today
     const data = await Task.find({
       employee_obj_id: id,
       taskcompleteStatus: "completed",
-      createdAt: {
-        $gte: startOfDay,
-        $lt: endOfDay,
+      updatedAt: {
+        $gte: startOfWeek,  // Start of Monday
+        $lte: endOfToday,   // End of today
       },
     });
 
-    if (!data) {
-      return res.status(404).json({ message: "No In Progress Tasks Found" });
+    if (!data || data.length === 0) {
+      return res.status(404).json({ message: "No Completed Tasks Found" });
     }
 
     res.status(200).json(data);
@@ -147,35 +156,65 @@ const getCompletedTasksByEmployeeIdDate = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+//Task History
+const completedTaskHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-//! Get In Late Tasks By EmployeeId According to date
+    // Fetch all completed tasks for the given employee ID
+    const data = await Task.find({
+      employee_obj_id: id,
+      taskcompleteStatus: "completed",
+    }).sort({ updatedAt: -1 }); // Sort by most recent tasks first
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({ message: "No Completed Tasks Found" });
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error fetching completed task history for employee:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+//Get  Late Tasks By EmployeeId According to date
 const getLateTasksByEmployeeIdDate = async (req, res) => {
   try {
     const { id } = req.params;
-    // Get the current date
-    const currentDate = new Date();
-    const startOfDay = new Date(currentDate.setUTCHours(0, 0, 0, 0));
-    const endOfDay = new Date(currentDate.setUTCHours(23, 59, 59, 999));
 
-    const data = await Task.find({
+    // Get today's start and end time
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    // Fetch tasks created today
+    const tasks = await Task.find({
       employee_obj_id: id,
-      taskcompleteStatus: "Late",
-      createdAt: {
-        $gte: startOfDay,
-        $lt: endOfDay,
-      },
+      taskcompleteStatus: "completed",
+      createdAt: { $gte: todayStart, $lte: todayEnd }, // Task created today
+      "taskTime_3.date_time": { $exists: true }, // Ensure taskTime_3 exists
     });
 
-    if (!data) {
-      return res.status(404).json({ message: "No Late Tasks Found" });
-    }
+    // Filter tasks where updatedAt is later than taskTime_3.date_time
+    const lateTasks = tasks.filter((task) => {
+      if (!task.taskTime_3 || !task.taskTime_3.date_time) return false;
 
-    res.status(200).json(data);
+      const taskTime3Date = new Date(task.taskTime_3.date_time * 1000); // Convert from seconds to milliseconds
+
+      return task.updatedAt > taskTime3Date; // Compare updatedAt with taskTime_3
+    });
+
+    res.status(200).json(lateTasks);
   } catch (error) {
-    console.error("Error fetching tasks by employee and date:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error fetching late tasks:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
+
 
 // ! Get Tasks by Id
 const getTaskById = async (req, res) => {
@@ -651,6 +690,26 @@ const delete_task_type = async (req, res) => {
   }
 };
 
+const getPendingTasksByEmpId = async (req, res) => {
+      try {
+      const { id } = req.params;
+
+      const tasks = await Task.find({
+        employee_obj_id: id,
+        taskcompleteStatus: "Task UnComplete"
+      });
+
+      if (!tasks.length) {
+        return res.status(404).json({ message: 'No incomplete tasks found for this employee.' });
+      }
+
+      res.json(tasks);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      res.status(500).json({ message: 'Server error.', error: error.message });
+    }
+}
+
 module.exports = {
   getTask,
   getTaskById,
@@ -667,5 +726,7 @@ module.exports = {
   delete_task_type,
   get_all_task_types,
   add_new_task_types,
-  taskCompleteStatusUpdate
+  taskCompleteStatusUpdate,
+  getPendingTasksByEmpId,
+  completedTaskHistory
 };

@@ -29,10 +29,10 @@ const leavesSchema = new mongoose.Schema(
       required: true,
     },
     leavesStart: {
-      type: String,
+      type: Date,
     },
     leavesEnd: {
-      type: String,
+      type: Date,
     },
     fromTime: {
       type: String,
@@ -42,7 +42,7 @@ const leavesSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      default: 'Pending',
+      default: "Pending",
       required: true,
     },
   },

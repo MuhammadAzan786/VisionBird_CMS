@@ -1,7 +1,14 @@
-import { ErrorMessage, Field, Form, Formik } from "formik";
+import { ErrorMessage, FastField, Field, Form, Formik } from "formik";
 import { TextField } from "formik-material-ui";
 import { object, string } from "yup";
 import DomainVerificationIcon from "@mui/icons-material/DomainVerification";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 import {
   FormControl,
   InputLabel,
@@ -14,12 +21,10 @@ import {
   ListItemText,
   Backdrop,
   Grid,
-  FormLabel,
   RadioGroup,
   FormControlLabel,
   Radio,
 } from "@mui/material";
-import Rating from "@mui/material/Rating";
 import Typography from "@mui/material/Typography";
 import "../../index.css";
 import { Link } from "react-router-dom";
@@ -54,11 +59,7 @@ const validationSchema = object().shape({
     .test("format", "contact must be in the format 03XX-XXXXXXX", (value) =>
       /^03\d{2}-\d{7}$/.test(value || "")
     ),
-  CNIC: string()
-    .required("Required CNIC")
-    .test("format", "CNIC must be in the format XXXXX-XXXXXXX-X", (value) =>
-      /^\d{5}-\d{7}-\d$/.test(value || "")
-    ),
+
   qualification: string().required("Required Field"),
   workExp: string().required("Work Experience Required"),
 });
@@ -105,9 +106,10 @@ const InterviewEvalForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [selectedValue, setSelectedValue] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
   const [applyForselectedValue, setapplyForselectedValue] = useState("");
   const POST_EVALUATION = "/api/interview/add_evaluation";
-  // console.log(value);
+  const queryClient = useQueryClient();
 
   const handleSuccess = () => {
     showMessage("success", "Evaluation Created successful!");
@@ -129,6 +131,7 @@ const InterviewEvalForm = () => {
         applyFor: "",
         internshipType: "",
         appliedOn: "",
+        interviewCalled: "",
         interviewCall: "",
         interviewTime: "",
         response: "",
@@ -141,7 +144,6 @@ const InterviewEvalForm = () => {
       }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
-        console.log(values);
         setLoading(true);
         var formData = new FormData();
         const fieldMap = {
@@ -154,6 +156,7 @@ const InterviewEvalForm = () => {
           applyFor: values.applyFor,
           internshipType: values.internshipType,
           appliedOn: values.appliedOn,
+          interviewCalled: values.interviewCalled,
           interviewCall: values.interviewCall,
           interviewTime: values.interviewTime,
           response: values.response,
@@ -199,6 +202,17 @@ const InterviewEvalForm = () => {
           })
           .then(() => {
             setLoading(false);
+            queryClient
+              .invalidateQueries({
+                queryKey: ["pending_evaluations"],
+                exact: false,
+              })
+              .then(() => {
+                console.log("Query invalidation completed successfully.");
+              })
+              .catch((error) => {
+                console.error("Error invalidating queries:", error.message);
+              });
             navigate("/interview-evaluation");
             handleSuccess();
           })
@@ -210,7 +224,7 @@ const InterviewEvalForm = () => {
       }}
     >
       {({ values, setFieldValue }) => (
-        <Box p={0}>
+        <Box pt={2} sx={{ height: "75vh" }}>
           <Link to={"/interview-evaluation"}>
             <Button startIcon={<KeyboardReturnIcon />}>Back</Button>
           </Link>
@@ -257,12 +271,17 @@ const InterviewEvalForm = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} md={12} lg={4}>
                   {" "}
-                  <Field
+                  <FastField
                     label="CNIC"
                     component={TextField}
-                    fullWidth
                     name="CNIC"
                     placeholder="XXXXX-XXXXXXX-X"
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "5px",
+                      },
+                    }}
                     onInput={(event) => {
                       const input = event.target.value;
                       const formattedInput = input.replace(/\D/g, ""); // Remove non-numeric characters
@@ -296,16 +315,18 @@ const InterviewEvalForm = () => {
                           renderValue={(selected) => selected.join(", ")}
                           MenuProps={MenuProps}
                         >
-                          {skills.map((skill) => (
-                            <MenuItem key={skill} value={skill}>
-                              <Checkbox
-                                checked={values.expertiseAndSkills.includes(
-                                  skill
-                                )}
-                              />
-                              <ListItemText primary={skill} />
-                            </MenuItem>
-                          ))}
+                          {skills
+                            .sort((a, b) => a.localeCompare(b))
+                            .map((skill) => (
+                              <MenuItem key={skill} value={skill}>
+                                <Checkbox
+                                  checked={values.expertiseAndSkills.includes(
+                                    skill
+                                  )}
+                                />
+                                <ListItemText primary={skill} />
+                              </MenuItem>
+                            ))}
                         </Select>
                       )}
                     </Field>
@@ -353,26 +374,75 @@ const InterviewEvalForm = () => {
                       fullWidth
                     />
                   </Grid>
-                  <Grid item xs={12} md={12} lg={4}>
+
+                  <Grid item xs={12} md={12} lg={8}>
                     <Field
-                      component={TextField}
-                      InputLabelProps={{ shrink: true }}
-                      label="Called for interview on"
-                      name="interviewCall"
-                      type="date"
-                      fullWidth
+                      name="interviewCalled"
+                      component={({ field }) => (
+                        <FormControl fullWidth>
+                          <InputLabel>Called for Interview</InputLabel>
+                          <Select
+                            {...field}
+                            value={field.value}
+                            label=" Called for Interview"
+                            onChange={(e) => {
+                              field.onChange(e); // Ensure Formik updates the value
+                              if (e.target.value === "yes") {
+                                setOpenDialog(true);
+                              } else {
+                                setOpenDialog(false);
+                              }
+                            }}
+                          >
+                            <MenuItem value="yes">Yes</MenuItem>
+                            <MenuItem value="no">No</MenuItem>
+                          </Select>
+                        </FormControl>
+                      )}
                     />
                   </Grid>
-                  <Grid item xs={12} md={12} lg={4}>
-                    <Field
-                      component={TextField}
-                      InputLabelProps={{ shrink: true }}
-                      label="Interview Time"
-                      name="interviewTime"
-                      type="time"
-                      fullWidth
-                    />
-                  </Grid>
+
+                  <Dialog
+                    open={openDialog}
+                    onClose={() => setOpenDialog(false)}
+                  >
+                    <DialogTitle>Contact Details</DialogTitle>
+                    <DialogContent>
+                      <Grid container spacing={2} sx={{ my: 1 }}>
+                        <Grid item xs={12} md={12} lg={12}>
+                          <Field
+                            component={TextField}
+                            InputLabelProps={{ shrink: true }}
+                            label="Called for interview on"
+                            name="interviewCall"
+                            type="date"
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={12} lg={12}>
+                          <Field
+                            component={TextField}
+                            InputLabelProps={{ shrink: true }}
+                            label="Interview Time"
+                            name="interviewTime"
+                            type="time"
+                            fullWidth
+                          />
+                        </Grid>
+                      </Grid>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={() => setOpenDialog(false)}>
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={() => setOpenDialog(false)}
+                        color="primary"
+                      >
+                        Save
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
                 </Grid>
               </div>
               <Grid container spacing={2}>
@@ -556,10 +626,18 @@ const InterviewEvalForm = () => {
                           as={Select}
                           onBlur={() => {}}
                         >
-                          <MenuItem value="UNPAID">UNPAID</MenuItem>
-                          <MenuItem value="VBT">VBT</MenuItem>
-                          <MenuItem value="PASHA">P@SHA</MenuItem>
-                          <MenuItem value="PSEB">PSEB</MenuItem>
+                          <MenuItem value="Unpaid-Internship-VBT">
+                            Unpaid (From VBT)
+                          </MenuItem>
+                          <MenuItem value="Paid-Internship-PASHA">
+                            Paid Internship (From P@SHA)
+                          </MenuItem>
+                          <MenuItem value="Paid-Internship-PSEB">
+                            Paid Internship (From PSEB)
+                          </MenuItem>
+                          <MenuItem value="Paid-Apprenticeship-PSEB">
+                            Paid Apprenticeship (From PSEB)
+                          </MenuItem>
                         </Field>
                       </FormControl>
                       <ErrorMessage

@@ -48,7 +48,7 @@ const columns = (handleStatusChange) => [
   {
     field: "taskTicketNo",
     headerName: "Ticket No",
-    width: 120,
+   minWidth: 200,
     sortable: false,
     headerAlign: "center",
     renderCell: (params) => (
@@ -67,7 +67,7 @@ const columns = (handleStatusChange) => [
   {
     field: "AssignedBy",
     headerName: "Assigned By",
-    width: 300,
+    width: 200,
     sortable: false,
     headerAlign: "center",
     renderCell: (params) => {
@@ -124,7 +124,7 @@ const columns = (handleStatusChange) => [
   {
     field: "taskPriority",
     headerName: "Task Priority",
-    width: 150,
+    minWidth: 200,
 
     editable: true,
     renderCell: (params) => {
@@ -167,7 +167,7 @@ const columns = (handleStatusChange) => [
   {
     field: "taskTime",
     headerName: "Time",
-    width: 250,
+    minWidth: 200,
     headerAlign: "center",
 
     renderCell: (params) => {
@@ -193,7 +193,7 @@ const columns = (handleStatusChange) => [
   {
     field: "taskStatus",
     headerName: "Status",
-    width: 250,
+    minWidth: 200,
     headerAlign: "center",
     cellClassName: "centeredCell",
 
@@ -299,7 +299,7 @@ const columns = (handleStatusChange) => [
   {
     field: "CompleteStatus",
     headerName: "Complete Status",
-    width: 220,
+    minWidth: 200,
     headerAlign: "center",
     renderCell: (params) => {
       const [status, setStatus] = useState({

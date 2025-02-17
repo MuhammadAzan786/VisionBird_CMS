@@ -15,12 +15,13 @@ import {
 import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import TaskBoard from "../TaskModule/EmployeeTaskModule/TaskBoard";
-import BasicLineChart from "../Performance/BasicLineChart";
+import BasicLineChart from "../Performance/BasicLineChart"; // Importing BasicLineChart
 import Top5EmployeesTable from "../../components/Tables/Top5EmployeesTable";
 import EmployeeTaskTable from "../TaskModule/EmployeeTaskModule/EmployeeTaskBoard";
 import { useSelector } from "react-redux";
 import InfoIcon from "@mui/icons-material/Info"; // Add an info icon for tooltips
 import { colorCombinations, customColors, palette } from "../../theme/colors";
+import TaskChart from "../Performance/TaskChart";
 
 const Employee = ({
   classes,
@@ -28,7 +29,7 @@ const Employee = ({
   inProgTasks,
   completeTasks,
   lateTask,
-  employeeId,
+  employeeId, // Receiving employeeId dynamically
 }) => {
   const [totalLeaves, setTotalLeaves] = useState(null);
   const [totalPosts, setTotalPosts] = useState(null);
@@ -212,9 +213,10 @@ const Employee = ({
           <Grid item xs={12} md={8}>
             <Paper>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                Performance Overview
+                Performance Overview for {currentUser.employeeName} 
               </Typography>
-              <BasicLineChart />
+              <BasicLineChart _currentUser={currentUser._id} />
+
             </Paper>
           </Grid>
 
@@ -272,6 +274,7 @@ const Employee = ({
       <Paper>
         <EmployeeTaskTable />
       </Paper>
+
     </Stack>
   );
 };

@@ -27,12 +27,14 @@ const AppearedFormDialog = ({ open, onClose, onSubmit }) => {
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth>
+      <DialogTitle>Appeared Form</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}>
           <TextField
             label="Expected Salary"
             type="number"
             fullWidth
+            required
             value={expectedSalary}
             onChange={(e) => setExpectedSalary(e.target.value)}
           />
@@ -44,6 +46,7 @@ const AppearedFormDialog = ({ open, onClose, onSubmit }) => {
             <Rating
               name="test-rating"
               value={testRating}
+              required
               precision={0.5}
               onChange={(e, newValue) => setTestRating(newValue)}
             />
@@ -57,6 +60,7 @@ const AppearedFormDialog = ({ open, onClose, onSubmit }) => {
               name="interview-rating"
               value={interviewRating}
               precision={0.5}
+              required
               onChange={(e, newValue) => setInterviewRating(newValue)}
             />
           </Box>
@@ -66,6 +70,7 @@ const AppearedFormDialog = ({ open, onClose, onSubmit }) => {
             multiline
             rows={4}
             fullWidth
+            required
             value={remarks}
             onChange={(e) => setRemarks(e.target.value)}
           />
